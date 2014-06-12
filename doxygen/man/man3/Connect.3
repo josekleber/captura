@@ -1,0 +1,173 @@
+.TH "Connect" 3 "Terça, 10 de Junho de 2014" "Version 1.0.x" "captura" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Connect \- 
+.PP
+Classe que representa uma conexão com um stream ou arquivo\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <connect\&.h>\fP
+.SS "Métodos Públicos"
+
+.in +1c
+.ti -1c
+.RI "\fBConnect\fP ()"
+.br
+.RI "\fIDefault constructor\&. \fP"
+.ti -1c
+.RI "virtual \fB~Connect\fP ()"
+.br
+.RI "\fIDefault destructor\&. \fP"
+.ti -1c
+.RI "AVFormatContext * \fBopen\fP (char *uri)"
+.br
+.RI "\fIabre conexão com o stream, ou arquivo, indicado pelo URI se tiver sucesso devolve AVFormatConext, caso contrario, devolve NULL\&. \fP"
+.ti -1c
+.RI "void \fBclose\fP ()"
+.br
+.RI "\fIFecha uma conexão\&. É importante chamar este método para liberar a memória alocada para o objeto AVFormatContext e o AVCodecContext\&. \fP"
+.ti -1c
+.RI "EnumStatusConnect \fBgetStatus\fP ()"
+.br
+.RI "\fIRetorna o status da conexão\&. \fP"
+.ti -1c
+.RI "double \fBgetConnectionTime\fP ()"
+.br
+.RI "\fITempo decorrido desde que a conexão foi estabelecida caso a conexão esteja fechada será devolvido '0'\&. \fP"
+.ti -1c
+.RI "\fBStreamType\fP * \fBgetStreamType\fP ()"
+.br
+.RI "\fIRetorna os streams da conexão Uma conexão pode ter vários streams, como : vídeo, audio, etc\&. Nesta versão vamos trabalhar apenas com o primeiro stream de audio que identificarmos\&. \fP"
+.ti -1c
+.RI "AVCodecContext * \fBgetCodecContext\fP ()"
+.br
+.RI "\fIRetorna o AVCodecContext do stream de audio\&. \fP"
+.ti -1c
+.RI "AVStream * \fBgetStream\fP ()"
+.br
+.RI "\fIRetorna o stream de audio\&. \fP"
+.ti -1c
+.RI "void \fBaddOptions\fP (char *key, char *value)"
+.br
+.RI "\fIAdiciona um parâmetro para a configuração das opções de conexão\&. \fP"
+.ti -1c
+.RI "AVDictionary * \fBgetListOptions\fP ()"
+.br
+.RI "\fIDevolve as opções de configuração da conexão caso não tenha opções será devolvido NULL\&. \fP"
+.in -1c
+.SS "Métodos Privados"
+
+.in +1c
+.ti -1c
+.RI "void \fBsetStreamType\fP ()"
+.br
+.RI "\fIDefine os streams existentes numa conexão\&. \fP"
+.in -1c
+.SS "Atributos Privados"
+
+.in +1c
+.ti -1c
+.RI "AVFormatContext * \fBformatContext\fP"
+.br
+.ti -1c
+.RI "AVCodecContext * \fBcodecContext\fP"
+.br
+.ti -1c
+.RI "AVStream * \fBstream\fP"
+.br
+.ti -1c
+.RI "AVDictionary * \fBdictionary\fP"
+.br
+.ti -1c
+.RI "clock_t \fBtimer\fP"
+.br
+.ti -1c
+.RI "EnumStatusConnect \fBstatusConnection\fP"
+.br
+.ti -1c
+.RI "\fBStreamType\fP * \fBstreamType\fP"
+.br
+.in -1c
+.SH "Descrição Detalhada"
+.PP 
+Classe que representa uma conexão com um stream ou arquivo\&. 
+
+O propósito dessa classe é apenas estabelecer uma conexão e setar um AVFormatContext que será utilizado, como ponteiro, na captura 
+.SH "Métodos"
+.PP 
+.SS "void Connect::addOptions (char *key, char *value)"
+
+.PP
+Adiciona um parâmetro para a configuração das opções de conexão\&. 
+.PP
+\fBParâmetros:\fP
+.RS 4
+\fIkey\fP - parâmetro de configuração 
+.br
+\fIvalue\fP - valor do parâmetro 
+.RE
+.PP
+TODO: adicionar o controle de FLAGS\&. falta estudo de sua aplicação 
+.SS "AVCodecContext * Connect::getCodecContext ()"
+
+.PP
+Retorna o AVCodecContext do stream de audio\&. 
+.SS "EnumStatusConnect Connect::getStatus ()"
+
+.PP
+Retorna o status da conexão\&. 
+.SS "AVStream * Connect::getStream ()"
+
+.PP
+Retorna o stream de audio\&. 
+.SS "\fBStreamType\fP * Connect::getStreamType ()"
+
+.PP
+Retorna os streams da conexão Uma conexão pode ter vários streams, como : vídeo, audio, etc\&. Nesta versão vamos trabalhar apenas com o primeiro stream de audio que identificarmos\&. Caso não seja identificado nenhum stream de audio será lançada uma exceção\&.
+.PP
+\fBExceções:\fP
+.RS 4
+\fI\fBConnectionClosedException\fP\fP 
+.RE
+.PP
+
+.SS "AVFormatContext * Connect::open (char *uri)"
+
+.PP
+abre conexão com o stream, ou arquivo, indicado pelo URI se tiver sucesso devolve AVFormatConext, caso contrario, devolve NULL\&. Numa conexão podem vir vários streams, como estamos usando apenas audio no momento, o primeiro stream de audio da sequência será utilizado por padrão\&.
+.PP
+\fBParâmetros:\fP
+.RS 4
+\fIuri\fP - URL do stream e/ou full path do arquivo 
+.RE
+.PP
+\fBRetorna:\fP
+.RS 4
+retorna uma instãncia de AVFormatContext 
+.RE
+.PP
+\fBExceções:\fP
+.RS 4
+\fI\fBBadAllocException\fP,\fBOpenConnectionException\fP,\fBConnectionClosedException\fP\fP 
+.RE
+.PP
+
+.SS "void Connect::setStreamType ()\fC [private]\fP"
+
+.PP
+Define os streams existentes numa conexão\&. 
+.PP
+\fBExceções:\fP
+.RS 4
+\fI\fBMediaTypeNoAudioException\fP\fP 
+.RE
+.PP
+
+
+.SH "Autor"
+.PP 
+Gerado automaticamente por Doxygen para captura a partir de seu código-fonte\&.

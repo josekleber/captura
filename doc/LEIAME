@@ -1,0 +1,72 @@
+***************************************************************************
+*** Projeto de refactoring do módulo de captura do sistema AudioMonitor *** 
+***************************************************************************
+
+1. Objetivo
+
+O Objetivo deste projeto é refatorar o módulo de captura com o objetivo de:
+ - Diminuir o trafego em rede, entre os diversos módulo que compõe o sistema
+   AudioMonitor;
+ - Diminuir as camadas necessárias para realização do processo;
+ - Diminuir o custo de infraestrutura.
+
+2. Escopo
+
+O Código do módulo de captura deverá ser reescrito em C++, no padrão c++11, e
+utilizando as bibliotecas do FFMPEG, versão 2.2.2, fará a captura e encode do
+áudio que será utilizado no sistema. Parte do código do MRServer será reescrito
+para gerar as fingerprints no próprio módulo de captura, o que deverá diminuir
+o trafego em rede.
+O Módulo de captura enviará o áudio que capturar direto para servidor MRServer
+e somente em caso de falha de comunicação com este é que mandará para uma fila 
+local.
+Toda a comunicação com o SQL Server será realizado apartir da captura, o que 
+dispensará por completo a necessidade do módulo de processamento, que passa a
+ser obsoleto.
+Todo o módulo deverá utilizar-se de threads e usar POO como base. 
+
+3. Processo
+
+Abaixo estão alistados os processos que compõe o mecanismo de captura:
+
+1 - conectar no stream;
+
+Conectar, usando as bibliotecas libav do FFMPEG;
+
+2 - Grava log;
+
+Grava no SQL Server a informação de que está efetuando recorte de uma rádio. 
+Este log é usado para saber se uma rádio está ativa ou não.
+
+3 - Transformar em dado RAW;
+
+O áudio deverá estar sem compressão para gerar a fingerprint e por isso será
+transformado em RAW, em memória. Até o momento da escrita deste documento não
+foram realizados testes para determinar a quantidade de memória para suportar
+800 rádios por máquina(*).
+Todo o dado RAW será PCM 16 bits LE e mono.
+
+4 - Gerar FingerPrint;
+
+Será gerado uma fingerprint do áudio, no módulo de captura, e é este dado que
+será trafegado em rede, ou armazenado na mensageria, para o servidor de reco-
+nhecimento.
+
+5 - Gravar AAC;
+
+Todo áudio capturado será gravado em disco no padrão : AAC, 32Kbps, 11.025Khz, mono.
+Este áudio será utilizado para auditoria e poderá ser apagado após 2 dias.
+
+6 - Enviar para reconhecimento;
+
+Todo o envio para o servidor de reconhecimento será via socket, usando o protocolo
+TCP.
+
+7 - Enviar para mensageria;
+
+Esta etapa só ocorrerá em caso de falha na comunicação com o sistema de reconhecimento.
+
+8 - Gravar reconhecimento;
+
+Grava no SQL Server os registros que foram identificados. Não será transferido o arquivo
+que foi identificado, quem ser encarregará disso será o módulo aprovador. 
