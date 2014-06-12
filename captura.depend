@@ -1,0 +1,51 @@
+# depslib dependency file v1.0
+1402341701 source:/home/kleber/projetos/mir/captura/main.cpp
+	<iostream>
+
+1402348444 source:/home/kleber/projetos/mir/captura/src/aacdata.cpp
+	"aacdata.h"
+
+1402348444 /home/kleber/projetos/mir/captura/include/aacdata.h
+
+1402437574 source:/home/kleber/projetos/mir/captura/src/connect.cpp
+	"connect.h"
+
+1402437860 /home/kleber/projetos/mir/captura/include/connect.h
+	<stdio.h>
+	<time.h>
+	"exceptionmir.h"
+	<libavformat/avformat.h>
+	<libavcodec/avcodec.h>
+
+1402348330 source:/home/kleber/projetos/mir/captura/src/logger.cpp
+	"logger.h"
+
+1402348330 /home/kleber/projetos/mir/captura/include/logger.h
+
+1402348490 source:/home/kleber/projetos/mir/captura/src/parser.cpp
+	"parser.h"
+
+1402348490 /home/kleber/projetos/mir/captura/include/parser.h
+
+1402348250 source:/home/kleber/projetos/mir/captura/src/queue.cpp
+	"queue.h"
+
+1402348250 /home/kleber/projetos/mir/captura/include/queue.h
+
+1402348423 source:/home/kleber/projetos/mir/captura/src/rawdata.cpp
+	"rawdata.h"
+
+1402348423 /home/kleber/projetos/mir/captura/include/rawdata.h
+
+1402348517 source:/home/kleber/projetos/mir/captura/src/threadpool.cpp
+	"threadpool.h"
+
+1402348517 /home/kleber/projetos/mir/captura/include/threadpool.h
+
+1402422341 source:/home/kleber/projetos/mir/captura/src/main.cpp
+	<iostream>
+	<boost/exception/all.hpp>
+
+1402435328 /home/kleber/projetos/mir/captura/include/exceptionmir.h
+	<boost/exception/all.hpp>
+

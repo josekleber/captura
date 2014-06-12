@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="captura" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/captura" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-std=c++11" />
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add directory="include" />
+				</Compiler>
+				<Linker>
+					<Add option="-lz" />
+					<Add option="-lm" />
+					<Add option="-lpthread" />
+					<Add option="-lmp3lame" />
+					<Add option="-lx264" />
+					<Add option="-lvorbis" />
+					<Add option="-lfdk-aac" />
+					<Add option="-lfaac" />
+					<Add library="/usr/lib/libavcodec.so" />
+					<Add library="/usr/lib/libavdevice.so" />
+					<Add library="/usr/lib/libavfilter.so" />
+					<Add library="/usr/lib/libavformat.so" />
+					<Add library="/usr/lib/libavutil.so" />
+					<Add library="/usr/lib/libswresample.so" />
+					<Add library="/usr/lib/libswscale.so" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/captura" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add directory="include" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+		</Compiler>
+		<Unit filename="include/aacdata.h" />
+		<Unit filename="include/connect.h" />
+		<Unit filename="include/exceptionmir.h" />
+		<Unit filename="include/logger.h" />
+		<Unit filename="include/parser.h" />
+		<Unit filename="include/queue.h" />
+		<Unit filename="include/rawdata.h" />
+		<Unit filename="include/threadpool.h" />
+		<Unit filename="src/aacdata.cpp" />
+		<Unit filename="src/connect.cpp" />
+		<Unit filename="src/logger.cpp" />
+		<Unit filename="src/main.cpp" />
+		<Unit filename="src/parser.cpp" />
+		<Unit filename="src/queue.cpp" />
+		<Unit filename="src/rawdata.cpp" />
+		<Unit filename="src/threadpool.cpp" />
+		<Unit filename="version.h" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+			<envvars />
+			<DoxyBlocks>
+				<comment_style block="0" line="0" />
+				<doxyfile_project output_language="Brazilian" />
+				<doxyfile_build />
+				<doxyfile_warnings />
+				<doxyfile_output />
+				<doxyfile_dot />
+				<general />
+			</DoxyBlocks>
+			<AutoVersioning>
+				<Scheme minor_max="10" build_max="0" rev_max="0" rev_rand_max="10" build_times_to_increment_minor="100" />
+				<Settings autoincrement="1" date_declarations="1" use_define="0" update_manifest="0" do_auto_increment="1" ask_to_increment="0" language="C++" svn="0" svn_directory="" header_path="version.h" />
+				<Changes_Log show_changes_editor="1" app_title="released version %M.%m.%b of %p" changeslog_path="ChangesLog.txt" />
+				<Code header_guard="VERSION_H" namespace="AutoVersion" prefix="" />
+			</AutoVersioning>
+			<lib_finder>
+				<lib name="zlib" />
+				<lib name="libavutil" />
+				<lib name="libavfilter" />
+				<lib name="libavformat" />
+				<lib name="libavcodec" />
+				<lib name="libavdevice" />
+				<lib name="x264" />
+				<lib name="aacplus" />
+				<lib name="fdk-aac" />
+			</lib_finder>
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
