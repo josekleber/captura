@@ -7,12 +7,13 @@
 
 1402348444 /home/kleber/projetos/mir/captura/include/aacdata.h
 
-1402437574 source:/home/kleber/projetos/mir/captura/src/connect.cpp
+1402496191 source:/home/kleber/projetos/mir/captura/src/connect.cpp
 	"connect.h"
 
-1402437860 /home/kleber/projetos/mir/captura/include/connect.h
+1402495498 /home/kleber/projetos/mir/captura/include/connect.h
 	<stdio.h>
 	<time.h>
+	<string.h>
 	"exceptionmir.h"
 	<libavformat/avformat.h>
 	<libavcodec/avcodec.h>
@@ -22,15 +23,19 @@
 
 1402348330 /home/kleber/projetos/mir/captura/include/logger.h
 
-1402348490 source:/home/kleber/projetos/mir/captura/src/parser.cpp
+1402935875 source:/home/kleber/projetos/mir/captura/src/parser.cpp
 	"parser.h"
 
-1402348490 /home/kleber/projetos/mir/captura/include/parser.h
+1402932994 /home/kleber/projetos/mir/captura/include/parser.h
+	<libavcodec/avcodec.h>
+	<libavformat/avformat.h>
+	<libavutil/avutil.h>
 
 1402348250 source:/home/kleber/projetos/mir/captura/src/queue.cpp
 	"queue.h"
 
-1402348250 /home/kleber/projetos/mir/captura/include/queue.h
+1402680161 /home/kleber/projetos/mir/captura/include/queue.h
+	<amqpcpp.h>
 
 1402348423 source:/home/kleber/projetos/mir/captura/src/rawdata.cpp
 	"rawdata.h"
@@ -42,10 +47,172 @@
 
 1402348517 /home/kleber/projetos/mir/captura/include/threadpool.h
 
-1402422341 source:/home/kleber/projetos/mir/captura/src/main.cpp
+1402940720 source:/home/kleber/projetos/mir/captura/src/main.cpp
 	<iostream>
 	<boost/exception/all.hpp>
+	"queuehandler.h"
+	"streamradio.h"
 
 1402435328 /home/kleber/projetos/mir/captura/include/exceptionmir.h
 	<boost/exception/all.hpp>
+
+1402693014 source:/home/kleber/projetos/mir/captura/src/queuehandler.cpp
+	"queuehandler.h"
+
+1402696876 /home/kleber/projetos/mir/captura/include/streamradio.h
+	<stdio.h>
+	<time.h>
+	<string.h>
+	"exceptionmir.h"
+	<libavformat/avformat.h>
+	<libavcodec/avcodec.h>
+
+1402695473 /home/kleber/projetos/mir/captura/include/queuehandler.h
+	<amqpcpp.h>
+
+1402933448 source:/home/kleber/projetos/mir/captura/src/streamradio.cpp
+	"streamradio.h"
+
+1402927197 /usr/local/include/libavformat/avformat.h
+	<time.h>
+	<stdio.h>
+	"libavcodec/avcodec.h"
+	"libavutil/dict.h"
+	"libavutil/log.h"
+	"avio.h"
+	"libavformat/version.h"
+
+1402927197 /usr/local/include/libavcodec/avcodec.h
+	<errno.h>
+	"libavutil/samplefmt.h"
+	"libavutil/attributes.h"
+	"libavutil/avutil.h"
+	"libavutil/buffer.h"
+	"libavutil/cpu.h"
+	"libavutil/channel_layout.h"
+	"libavutil/dict.h"
+	"libavutil/frame.h"
+	"libavutil/log.h"
+	"libavutil/pixfmt.h"
+	"libavutil/rational.h"
+	"version.h"
+	"libavutil/mem.h"
+	"old_codec_ids.h"
+
+1402927197 /usr/local/include/libavutil/samplefmt.h
+	<stdint.h>
+	"avutil.h"
+	"attributes.h"
+
+1402927197 /usr/local/include/libavutil/avutil.h
+	"common.h"
+	"error.h"
+	"version.h"
+	"macros.h"
+	"mathematics.h"
+	"rational.h"
+	"log.h"
+	"pixfmt.h"
+
+1402927197 /usr/local/include/libavutil/common.h
+	<errno.h>
+	<inttypes.h>
+	<limits.h>
+	<math.h>
+	<stdint.h>
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"attributes.h"
+	"version.h"
+	"libavutil/avconfig.h"
+	"config.h"
+	"intmath.h"
+	"common.h"
+	"mem.h"
+	"internal.h"
+
+1402927197 /usr/local/include/libavutil/attributes.h
+
+1402927197 /usr/local/include/libavutil/version.h
+	"macros.h"
+
+1402927197 /usr/local/include/libavutil/macros.h
+
+1402927197 /usr/local/include/libavutil/avconfig.h
+
+1402927197 /usr/local/include/libavutil/mem.h
+	<limits.h>
+	<stdint.h>
+	"attributes.h"
+	"error.h"
+	"avutil.h"
+
+1402927197 /usr/local/include/libavutil/error.h
+	<errno.h>
+	<stddef.h>
+
+1402927197 /usr/local/include/libavutil/mathematics.h
+	<stdint.h>
+	<math.h>
+	"attributes.h"
+	"rational.h"
+	"intfloat.h"
+
+1402927197 /usr/local/include/libavutil/rational.h
+	<stdint.h>
+	<limits.h>
+	"attributes.h"
+
+1402927197 /usr/local/include/libavutil/intfloat.h
+	<stdint.h>
+	"attributes.h"
+
+1402927197 /usr/local/include/libavutil/log.h
+	<stdarg.h>
+	"avutil.h"
+	"attributes.h"
+
+1402927197 /usr/local/include/libavutil/pixfmt.h
+	"libavutil/avconfig.h"
+	"version.h"
+	"old_pix_fmts.h"
+
+1402927197 /usr/local/include/libavutil/old_pix_fmts.h
+
+1402927197 /usr/local/include/libavutil/buffer.h
+	<stdint.h>
+
+1402927197 /usr/local/include/libavutil/cpu.h
+	"attributes.h"
+
+1402927197 /usr/local/include/libavutil/channel_layout.h
+	<stdint.h>
+
+1402927197 /usr/local/include/libavutil/dict.h
+
+1402927197 /usr/local/include/libavutil/frame.h
+	<stdint.h>
+	"avutil.h"
+	"buffer.h"
+	"dict.h"
+	"rational.h"
+	"samplefmt.h"
+	"version.h"
+
+1402927197 /usr/local/include/libavcodec/version.h
+	"libavutil/version.h"
+
+1402927197 /usr/local/include/libavcodec/old_codec_ids.h
+	"libavutil/common.h"
+
+1402927197 /usr/local/include/libavformat/avio.h
+	<stdint.h>
+	"libavutil/common.h"
+	"libavutil/dict.h"
+	"libavutil/log.h"
+	"libavformat/version.h"
+
+1402927197 /usr/local/include/libavformat/version.h
+	"libavutil/version.h"
 

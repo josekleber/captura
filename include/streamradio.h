@@ -1,5 +1,5 @@
-#ifndef CONNECT_H
-#define CONNECT_H
+#ifndef STREAMRADIO_H
+#define STREAMRADIO_H
 
 #include <stdio.h>
 #include <time.h>
@@ -62,18 +62,18 @@ struct StreamType
  * Classe que representa uma conexão com um stream ou arquivo
  *
  * O propósito dessa classe é apenas estabelecer uma conexão e setar
- * um AVFormatContext que será utilizado, como ponteiro, na captura
+ * um AVFormatContext que será utilizado, como ponteiro, na captura.
  *
  */
-class Connect
+class StreamRadio
 {
 public:
 
     /** \brief Default constructor */
-    Connect();
+    StreamRadio();
 
     /** \brief Default destructor */
-    virtual ~Connect();
+    virtual ~StreamRadio();
 
     /** \brief
     * abre conexão com o stream, ou arquivo, indicado pelo URI
