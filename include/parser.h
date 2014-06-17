@@ -1,6 +1,14 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+extern "C"
+{
+#include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
+#include <libavutil/avutil.h>
+}
+
+using namespace std;
 
 class Parser
 {
@@ -9,6 +17,11 @@ class Parser
         Parser();
         /** Default destructor */
         virtual ~Parser();
+
+        /** \brief
+        * Converte o audio
+        */
+        void Execute();
     protected:
     private:
 };

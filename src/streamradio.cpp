@@ -1,6 +1,6 @@
-#include "connect.h"
+#include "streamradio.h"
 
-Connect::Connect()
+StreamRadio::StreamRadio()
 {
     // zera o timer
     timer = 0;
@@ -11,14 +11,14 @@ Connect::Connect()
     statusConnection = MIR_CONNETION_CLOSE;
 }
 
-Connect::~Connect()
+StreamRadio::~StreamRadio()
 {
     //dtor
     if ((formatContext))
         avformat_free_context(formatContext);
 }
 
-double Connect::getConnectionTime()
+double StreamRadio::getConnectionTime()
 {
     if ((statusConnection != MIR_CONNECTION_OPEN))
         return 0;
@@ -30,12 +30,12 @@ double Connect::getConnectionTime()
     return elapsed_secs;
 }
 
-EnumStatusConnect Connect::getStatus()
+EnumStatusConnect StreamRadio::getStatus()
 {
     return statusConnection;
 }
 
-void Connect::close()
+void StreamRadio::close()
 {
     if ((formatContext))
         avformat_close_input(&formatContext);
@@ -44,35 +44,42 @@ void Connect::close()
     statusConnection = MIR_CONNETION_CLOSE;
 }
 
-AVFormatContext* Connect::open(std::string *uri)
+AVFormatContext* StreamRadio::open(string *uri)
 {
     formatContext = avformat_alloc_context();
     int ret = 0; // retorno das funções FFMPEG
 
     // verifica se conseguiu alocar o contexto
-    if ((formatContext))
+    if (!(formatContext))
         throw BadAllocException() << errno_code(MIR_ERR_BADALLOC_CONTEXT);
 
     // força RTSP usar TCP
     rtspDetect(uri);
 
     // abre a conexão
-    if ((ret=avformat_open_input(&formatContext,uri->c_str(),NULL,&dictionary)))
+    if ((ret=avformat_open_input(&formatContext,uri->c_str(),NULL,&dictionary))< 0)
     {
         statusConnection = MIR_CONNECTION_ERROR;
         throw OpenConnectionException() <<errno_code(MIR_ERR_STREAM_CONNECTION);
     }
 
+    // pega informações do stream
+    if ((ret=avformat_find_stream_info(formatContext,NULL)) < 0)
+    {
+        statusConnection = MIR_CONNECTION_ERROR;
+        throw OpenConnectionException() <<errno_code(MIR_ERR_STREAM_CONNECTION);
+    }
+
+    statusConnection = MIR_CONNECTION_OPEN;
+
     setStreamType(); // pega os streams que a conexão contém
 
     timer = clock(); // inicia a contagem do tempo de conexão
 
-    statusConnection = MIR_CONNECTION_OPEN;
-
     return formatContext;
 }
 
-void Connect::setStreamType()
+void StreamRadio::setStreamType()
 {
     if ((statusConnection != MIR_CONNECTION_OPEN))
         throw ConnectionClosedException() <<errno_code(MIR_ERR_CONNECTION_CLOSED);
@@ -102,18 +109,18 @@ void Connect::setStreamType()
 
 }
 
-void Connect::addOptions(std::string *key, std::string *value)
+void StreamRadio::addOptions(string *key, string *value)
 {
     ///TODO: adicionar o controle de FLAGS. falta estudo de sua aplicação
     av_dict_set(&dictionary,key->c_str(),value->c_str(),0);
 }
 
-AVDictionary * Connect::getListOptions()
+AVDictionary * StreamRadio::getListOptions()
 {
     return dictionary;
 }
 
-StreamType * Connect::getStreamType()
+StreamType * StreamRadio::getStreamType()
 {
     if ((statusConnection != MIR_CONNECTION_OPEN))
         throw ConnectionClosedException() <<errno_code(MIR_ERR_CONNECTION_CLOSED);
@@ -121,17 +128,17 @@ StreamType * Connect::getStreamType()
     return streamType;
 }
 
-AVCodecContext * Connect::getCodecContext()
+AVCodecContext * StreamRadio::getCodecContext()
 {
     return codecContext;
 }
 
-AVStream * Connect::getStream()
+AVStream * StreamRadio::getStream()
 {
     return stream;
 }
 
-void Connect::rtspDetect(std::string *uri)
+void StreamRadio::rtspDetect(string *uri)
 {
     int pos = (int)(uri->find("rtsp://",0));
 
