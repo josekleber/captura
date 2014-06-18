@@ -98,6 +98,10 @@ void StreamRadio::setStreamType()
             {
                 stream = formatContext->streams[index];
                 codecContext = stream->codec;
+                codecContext->codec = avcodec_find_decoder(codecContext->codec_id);
+
+                if ((codecContext->codec == NULL))
+                    throw CodecNotSupportedException() <<errno_code(MIR_ERR_CODEC_NOT_SUPPORTED);
             }
         }
     }

@@ -14,7 +14,7 @@
 /** @brief Exceção base de conexão
 * estrutura usada para indicar que houve uma exceção de conexão
 */
-struct ConnectException : virtual std::exception, virtual boost::exception{};
+struct BaseException : virtual std::exception, virtual boost::exception{};
 
 /** @brief Estrutura para informar o código do erro */
 typedef boost::error_info<struct tag_errno_code,int> errno_code;
@@ -26,7 +26,8 @@ enum MIR_EXCEPTION
     MIR_ERR_STREAM_CONNECTION       = -10001,
     MIR_ERR_BADALLOC_CONTEXT        = -10002,
     MIR_ERR_CONNECTION_CLOSED       = -10003,
-    MIR_ERR_MEDIA_TYPE_NO_AUDIO     = -10004
+    MIR_ERR_MEDIA_TYPE_NO_AUDIO     = -10004,
+    MIR_ERR_CODEC_NOT_SUPPORTED     = -11001
 
     // IDENTIFICACAO
 

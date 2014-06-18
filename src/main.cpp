@@ -13,10 +13,11 @@ int main()
 {
     cout << "Hello world!" << endl;
 
-    AVFormatContext *fmt_ctx_in = NULL;
+    AVFormatContext *fmt_ctx_in = NULL, *fmt_ctx_out = NULL;
     AVStream *stm = NULL;
     AVCodecContext *cdc_ctx_in = NULL;
     AVFrame *frame = NULL;
+    AVIOContext *io_ctx = NULL;
 
     /* registrando compoentes do FFMPEG */
     av_register_all();
@@ -26,24 +27,43 @@ int main()
 
     StreamRadio *streamInput = new StreamRadio();
     //string uri = "mmsh://radio.tokhost.com.br/germaniafm";
-    string uri = "/home/kleber/projetos/mir/captura/bin/Debug/1.mp3";
+    string uri_in = "/home/kleber/projetos/mir/captura/bin/Debug/1.mp3";
+    string uri_out = "/home/kleber/projetos/mir/captura/bin/Debug/saida.mp3";
 
-    fmt_ctx_in = streamInput->open(&uri);
+    fmt_ctx_in = streamInput->open(&uri_in);
     stm = streamInput->getStream();
     cdc_ctx_in = streamInput->getCodecContext();
 
     EnumStatusConnect status = streamInput->getStatus();
 
+    if ((status == MIR_CONNECTION_OPEN))
+    {
+        printf("conexão aberta\n");
+
+        fmt_ctx_out = avformat_alloc_context();
+
+        // abrindo contexto de saída
+        avio_open(&io_ctx,uri_out.c_str(),AVIO_FLAG_WRITE);
+
+        fmt_ctx_out->pb = io_ctx;
+
+        fmt_ctx_out->oformat =
+
+
+
+    }
+    else
+    {
+        printf("falha na abertura da conexão.\n");
+    }
+
+    /*
     // verifica o status da conexão
     if ((status == MIR_CONNECTION_OPEN))
     {
         printf("conexão aberta\n");
         frame = av_frame_alloc();
         //av_free(frame);
-
-        avcodec_open2
-
-        cdc_ctx_in->codec = avcodec_find_decoder(cdc_ctx_in->codec_id);
 
         if ((cdc_ctx_in->codec == NULL))
             printf("Codec not found.\n");
@@ -80,6 +100,8 @@ int main()
     {
         printf("falha na abertura da conexão.\n");
     }
+
+    */
 
     return 0;
 }
