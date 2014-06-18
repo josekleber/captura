@@ -18,24 +18,29 @@ using namespace std;
 /** \brief
 * Exceção ocorre quando não for possível alocar memória
 */
-struct BadAllocException : virtual ConnectException {};
+struct BadAllocException : virtual BaseException {};
 
 /** \brief
 * Exceção ocorre quando não for possível conectar na URI informada
 */
-struct OpenConnectionException : virtual ConnectException {};
+struct OpenConnectionException : virtual BaseException {};
 
 /** \brief
 * Exceção ocorre quando se tenta acessar informações da conexão e/ou
 * codec sem ter aberto a conexão.
 */
-struct ConnectionClosedException : virtual ConnectException {};
+struct ConnectionClosedException : virtual BaseException {};
 
 /** \brief
 * Exceção ocorre quando na conexão não for identificado nenhum
 * stream de audio, o que nesta versão não é suportado.
 */
-struct MediaTypeNoAudioException : virtual ConnectException{};
+struct MediaTypeNoAudioException : virtual BaseException{};
+
+/** \brief
+* Exceção ocorre quando for usado um codec não suportado.
+*/
+struct CodecNotSupportedException : virtual BaseException{};
 
 
 /** \brief

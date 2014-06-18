@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "/home/nelson/Projetos/mir/fingerprint/include/filter.h"
+//#include "/home/nelson/Projetos/mir/fingerprint/include/filter.h"
 
 
 #include <boost/date_time/posix_time/posix_time.hpp>

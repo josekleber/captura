@@ -47,7 +47,7 @@ int main()
 
         fmt_ctx_out->pb = io_ctx;
 
-        fmt_ctx_out->oformat =
+        fmt_ctx_out->oformat = av_guess_format(NULL,uri_out.c_str(),NULL);
 
 
 
