@@ -216,3 +216,49 @@
 1402927197 /usr/local/include/libavformat/version.h
 	"libavutil/version.h"
 
+1403093719 source:/home/kleber/git/captura/src/aacdata.cpp
+	"aacdata.h"
+
+1403093719 /home/kleber/git/captura/include/aacdata.h
+
+1403093719 source:/home/kleber/git/captura/src/logger.cpp
+	"logger.h"
+
+1403093719 /home/kleber/git/captura/include/logger.h
+
+1403096237 source:/home/kleber/git/captura/src/main.cpp
+	<iostream>
+	<boost/exception/all.hpp>
+	"queuehandler.h"
+	"streamradio.h"
+
+1403093719 /home/kleber/git/captura/include/queuehandler.h
+	<amqpcpp.h>
+
+1403096434 /home/kleber/git/captura/include/streamradio.h
+	<stdio.h>
+	<time.h>
+	<string.h>
+	"exceptionmir.h"
+	<libavformat/avformat.h>
+	<libavcodec/avcodec.h>
+
+1402951537 /home/kleber/git/captura/include/exceptionmir.h
+	<boost/exception/all.hpp>
+
+1403093719 source:/home/kleber/git/captura/src/parser.cpp
+	"parser.h"
+
+1403093719 /home/kleber/git/captura/include/parser.h
+	<libavcodec/avcodec.h>
+	<libavformat/avformat.h>
+	<libavutil/avutil.h>
+
+1403093719 source:/home/kleber/git/captura/src/rawdata.cpp
+	"rawdata.h"
+
+1403093719 /home/kleber/git/captura/include/rawdata.h
+
+1402951602 source:/home/kleber/git/captura/src/streamradio.cpp
+	"streamradio.h"
+
