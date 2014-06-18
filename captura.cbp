@@ -26,6 +26,7 @@
 					<Add option="-lvorbis" />
 					<Add option="-lfdk-aac" />
 					<Add option="-lfaac" />
+					<Add option="-lodbc" />
 					<Add library="/usr/local/lib/libavcodec.so" />
 					<Add library="/usr/local/lib/libavdevice.so" />
 					<Add library="/usr/local/lib/libavfilter.so" />
@@ -54,6 +55,7 @@
 			<Add option="-fexceptions" />
 		</Compiler>
 		<Unit filename="include/aacdata.h" />
+		<Unit filename="include/database.h" />
 		<Unit filename="include/exceptionmir.h" />
 		<Unit filename="include/logger.h" />
 		<Unit filename="include/parser.h" />
@@ -62,6 +64,7 @@
 		<Unit filename="include/streamradio.h" />
 		<Unit filename="include/threadpool.h" />
 		<Unit filename="src/aacdata.cpp" />
+		<Unit filename="src/database.cpp" />
 		<Unit filename="src/logger.cpp" />
 		<Unit filename="src/main.cpp" />
 		<Unit filename="src/parser.cpp" />
