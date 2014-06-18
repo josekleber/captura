@@ -34,6 +34,8 @@
 					<Add library="/usr/local/lib/libavutil.so" />
 					<Add library="/usr/local/lib/libswresample.so" />
 					<Add library="/usr/local/lib/libswscale.so" />
+					<Add library="/usr/local/lib/libboost_system.so" />
+					<Add library="/usr/local/lib/libboost_thread.so" />
 				</Linker>
 			</Target>
 			<Target title="Release">
