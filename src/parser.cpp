@@ -19,6 +19,7 @@ void Parser::Execute()
     //AQUI MERDA
     // kleber
     //FERROU
+    //NELSON
     AVFormatContext *outFormatContext = NULL;
     AVCodec *outCodec = NULL;
 
