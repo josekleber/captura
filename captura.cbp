@@ -36,6 +36,7 @@
 					<Add library="/usr/local/lib/libswscale.so" />
 					<Add library="/usr/local/lib/libboost_system.so" />
 					<Add library="/usr/local/lib/libboost_thread.so" />
+					<Add library="/usr/local/lib/mir/libfingerprint.so" />
 				</Linker>
 			</Target>
 			<Target title="Release">
@@ -64,6 +65,7 @@
 		<Unit filename="include/queuehandler.h" />
 		<Unit filename="include/rawdata.h" />
 		<Unit filename="include/streamradio.h" />
+		<Unit filename="include/threadcapture.h" />
 		<Unit filename="include/threadpool.h" />
 		<Unit filename="src/aacdata.cpp" />
 		<Unit filename="src/database.cpp" />
@@ -72,6 +74,7 @@
 		<Unit filename="src/parser.cpp" />
 		<Unit filename="src/rawdata.cpp" />
 		<Unit filename="src/streamradio.cpp" />
+		<Unit filename="src/threadcapture.cpp" />
 		<Unit filename="src/threadpool.cpp" />
 		<Unit filename="version.h" />
 		<Extensions>
