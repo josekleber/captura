@@ -17,6 +17,7 @@ Parser::~Parser()
 void Parser::Execute()
 {
     //AQUI MERDA
+    //FERROU
     AVFormatContext *outFormatContext = NULL;
     AVCodec *outCodec = NULL;
 
