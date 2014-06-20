@@ -97,11 +97,23 @@ void StreamRadio::setStreamType()
             if ((streamType[index].streamType = AVMEDIA_TYPE_AUDIO))
             {
                 stream = formatContext->streams[index];
+
+                codec = avcodec_find_decoder(stream->codec->codec_id);
+
+                printf("codec de entrada %s\n",codec->name);
+
+                /// TODO verificar a necessidade desta função. ver avcodec_open2
+                codecContext = avcodec_alloc_context3(codec);
+
                 codecContext = stream->codec;
-                codecContext->codec = avcodec_find_decoder(codecContext->codec_id);
+
+                if (avcodec_open2(codecContext,codec,NULL) < 0)
+                    throw CodecNotSupportedException() <<errno_code(MIR_ERR_CODEC_NOT_SUPPORTED);
 
                 if ((codecContext->codec == NULL))
                     throw CodecNotSupportedException() <<errno_code(MIR_ERR_CODEC_NOT_SUPPORTED);
+
+
             }
         }
     }

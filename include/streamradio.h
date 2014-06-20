@@ -158,6 +158,7 @@ private:
     AVFormatContext *formatContext;
     AVCodecContext *codecContext;
     AVStream *stream;
+    AVCodec *codec;
     AVDictionary *dictionary;
     clock_t timer;
     EnumStatusConnect statusConnection;

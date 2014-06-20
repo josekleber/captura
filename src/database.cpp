@@ -57,7 +57,7 @@ vector<UrlStream* >  database::getRadiosActive(string guid)
     }
 
 
-    SQLExecute()
+
     if(SQL_SUCCESS!=SQLExecDirect(sqlStatementhandle, (SQLCHAR*)query.c_str(), SQL_NTS))
     {
         showError(SQL_HANDLE_DBC, sqlConnectionhandle);
