@@ -5,11 +5,12 @@ using namespace std;
 ThreadCapture::ThreadCapture()
 {
     status = 0;
+    stopThread = false;
 }
 
 ThreadCapture::~ThreadCapture()
 {
-    //dtor
+    stopThread = false;
 }
 
 void ThreadCapture::thrRun()
@@ -20,7 +21,7 @@ void ThreadCapture::thrRun()
 
     try
     {
-        while (true)
+        while (!stopThread)
         {
             // coletar recorte
 

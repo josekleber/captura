@@ -42,7 +42,7 @@ class ThreadCapture
         void CloseThread();
     protected:
     private:
-
+        bool stopThread;
 };
 
 #endif // CAPTURE_H
