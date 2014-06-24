@@ -226,7 +226,7 @@
 
 1403093719 /home/kleber/git/captura/include/logger.h
 
-1403301634 source:/home/kleber/git/captura/src/main.cpp
+1403643258 source:/home/kleber/git/captura/src/main.cpp
 	<iostream>
 	<cstdio>
 	<boost/exception/all.hpp>
@@ -244,37 +244,41 @@
 1403093719 /home/kleber/git/captura/include/queuehandler.h
 	<amqpcpp.h>
 
-1403284559 /home/kleber/git/captura/include/streamradio.h
+1403646353 /home/kleber/git/captura/include/streamradio.h
 	<stdio.h>
 	<time.h>
 	<string.h>
 	"exceptionmir.h"
 	<libavformat/avformat.h>
 	<libavcodec/avcodec.h>
+	<libavutil/audio_fifo.h>
 
-1402951537 /home/kleber/git/captura/include/exceptionmir.h
+1403535357 /home/kleber/git/captura/include/exceptionmir.h
 	<boost/exception/all.hpp>
 
-1403109536 source:/home/kleber/git/captura/src/parser.cpp
+1403643101 source:/home/kleber/git/captura/src/parser.cpp
 	"parser.h"
 
-1403093719 /home/kleber/git/captura/include/parser.h
+1403643101 /home/kleber/git/captura/include/parser.h
+	<vector>
 	<libavcodec/avcodec.h>
 	<libavformat/avformat.h>
 	<libavutil/avutil.h>
+	<libavutil/audio_fifo.h>
 
 1403093719 source:/home/kleber/git/captura/src/rawdata.cpp
 	"rawdata.h"
 
 1403093719 /home/kleber/git/captura/include/rawdata.h
 
-1403289799 source:/home/kleber/git/captura/src/streamradio.cpp
+1403643243 source:/home/kleber/git/captura/src/streamradio.cpp
 	"streamradio.h"
 
-1403115502 source:/home/kleber/git/captura/src/database.cpp
+1403643101 source:/home/kleber/git/captura/src/database.cpp
 	"database.h"
 
-1403109536 /home/kleber/git/captura/include/database.h
+1403643101 /home/kleber/git/captura/include/database.h
+	"exceptionmir.h"
 	<time.h>
 	<iostream>
 	<list>
@@ -4181,7 +4185,7 @@
 	<boost/date_time/posix_time/posix_time.hpp>
 	<boost/thread/thread.hpp>
 
-1403099235 /home/kleber/git/captura/include/threadcapture.h
+1403643101 /home/kleber/git/captura/include/threadcapture.h
 	<stdlib.h>
 	<stdio.h>
 	<mir/filter.h>
@@ -7085,7 +7089,7 @@
 	<boost/config/abi_prefix.hpp>
 	<boost/config/abi_suffix.hpp>
 
-1403093719 source:/home/kleber/git/captura/src/threadcapture.cpp
+1403643101 source:/home/kleber/git/captura/src/threadcapture.cpp
 	"threadcapture.h"
 
 1402927197 /usr/local/include/libavutil/timestamp.h

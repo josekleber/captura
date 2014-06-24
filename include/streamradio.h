@@ -182,14 +182,6 @@ private:
     clock_t timer;
     EnumStatusConnect statusConnection;
     StreamType * streamType;
-    /*
-    * variáveis que definem os dados da conexão
-    */
-    int bitrate = 0;                // em Kbps
-    int samplerate = 0;             // em KHz
-    int channel = 0;                // quantidade de canais
-    int frameSize = 0;              // tamanho do frame
-    AVSampleFormat sampleformat;    // formato
 
 
     /** \brief
@@ -243,6 +235,11 @@ private:
     * \param frameSize      - tamanho dos dados.
     */
     void addSamplesFIFO(uint8_t **inputSamples, const int frameSize);
+
+    /** \brief
+    * Retorna um ponteiro para a FIFO de captura
+    */
+    AVAudioFifo *getFIFO();
 };
 
 #endif // CONNECT_H

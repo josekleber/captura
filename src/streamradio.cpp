@@ -288,3 +288,8 @@ void StreamRadio::addSamplesFIFO(uint8_t **inputSamples, const int frameSize)
     }
 }
 
+AVAudioFifo * StreamRadio::getFIFO()
+{
+    return fifo;
+}
+
