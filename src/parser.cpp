@@ -2,7 +2,6 @@
 
 Parser::Parser()
 {
-    //ctor
 }
 
 Parser::~Parser()
@@ -10,22 +9,9 @@ Parser::~Parser()
     //dtor
 }
 
-/**
-    Método de teste
-    irá LER o stream e reencodar o áudio
-*/
-void Parser::Execute()
+unsigned char* Parser::ReadData(AVAudioFifo *fifo)
 {
-    //AQUI MERDA
-    // kleber
-    //FERROU
-    //NELSON
-    AVFormatContext *outFormatContext = NULL;
-    AVCodec *outCodec = NULL;
+    bufRaw.push_back((unsigned char)'a');
 
-    outFormatContext = avformat_alloc_context();
-
-
-
-
+    return NULL;
 }
