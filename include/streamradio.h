@@ -8,9 +8,10 @@
 
 extern "C"
 {
-    /** inclusão dos headers FFMPEG */
+/** inclusão dos headers FFMPEG */
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
+#include <libavutil/audio_fifo.h>
 }
 
 using namespace std;
@@ -42,6 +43,16 @@ struct MediaTypeNoAudioException : virtual BaseException{};
 */
 struct CodecNotSupportedException : virtual BaseException{};
 
+/** \brief
+* Erro na leitura dos Frames
+*/
+struct FrameReadException : virtual BaseException{};
+
+/** \brief
+* Erro de decodificação dos Frames
+*/
+struct DecoderException : virtual BaseException{};
+
 
 /** \brief
 * Enumerador do status da conexão
@@ -64,11 +75,12 @@ struct StreamType
 
 
 /** \brief
- * Classe que representa uma conexão com um stream ou arquivo
+ * Classe que responsável por conectar com um stream ou arquivo de áudio
+ * e gerar o FIFO de entrada com os frames que serão capturados.
  *
- * O propósito dessa classe é apenas estabelecer uma conexão e setar
- * um AVFormatContext que será utilizado, como ponteiro, na captura.
+ * Os dados salvos no FIFO serão dados decodificados.
  *
+ * \see https://www.ffmpeg.org/doxygen/trunk/transcode__aac_8c.html
  */
 class StreamRadio
 {
@@ -101,6 +113,11 @@ public:
     * para o objeto AVFormatContext e o AVCodecContext
     */
     void close();
+
+    /** \brief
+    * Lê os dados de um stream.
+    */
+    void read();
 
     /** \brief
     * Retorna o status da conexão
@@ -159,10 +176,21 @@ private:
     AVCodecContext *codecContext;
     AVStream *stream;
     AVCodec *codec;
+    AVFrame *frame = NULL;
     AVDictionary *dictionary;
+    AVAudioFifo *fifo = NULL;
     clock_t timer;
     EnumStatusConnect statusConnection;
     StreamType * streamType;
+    /*
+    * variáveis que definem os dados da conexão
+    */
+    int bitrate = 0;                // em Kbps
+    int samplerate = 0;             // em KHz
+    int channel = 0;                // quantidade de canais
+    int frameSize = 0;              // tamanho do frame
+    AVSampleFormat sampleformat;    // formato
+
 
     /** \brief
     * Define os streams existentes numa conexão
@@ -181,6 +209,40 @@ private:
     * \param uri - url do stream.
     */
     void rtspDetect(string *uri);
+
+    /** \brief
+    * Aloca memória para a fila de entrada.
+    *
+    * \param fifo - fila para a captura do áudio.
+    * \see AVAudioFifo
+    */
+    void initFIFO(AVAudioFifo **fifo);
+
+    /**\brief
+    * Lê os frames da conexão e armazena no FIFO.
+    * A captura será constante
+    */
+    void readFrame();
+
+    /** \brief
+    * Decodifica um frame do stream de áudio.
+    *
+    * \param frame          - ponteiro para o frame do stream.
+    * \param fmt_ctx_in     - ponteiro para o contexto I/O de entrada.
+    * \param cdc_ctx_in     - ponteiro para o contexto do codec de entrada.
+    * \param data           - buffer utilizado na decodificação.
+    * \param finished       - controle para verificar se chegou a processar todos os dados do frame.
+    *
+    */
+    void decodeAudioFrame(int *data, int *finished, AVPacket *inputPacket);
+
+    /** \brief
+    * Adiciona frame decodificado para o FIFO de entrada.
+    *
+    * \param inputSamples   - dados decodificados que serão inseridos no FIFO ( do Kininho )
+    * \param frameSize      - tamanho dos dados.
+    */
+    void addSamplesFIFO(uint8_t **inputSamples, const int frameSize);
 };
 
 #endif // CONNECT_H

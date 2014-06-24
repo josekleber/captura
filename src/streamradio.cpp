@@ -8,6 +8,7 @@ StreamRadio::StreamRadio()
     codecContext = NULL;
     stream = NULL;
     dictionary = NULL;
+    fifo = NULL;
     statusConnection = MIR_CONNETION_CLOSE;
 }
 
@@ -16,6 +17,8 @@ StreamRadio::~StreamRadio()
     //dtor
     if ((formatContext))
         avformat_free_context(formatContext);
+
+    //TODO : matar todos os objetos de conexão
 }
 
 double StreamRadio::getConnectionTime()
@@ -79,6 +82,14 @@ AVFormatContext* StreamRadio::open(string *uri)
     return formatContext;
 }
 
+void StreamRadio::read()
+{
+    if (statusConnection != MIR_CONNECTION_OPEN)
+        throw ConnectionClosedException() <<errno_code(MIR_ERR_CONNECTION_CLOSED);
+
+    readFrame();
+}
+
 void StreamRadio::setStreamType()
 {
     if ((statusConnection != MIR_CONNECTION_OPEN))
@@ -108,12 +119,10 @@ void StreamRadio::setStreamType()
                 codecContext = stream->codec;
 
                 if (avcodec_open2(codecContext,codec,NULL) < 0)
-                    throw CodecNotSupportedException() <<errno_code(MIR_ERR_CODEC_NOT_SUPPORTED);
+                    throw BadAllocException() <<errno_code(MIR_ERR_BADALLOC_CONTEXT);
 
                 if ((codecContext->codec == NULL))
                     throw CodecNotSupportedException() <<errno_code(MIR_ERR_CODEC_NOT_SUPPORTED);
-
-
             }
         }
     }
@@ -163,3 +172,119 @@ void StreamRadio::rtspDetect(string *uri)
         av_dict_set(&dictionary,"rtsp_transport","tcp",0);
     }
 }
+
+void StreamRadio::initFIFO(AVAudioFifo **fifo)
+{
+    /** Create the FIFO buffer based on the specified output sample format.
+       nb_samples  initial allocation size, in samples */
+
+
+    if (!(*fifo = av_audio_fifo_alloc(codecContext->sample_fmt, codecContext->channels,1)))
+    {
+        printf("FIFO não pode ser alocado.\n");
+        throw BadAllocException() <<errno_code(AVERROR(ENOMEM));
+    }
+}
+
+void StreamRadio::readFrame()
+{
+    bool isTrue = true;
+    int *finished=0;
+    int error;
+
+    int data;
+
+    // Pacote para dados temporários.
+    AVPacket inputPacket;
+
+    // inicia a FIFO
+    initFIFO(&fifo);
+
+    while (isTrue)
+    {
+        frame = NULL;
+        av_init_packet(&inputPacket);
+        // ainda não entendi o porquê setar os dados abaixo. Porém, em todos os
+        // exemplos da ferramenta foi inicializado então...
+        inputPacket.data = NULL;
+        inputPacket.size = 0;
+
+        if (!(frame = av_frame_alloc()))
+            throw BadAllocException() <<errno_code(MIR_ERR_BADALLOC_CONTEXT);
+
+        // Lê um frame do áudio e coloca no pacote temporário.
+        if ((error = av_read_frame(formatContext, &inputPacket)) < 0)
+        {
+            // Se for final de arquivo ( em caso de arquivo ).
+            if (error == AVERROR_EOF)
+                *finished = 1;
+            else
+                throw FrameReadException() <<errno_code(MIR_ERR_FRAME_READ);
+        }
+
+        try
+        {
+            // decodifica o frame
+            decodeAudioFrame(&data,finished,&inputPacket);
+
+            /**
+            * Se o decodificador não terminar de processar os dados, esta função será chamada novamente.
+            */
+            if (finished && data)
+                *finished = 0;
+
+            // libera memória do pacote temporário
+            av_free_packet(&inputPacket);
+
+        }
+        catch(DecoderException ex)
+        {
+            av_free_packet(&inputPacket);
+        }
+
+        // Adiciona ao FIFO
+        addSamplesFIFO(frame->extended_data, frame->nb_samples);
+
+    }
+}
+
+void StreamRadio::decodeAudioFrame(int *data, int *finished, AVPacket *inputPacket)
+{
+    int error=0;
+
+    /**
+     * Decodificar o frame de áudio armazenados no pacote temporário.
+     * Se estamos no final do arquivo, passar um pacote vazio para o descodificador
+     * para nivelá-lo.
+     */
+    if ((error = avcodec_decode_audio4(codecContext, frame,
+                                       data, inputPacket)) < 0)
+    {
+        printf("Could not decode frame (error '%d')\n", error);
+        throw DecoderException() << errno_code(MIR_ERR_DECODE);
+    }
+
+
+}
+
+void StreamRadio::addSamplesFIFO(uint8_t **inputSamples, const int frameSize)
+{
+    int error;
+
+    /**
+     * Make the FIFO as large as it needs to be to hold both,
+     * the old and the new samples.
+     */
+    if ((error = av_audio_fifo_realloc(fifo, av_audio_fifo_size(fifo) + frameSize)) < 0)
+    {
+        printf("Could not reallocate FIFO\n");
+    }
+
+    /** Store the new samples in the FIFO buffer. */
+    if (av_audio_fifo_write(fifo, (void **)inputSamples,
+                            frameSize) < frameSize)
+    {
+        printf("Could not write data to FIFO\n");
+    }
+}
+

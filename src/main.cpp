@@ -147,7 +147,7 @@ static int init_resampler(AVCodecContext *input_codec_context,
     return 0;
 }
 
-static int init_fifo(AVAudioFifo **fifo)
+static int initFIFO(AVAudioFifo **fifo)
 {
     /** Create the FIFO buffer based on the specified output sample format. */
     if (!(*fifo = av_audio_fifo_alloc(STREAM_SAMPLEFMT, STREAM_CHANNEL, 1)))
@@ -200,16 +200,14 @@ static int decode_audio_frame(AVFrame *frame,
     }
 
     /**
-     * Decode the audio frame stored in the temporary packet.
-     * The input audio stream decoder is used to do this.
-     * If we are at the end of the file, pass an empty packet to the decoder
-     * to flush it.
+     * Decodificar o frame de áudio armazenados no pacote temporário.
+         * Se estamos no final do arquivo, passar um pacote vazio para o descodificador
+     * para nivelá-lo.
      */
     if ((error = avcodec_decode_audio4(input_codec_context, frame,
                                        data_present, &input_packet)) < 0)
     {
-        fprintf(stderr, "Could not decode frame (error '%s')\n",
-                get_error_text(error));
+        printf("Could not decode frame (error '%s')\n", get_error_text(error));
         av_free_packet(&input_packet);
         return error;
     }
@@ -419,7 +417,7 @@ static int init_output_frame(AVFrame **frame,
     (*frame)->nb_samples     = frame_size;
     (*frame)->channel_layout = output_codec_context->channel_layout;
     (*frame)->format         = output_codec_context->sample_fmt;
-    //(*frame)->sample_rate    = output_codec_context->sample_rate;
+    (*frame)->sample_rate    = output_codec_context->sample_rate;
 
     /**
      * Allocate the samples of the created frame. This call will make
@@ -557,133 +555,139 @@ int main()
     //string uri_in = "/home/kleber/projetos/mir/captura/bin/Debug/1.mp3";
     string uri_out = "/home/kleber/git/captura/bin/Debug/saida.qq";
 
-    fmt_ctx_in = streamInput->open(&uri_in);
-    stm_in = streamInput->getStream();
-    cdc_ctx_in = streamInput->getCodecContext();
+    streamInput->open(&uri_in);
 
-    EnumStatusConnect status = streamInput->getStatus();
+    streamInput->read();
 
-    if ((status == MIR_CONNECTION_OPEN))
-    {
-        printf("conexão aberta\n");
 
-        // OBS.: format_name = mpeg, mp3, wav, flac, ipod, asf
-        avformat_alloc_output_context2(&fmt_ctx_out,NULL,"mp3",uri_out.c_str());
+    /*
+        fmt_ctx_in = streamInput->open(&uri_in);
+        stm_in = streamInput->getStream();
+        cdc_ctx_in = streamInput->getCodecContext();
 
-        out_fmt = fmt_ctx_out->oformat;
-        stm_out = add_audio_stream(fmt_ctx_out,out_fmt->audio_codec);
+        EnumStatusConnect status = streamInput->getStatus();
 
-        /* dump input information to stderr */
-        av_dump_format(fmt_ctx_in, 0, uri_in.c_str(), 0);
-        av_dump_format(fmt_ctx_out,0,uri_out.c_str(),1);
-
-        // abrindo contexto de saída
-        avio_open(&io_ctx,uri_out.c_str(),AVIO_FLAG_WRITE);
-        // atribuindo IO para o contexto
-        fmt_ctx_out->pb = io_ctx;
-
-        printf("nome do codec de saída %s\n",fmt_ctx_out->oformat->name);
-
-        // pegando o codec de saída
-        stm_out = fmt_ctx_out->streams[0];
-        cdc_out = avcodec_find_encoder(stm_out->codec->codec_id);
-        cdc_ctx_out = avcodec_alloc_context3(cdc_out);
-        cdc_ctx_out = stm_out->codec;
-        avcodec_open2(cdc_ctx_out,cdc_out,NULL);
-
-        init_resampler(cdc_ctx_in,cdc_ctx_out,&swr_ctx);
-
-        init_fifo(&fifo);
-
-        avformat_write_header(fmt_ctx_out, NULL);
-
-        printf("Demuxing audio from file '%s' into '%s'\n", uri_in.c_str(), uri_out.c_str());
-
-        //int decoded;
-        //int audio_frame_count=0;
-
-        while (true)
+        if ((status == MIR_CONNECTION_OPEN))
         {
-            const int output_frame_size = cdc_ctx_out->frame_size;
-            int finished                = 0;
+            printf("conexão aberta\n");
 
-            /* verifica se há buffer no FIFO */
-            while (av_audio_fifo_size(fifo) < output_frame_size)
+            // OBS.: format_name = mpeg, mp3, wav, flac, ipod, asf
+            avformat_alloc_output_context2(&fmt_ctx_out,NULL,"wav",uri_out.c_str());
+
+            out_fmt = fmt_ctx_out->oformat;
+            stm_out = add_audio_stream(fmt_ctx_out,out_fmt->audio_codec);
+
+            // dump input information to stderr
+            av_dump_format(fmt_ctx_in, 0, uri_in.c_str(), 0);
+            av_dump_format(fmt_ctx_out,0,uri_out.c_str(),1);
+
+            // abrindo contexto de saída
+            avio_open(&io_ctx,uri_out.c_str(),AVIO_FLAG_WRITE);
+            // atribuindo IO para o contexto
+            fmt_ctx_out->pb = io_ctx;
+
+            printf("nome do codec de saída %s\n",fmt_ctx_out->oformat->name);
+
+            // pegando o codec de saída
+            stm_out = fmt_ctx_out->streams[0];
+            cdc_out = avcodec_find_encoder(stm_out->codec->codec_id);
+            cdc_ctx_out = avcodec_alloc_context3(cdc_out);
+            cdc_ctx_out = stm_out->codec;
+            avcodec_open2(cdc_ctx_out,cdc_out,NULL);
+
+            init_resampler(cdc_ctx_in,cdc_ctx_out,&swr_ctx);
+
+            initFIFO(&fifo);
+
+            avformat_write_header(fmt_ctx_out, NULL);
+
+            printf("Demuxing audio from file '%s' into '%s'\n", uri_in.c_str(), uri_out.c_str());
+
+            //int decoded;
+            //int audio_frame_count=0;
+
+            while (true)
             {
-                /**
-                * Decode one frame worth of audio samples, convert it to the
-                * output sample format and put it into the FIFO buffer.
-                */
-                read_decode_convert_and_store(fifo, fmt_ctx_in,
-                                              cdc_ctx_in,
-                                              cdc_ctx_out,
-                                              swr_ctx, &finished);
-                if (finished)
-                    break;
+                const int output_frame_size = cdc_ctx_out->frame_size;
+                int finished                = 0;
 
-            }
-
-            /**
-            * If we have enough samples for the encoder, we encode them.
-            * At the end of the file, we pass the remaining samples to
-            * the encoder.
-            */
-            while (av_audio_fifo_size(fifo) >= output_frame_size ||
-                    (finished && av_audio_fifo_size(fifo) > 0))
-                /**
-                 * Take one frame worth of audio samples from the FIFO buffer,
-                 * encode it and write it to the output file.
-                 */
-                load_encode_and_write(fifo, fmt_ctx_out,
-                                      cdc_ctx_out);
-
-
-            /*
-                    AVPacket *orig_pkt = &pkt;
-
-                    av_init_packet(&pkt);
-                    frame = av_frame_alloc();
-                    if (av_read_frame(fmt_ctx_in, &pkt) < 0)
+                // verifica se há buffer no FIFO
+                while (av_audio_fifo_size(fifo) < output_frame_size)
+                {
+                    //
+                    // Decode one frame worth of audio samples, convert it to the
+                    // output sample format and put it into the FIFO buffer.
+                    //
+                    read_decode_convert_and_store(fifo, fmt_ctx_in,
+                                                  cdc_ctx_in,
+                                                  cdc_ctx_out,
+                                                  swr_ctx, &finished);
+                    if (finished)
                         break;
 
-                    do
-                    {
-                        decoded = pkt.size;
-                        ret = 0;
+                }
 
-                        ret = avcodec_decode_audio4(cdc_ctx_in,frame,&got_frame,&pkt);
+                //
+                // If we have enough samples for the encoder, we encode them.
+                // At the end of the file, we pass the remaining samples to
+                // the encoder.
+                //
+                while (av_audio_fifo_size(fifo) >= output_frame_size ||
+                        (finished && av_audio_fifo_size(fifo) > 0))
+                    //
+                    // Take one frame worth of audio samples from the FIFO buffer,
+                    // encode it and write it to the output file.
+                    //
+                    load_encode_and_write(fifo, fmt_ctx_out,
+                                          cdc_ctx_out);
 
-                        decoded = FFMIN(ret, pkt.size);
 
-                        if (got_frame)
-                            printf("gente, o programa tá lendo... %d\n",audio_frame_count++);
+                /*
+                        AVPacket *orig_pkt = &pkt;
 
-                        av_frame_unref(frame);
-
-                        if (decoded < 0)
+                        av_init_packet(&pkt);
+                        frame = av_frame_alloc();
+                        if (av_read_frame(fmt_ctx_in, &pkt) < 0)
                             break;
-                        pkt.data += decoded;
-                        pkt.size -= decoded;
-                    }
-                    while (pkt.size > 0);
 
-                    av_free_packet(orig_pkt);
-            */
-            //av_free_packet(pkt);
-        }
+                        do
+                        {
+                            decoded = pkt.size;
+                            ret = 0;
+
+                            ret = avcodec_decode_audio4(cdc_ctx_in,frame,&got_frame,&pkt);
+
+                            decoded = FFMIN(ret, pkt.size);
+
+                            if (got_frame)
+                                printf("gente, o programa tá lendo... %d\n",audio_frame_count++);
+
+                            av_frame_unref(frame);
+
+                            if (decoded < 0)
+                                break;
+                            pkt.data += decoded;
+                            pkt.size -= decoded;
+                        }
+                        while (pkt.size > 0);
+
+                        av_free_packet(orig_pkt);
+                */
+    //av_free_packet(pkt);
+    // }
 
 
-        //fmt_ctx_in->
+    //fmt_ctx_in->
 
 
-        //avformat_write_header(fmt_ctx_out,NULL);
+    //avformat_write_header(fmt_ctx_out,NULL);
 
 
-    }
-    else
-    {
-        printf("falha na abertura da conexão.\n");
-    }
+//    }
+//    else
+//    {
+//        printf("falha na abertura da conexão.\n");
+//    }
 
     /*
     // verifica o status da conexão
@@ -732,4 +736,5 @@ int main()
     */
 
     return 0;
+
 }
