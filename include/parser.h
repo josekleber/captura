@@ -7,11 +7,23 @@ extern "C"
 {
     #include <libavcodec/avcodec.h>
     #include <libavformat/avformat.h>
+    #include <libavutil/avstring.h>
     #include <libavutil/avutil.h>
     #include <libavutil/audio_fifo.h>
+    #include <libavutil/frame.h>
+    #include <libavutil/timestamp.h>
+    #include <libavutil/error.h>
+    #include <libavutil/avassert.h>
+    #include <libswresample/swresample.h>
 }
 
+#include "exceptionmir.h"
+#include "streamradio.h"
+
 using namespace std;
+
+struct ContextCreatorException : virtual BaseException {};
+struct ConvertException : virtual BaseException {};
 
 class Parser
 {
@@ -33,12 +45,19 @@ class Parser
          */
         unsigned char* ReadData(AVAudioFifo *fifo);
         int WriteToArq();
+
+
     protected:
     private:
         vector <unsigned char> bufRaw;
         AVFormatContext *rawFormatContext, *m4aFormatContext;
-        AVCodecContext *rawCodecContext, *m4aCodecContext;
+        AVCodecContext *rawCodecContext, *m4aCodecContext, *inCodecContext;
+        SwrContext *rawSwrContext, *m4aSwrContext;
+        AVAudioFifo *fifo;
 
+        void CreateContextRAW();
+        void CreateContextM4A(string arqName);
+        void ConvertFrame();
 };
 
 #endif // PARSER_H
