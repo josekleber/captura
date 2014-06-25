@@ -40,12 +40,14 @@ class ThreadPool
 
         vector<Filter> Filters;
 
-        void addThreads(string uriRadio, int i);
+        void addThreads(string uriRadio, int id);
+        void stopThread(int id);
 
         void TesteThread();
     protected:
     private:
-        vector<ctrlThread*> ctrlThreads;
+        //vector<ctrlThread*> ctrlThreads;
+        map<unsigned int, ctrlThread*> ctrlThreads;
 };
 
 #endif // THREADPOOL_H

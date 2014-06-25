@@ -39,7 +39,7 @@ class ThreadCapture
          *
          */
         void thrRun();
-        void CloseThread();
+        void thrClose();
     protected:
     private:
         bool stopThread;

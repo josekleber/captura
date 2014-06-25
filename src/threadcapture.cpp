@@ -23,6 +23,9 @@ void ThreadCapture::thrRun()
     {
         while (!stopThread)
         {
+            printf("%s\n", uriRadio.c_str());
+            for (int i = 0; i < 2000000; i++);
+
             // coletar recorte
 
             // criar fingerprint
@@ -38,4 +41,9 @@ void ThreadCapture::thrRun()
     {
         throw;
     }
+}
+
+void ThreadCapture::thrClose()
+{
+    stopThread = true;
 }

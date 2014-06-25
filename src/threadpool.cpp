@@ -12,11 +12,11 @@ ThreadPool::~ThreadPool()
     //dtor
 }
 
-void ThreadPool::addThreads(string uriRadio, int i)
+void ThreadPool::addThreads(string uriRadio, int id)
 {
     ctrlThread* objThreadControl = new ctrlThread;
     objThreadControl->isStop = true;
-    objThreadControl->idThread = i;
+    objThreadControl->idThread = id;
 
     objThreadControl->objCapture = new ThreadCapture;
     objThreadControl->objCapture->slqConnString = slqConnString;
@@ -30,5 +30,12 @@ void ThreadPool::addThreads(string uriRadio, int i)
 //    objThreadControl->objThread->join();
     objThreadControl->isStop = false;
 
-    ctrlThreads.push_back(objThreadControl);
+ //   ctrlThreads.push_back(objThreadControl);
+    ctrlThreads[id] = objThreadControl;
+}
+
+void ThreadPool::stopThread(int id)
+{
+    ctrlThread* objThreadControl = ctrlThreads[id];
+    objThreadControl->objCapture->thrClose();
 }
