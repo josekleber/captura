@@ -39,3 +39,15 @@ void ThreadPool::stopThread(int id)
     ctrlThread* objThreadControl = ctrlThreads[id];
     objThreadControl->objCapture->thrClose();
 }
+
+void ThreadPool::TesteThread(int cnt)
+{
+    for (int i = 1; i <= cnt; i++)
+        this->addThreads("Thread numero " + std::to_string(i), i);
+
+    for (int i = cnt; i > 0; i--)
+    {
+        sleep(2);
+        this->stopThread(i);
+    }
+}

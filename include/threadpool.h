@@ -43,7 +43,8 @@ class ThreadPool
         void addThreads(string uriRadio, int id);
         void stopThread(int id);
 
-        void TesteThread();
+
+        void TesteThread(int cnt);
     protected:
     private:
         //vector<ctrlThread*> ctrlThreads;
