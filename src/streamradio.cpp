@@ -47,7 +47,7 @@ void StreamRadio::close()
     statusConnection = MIR_CONNETION_CLOSE;
 }
 
-AVFormatContext* StreamRadio::open(string *uri)
+AVFormatContext* StreamRadio::open(string uri)
 {
     formatContext = avformat_alloc_context();
     int ret = 0; // retorno das funções FFMPEG
@@ -60,7 +60,7 @@ AVFormatContext* StreamRadio::open(string *uri)
     rtspDetect(uri);
 
     // abre a conexão
-    if ((ret=avformat_open_input(&formatContext,uri->c_str(),NULL,&dictionary))< 0)
+    if ((ret=avformat_open_input(&formatContext,uri.c_str(),NULL,&dictionary))< 0)
     {
         statusConnection = MIR_CONNECTION_ERROR;
         throw OpenConnectionException() <<errno_code(MIR_ERR_STREAM_CONNECTION);
@@ -163,9 +163,9 @@ AVStream * StreamRadio::getStream()
     return stream;
 }
 
-void StreamRadio::rtspDetect(string *uri)
+void StreamRadio::rtspDetect(string uri)
 {
-    int pos = (int)(uri->find("rtsp://",0));
+    int pos = (int)(uri.find("rtsp://",0));
 
     if ((pos > 0))
     {
@@ -288,8 +288,8 @@ void StreamRadio::addSamplesFIFO(uint8_t **inputSamples, const int frameSize)
     }
 }
 
-AVAudioFifo * StreamRadio::getFIFO()
+AVAudioFifo** StreamRadio::getFIFO()
 {
-    return fifo;
+    return &fifo;
 }
 

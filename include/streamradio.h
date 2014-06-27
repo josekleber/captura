@@ -105,7 +105,7 @@ public:
     *   \return retorna uma instãncia de AVFormatContext
     *   \exception BadAllocException, OpenConnectionException, ConnectionClosedException
     */
-    AVFormatContext* open(string *uri);
+    AVFormatContext* open(string uri);
 
     /** \brief
     * Fecha uma conexão.
@@ -170,6 +170,11 @@ public:
     */
     AVDictionary * getListOptions();
 
+    /** \brief
+    * Retorna um ponteiro para a FIFO de captura
+    */
+    AVAudioFifo**getFIFO();
+
 protected:
 private:
     AVFormatContext *formatContext;
@@ -200,7 +205,7 @@ private:
     *
     * \param uri - url do stream.
     */
-    void rtspDetect(string *uri);
+    void rtspDetect(string uri);
 
     /** \brief
     * Aloca memória para a fila de entrada.
@@ -235,11 +240,6 @@ private:
     * \param frameSize      - tamanho dos dados.
     */
     void addSamplesFIFO(uint8_t **inputSamples, const int frameSize);
-
-    /** \brief
-    * Retorna um ponteiro para a FIFO de captura
-    */
-    AVAudioFifo *getFIFO();
 };
 
 #endif // CONNECT_H
