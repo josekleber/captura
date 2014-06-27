@@ -7136,7 +7136,7 @@
 	<sqlext.h>
 	<vector>
 
-1403721199 /home/nelson/Projetos/mir/captura/include/exceptionmir.h
+1403823138 /home/nelson/Projetos/mir/captura/include/exceptionmir.h
 	<boost/exception/all.hpp>
 
 1403569888 source:/home/nelson/Projetos/mir/captura/src/logger.cpp
@@ -7159,10 +7159,10 @@
 	<boost/date_time/posix_time/posix_time.hpp>
 	<boost/thread/thread.hpp>
 
-1403710346 source:/home/nelson/Projetos/mir/captura/src/threadpool.cpp
+1403795634 source:/home/nelson/Projetos/mir/captura/src/threadpool.cpp
 	"threadpool.h"
 
-1403709861 /home/nelson/Projetos/mir/captura/include/threadpool.h
+1403795335 /home/nelson/Projetos/mir/captura/include/threadpool.h
 	<stdlib.h>
 	<stdio.h>
 	<thread>
@@ -7171,27 +7171,13 @@
 	<boost/date_time/posix_time/posix_time.hpp>
 	<boost/thread/thread.hpp>
 
-1403716618 source:/home/nelson/Projetos/mir/captura/src/main.cpp
-	<iostream>
-	<cstdio>
-	<boost/exception/all.hpp>
-	"queuehandler.h"
-	"streamradio.h"
-	"parser.h"
-	"threadpool.h"
-	<libavformat/avformat.h>
-	<libavcodec/avcodec.h>
-	<libavutil/frame.h>
-	<libavutil/timestamp.h>
-	<libavutil/error.h>
-	<libswresample/swresample.h>
-	<libavutil/avassert.h>
-	<libavutil/audio_fifo.h>
+1403827463 source:/home/nelson/Projetos/mir/captura/src/main.cpp
+	"testes.h"
 
 1403569888 /home/nelson/Projetos/mir/captura/include/queuehandler.h
 	<amqpcpp.h>
 
-1403696595 /home/nelson/Projetos/mir/captura/include/streamradio.h
+1403870071 /home/nelson/Projetos/mir/captura/include/streamradio.h
 	<stdio.h>
 	<time.h>
 	<string.h>
@@ -7200,13 +7186,13 @@
 	<libavcodec/avcodec.h>
 	<libavutil/audio_fifo.h>
 
-1403717140 source:/home/nelson/Projetos/mir/captura/src/parser.cpp
+1403869440 source:/home/nelson/Projetos/mir/captura/src/parser.cpp
 	"parser.h"
 
-1403721273 /home/nelson/Projetos/mir/captura/include/parser.h
+1403869488 /home/nelson/Projetos/mir/captura/include/parser.h
 	<vector>
-	<libavcodec/avcodec.h>
 	<libavformat/avformat.h>
+	<libavcodec/avcodec.h>
 	<libavutil/avstring.h>
 	<libavutil/avutil.h>
 	<libavutil/audio_fifo.h>
@@ -7218,11 +7204,37 @@
 	"exceptionmir.h"
 	"streamradio.h"
 
-1403696595 source:/home/nelson/Projetos/mir/captura/src/streamradio.cpp
+1403870071 source:/home/nelson/Projetos/mir/captura/src/streamradio.cpp
 	"streamradio.h"
 
 1403378799 /usr/local/include/libavutil/avstring.h
 	<stddef.h>
 	<stdint.h>
 	"attributes.h"
+
+1403814681 source:/home/nelson/Projetos/mir/captura/src/testes.cpp
+	"testes.h"
+
+1403826898 /home/nelson/Projetos/mir/captura/include/testes.h
+	"streamradio.h"
+	"threadpool.h"
+
+1403870144 source:/home/nelson/Projetos/mir/captura/src/teste_ffmpeg.cpp
+	<iostream>
+	<cstdio>
+	<unistd.h>
+	<libavformat/avformat.h>
+	<libavcodec/avcodec.h>
+	<libavutil/frame.h>
+	<libavutil/timestamp.h>
+	<libavutil/error.h>
+	<libswresample/swresample.h>
+	<libavutil/avassert.h>
+	<libavutil/audio_fifo.h>
+	"testes.h"
+	"streamradio.h"
+	"parser.h"
+
+1403814646 source:/home/nelson/Projetos/mir/captura/src/teste_thread.cpp
+	"testes.h"
 
