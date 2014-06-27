@@ -2,8 +2,6 @@
 
 Parser::Parser()
 {
-    CreateContextRAW();
-    CreateContextM4A("Teste");
 }
 
 Parser::~Parser()
@@ -13,6 +11,9 @@ Parser::~Parser()
 
 
 
+
+
+// somente para teste
 static char *const get_error_text(const int error)
 {
     static char error_buffer[255];
@@ -22,7 +23,25 @@ static char *const get_error_text(const int error)
 
 
 
+AVFormatContext* Parser::getFormatContext()
+{
+    return rawFormatContext;
+}
 
+AVCodecContext* Parser::getCodecContext()
+{
+    return rawCodecContext;
+}
+
+AVCodecContext* Parser::getInCodecContext()
+{
+    return inCodecContext;
+}
+
+SwrContext* Parser::getSwrContext()
+{
+    return rawSwrContext;
+}
 
 unsigned char* Parser::ReadData(AVAudioFifo *fifo)
 {
@@ -31,118 +50,22 @@ unsigned char* Parser::ReadData(AVAudioFifo *fifo)
     return NULL;
 }
 
-void Parser::CreateContextRAW()
+void Parser::CreateRAWContext(string arqName)
 {
-    int err;
+    AVDictionary* options = NULL;
 
-    rawFormatContext = avformat_alloc_context();
-    if (rawFormatContext == NULL)
-        throw ContextCreatorException() << errno_code(MIR_ERR_CREATE_FORMAT_CONTEXT);
-    if ((err = avio_open(&rawFormatContext->pb, "oi.wav", AVIO_FLAG_WRITE)) < 0)
-    {
-        fprintf(stderr, "%s\n", get_error_text(err));
-        throw ContextCreatorException() << errno_code(MIR_ERR_OPEN_STREAM);
-    }
-    if ((rawFormatContext->oformat = av_guess_format(NULL, "oi.wav", NULL)) == NULL)
-        throw ContextCreatorException() << errno_code(MIR_ERR_CREATE_FORMAT_CONTEXT);
-    //av_strlcpy(rawFormatContext->filename, arqNameOut.c_str(), sizeof(rawFormatContext->filename));
-
-    AVCodec* auxCodec = avcodec_find_encoder(rawFormatContext->oformat->audio_codec);
-    AVStream* auxStream = avformat_new_stream(rawFormatContext, auxCodec);
-
-
-    rawCodecContext = auxStream->codec;
-    rawCodecContext->channels       = 1;
-    rawCodecContext->channel_layout = av_get_default_channel_layout(rawCodecContext->channels);
-    rawCodecContext->sample_rate    = 44100;
-    rawCodecContext->sample_fmt     = AV_SAMPLE_FMT_S16;
-    rawCodecContext->bit_rate       = 1411200;
-
-    if(rawFormatContext->oformat->flags & AVFMT_GLOBALHEADER)
-        rawCodecContext->flags |= CODEC_FLAG_GLOBAL_HEADER;
-
-    if ((err = avcodec_open2(rawCodecContext, auxCodec, NULL)) < 0)
-    {
-        fprintf(stderr, "%s\n", get_error_text(err));
-        throw ContextCreatorException() << errno_code(MIR_ERR_OPEN_CODEC);
-    }
-
-
-    rawSwrContext = swr_alloc_set_opts(NULL,
-                       av_get_default_channel_layout(rawCodecContext->channels),
-                       rawCodecContext->sample_fmt,
-                       rawCodecContext->sample_rate,
-                       av_get_default_channel_layout(inCodecContext->channels),
-                       inCodecContext->sample_fmt,
-                       inCodecContext->sample_rate,
-                       0, NULL);
-    if (!rawSwrContext)
-        throw ContextCreatorException() << errno_code(MIR_ERR_ALLOC_SWR_CONTEXT);
-    //av_assert0(output_codec_context->sample_rate == inCodecContext->sample_rate);
-
-    /** Open the resampler with the specified parameters. */
-    if ((err = swr_init(rawSwrContext)) < 0)
-    {
-        fprintf(stderr, "Could not open resample context\n");
-        swr_free(&rawSwrContext);
-        throw ContextCreatorException() << errno_code(MIR_ERR_ALLOC_SWR_CONTEXT);
-    }
+    rawFormatContext = CreateFormatContext(arqName);
+    rawCodecContext = CreateCodecContext(rawFormatContext, 1, 44100, AVSampleFormat::AV_SAMPLE_FMT_S16, 1411200, &options);
+    rawSwrContext = CreateSwrContext(inCodecContext, rawCodecContext);
 }
 
-void Parser::CreateContextM4A(string arqName)
+void Parser::CreateM4AContext(string arqName)
 {
-    int err;
+    AVDictionary* options = NULL;
 
-    m4aFormatContext = avformat_alloc_context();
-    if (m4aFormatContext == NULL)
-        throw ContextCreatorException() << errno_code(MIR_ERR_CREATE_FORMAT_CONTEXT);
-    if ((err = avio_open(&m4aFormatContext->pb, (arqName + ".m4a").c_str(), AVIO_FLAG_WRITE)) < 0)
-    {
-        fprintf(stderr, "%s\n", get_error_text(err));
-        throw ContextCreatorException() << errno_code(MIR_ERR_OPEN_STREAM);
-    }
-    if ((m4aFormatContext->oformat = av_guess_format(NULL, (arqName + ".m4a").c_str(), NULL)) == NULL)
-        throw ContextCreatorException() << errno_code(MIR_ERR_CREATE_FORMAT_CONTEXT);
-    av_strlcpy(m4aFormatContext->filename, (arqName + ".m4a").c_str(), sizeof(m4aFormatContext->filename));
-
-    AVCodec* auxCodec = avcodec_find_encoder(m4aFormatContext->oformat->audio_codec);
-    AVStream* auxStream = avformat_new_stream(m4aFormatContext, auxCodec);
-
-    m4aCodecContext = auxStream->codec;
-    m4aCodecContext->channels       = 1;
-    m4aCodecContext->channel_layout = av_get_default_channel_layout(m4aCodecContext->channels);
-    m4aCodecContext->sample_rate    = 44100;
-    m4aCodecContext->sample_fmt     = AV_SAMPLE_FMT_S16;
-    m4aCodecContext->bit_rate       = 1411200;
-
-    if(m4aFormatContext->oformat->flags & AVFMT_GLOBALHEADER)
-        m4aCodecContext->flags |= CODEC_FLAG_GLOBAL_HEADER;
-
-    if ((err = avcodec_open2(m4aCodecContext, auxCodec, NULL)) < 0)
-    {
-        fprintf(stderr, "%s\n", get_error_text(err));
-        throw ContextCreatorException() << errno_code(MIR_ERR_OPEN_CODEC);
-    }
-
-    m4aSwrContext = swr_alloc_set_opts(NULL,
-                       av_get_default_channel_layout(m4aCodecContext->channels),
-                       m4aCodecContext->sample_fmt,
-                       m4aCodecContext->sample_rate,
-                       av_get_default_channel_layout(inCodecContext->channels),
-                       inCodecContext->sample_fmt,
-                       inCodecContext->sample_rate,
-                       0, NULL);
-    if (!m4aSwrContext)
-        throw ContextCreatorException() << errno_code(MIR_ERR_ALLOC_SWR_CONTEXT);
-    //av_assert0(output_codec_context->sample_rate == inCodecContext->sample_rate);
-
-    /** Open the resampler with the specified parameters. */
-    if ((err = swr_init(m4aSwrContext)) < 0)
-    {
-        fprintf(stderr, "Could not open resample context\n");
-        swr_free(&m4aSwrContext);
-        throw ContextCreatorException() << errno_code(MIR_ERR_ALLOC_SWR_CONTEXT);
-    }
+    m4aFormatContext = CreateFormatContext(arqName);
+    m4aCodecContext = CreateCodecContext(m4aFormatContext, 2, 44100, AVSampleFormat::AV_SAMPLE_FMT_S16, 640000, &options);
+    m4aSwrContext = CreateSwrContext(inCodecContext, m4aCodecContext);
 }
 
 
@@ -288,4 +211,79 @@ void Parser::ConvertFrame()
 
         av_free_packet(&outPacket);
     }
+}
+
+void Parser::SetInCodecContext(AVCodecContext* inContext)
+{
+    inCodecContext = inContext;
+}
+
+AVFormatContext* Parser::CreateFormatContext(string arqName)
+{
+    AVIOContext *ioContext = NULL;
+    AVFormatContext *outFormatContext = NULL;
+
+    if (avio_open(&ioContext, arqName.c_str(), AVIO_FLAG_WRITE) < 0)
+        throw ConvertException() << errno_code(MIR_ERR_OPEN_OUTPUT_FILE);
+    if (!(outFormatContext = avformat_alloc_context()))
+        throw ConvertException() << errno_code(MIR_ERR_OPEN_FORMAT_CONTEXT);
+
+    outFormatContext->pb = ioContext;
+
+    if (!(outFormatContext->oformat = av_guess_format(NULL, arqName.c_str(), NULL)))
+        throw ConvertException() << errno_code(MIR_ERR_OPEN_OUTPUT_FORMAT);
+
+    int len;
+    for (len = 0; (arqName.c_str())[len] != 0; outFormatContext->filename[len] = (arqName.c_str())[len++]);
+    outFormatContext->filename[len] = 0;
+
+    return outFormatContext;
+}
+
+AVCodecContext* Parser::CreateCodecContext(AVFormatContext* frmContext, int chanell, int SampleRate, AVSampleFormat SampleFormat, int BitRate, AVDictionary** outOptions)
+{
+    AVCodec *outCodec = NULL;
+    AVStream *outStream = NULL;
+    AVCodecContext* outCodecContext = NULL;
+
+    if (!(outCodec = avcodec_find_encoder(frmContext->oformat->audio_codec)))
+        throw ConvertException() << errno_code(MIR_ERR_OPEN_CODEC);
+    if (!(outStream = avformat_new_stream(frmContext, outCodec)))
+        throw ConvertException() << errno_code(MIR_ERR_OPEN_STREAM);
+    outCodecContext = outStream->codec;
+
+    outCodecContext->channels       = chanell;
+    outCodecContext->channel_layout = av_get_default_channel_layout(chanell);
+    outCodecContext->sample_rate    = SampleRate;
+    outCodecContext->sample_fmt     = SampleFormat;
+    outCodecContext->bit_rate       = BitRate;
+
+    if (frmContext->oformat->flags & AVFMT_GLOBALHEADER)
+        outCodecContext->flags |= CODEC_FLAG_GLOBAL_HEADER;
+
+    if ((avcodec_open2(outCodecContext, outCodec, outOptions)) < 0)
+        throw ConvertException() << errno_code(MIR_ERR_OPEN_CODEC_CONTEXT);
+
+    return outCodecContext;
+}
+
+SwrContext* Parser::CreateSwrContext(AVCodecContext *inCodecContext, AVCodecContext *outCodecContext)
+{
+    SwrContext* swrContext = swr_alloc_set_opts(NULL,
+       av_get_default_channel_layout(outCodecContext->channels),
+       outCodecContext->sample_fmt,
+       outCodecContext->sample_rate,
+       av_get_default_channel_layout(inCodecContext->channels),
+       inCodecContext->sample_fmt,
+       inCodecContext->sample_rate,
+       0, NULL);
+
+    if (!swrContext)
+        throw ContextCreatorException() << errno_code(MIR_ERR_ALLOC_SWR_CONTEXT);
+
+    /** Open the resampler with the specified parameters. */
+    if (swr_init(swrContext) < 0)
+        throw ContextCreatorException() << errno_code(MIR_ERR_ALLOC_SWR_CONTEXT);
+
+    return swrContext;
 }

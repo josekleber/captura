@@ -5,8 +5,8 @@
 
 extern "C"
 {
-    #include <libavcodec/avcodec.h>
     #include <libavformat/avformat.h>
+    #include <libavcodec/avcodec.h>
     #include <libavutil/avstring.h>
     #include <libavutil/avutil.h>
     #include <libavutil/audio_fifo.h>
@@ -46,6 +46,18 @@ class Parser
         unsigned char* ReadData(AVAudioFifo *fifo);
         int WriteToArq();
 
+        AVFormatContext* getFormatContext();
+        AVCodecContext* getCodecContext();
+        AVCodecContext* getInCodecContext();
+        SwrContext* getSwrContext();
+
+
+
+// depois colocar como private
+        void SetInCodecContext(AVCodecContext* inContext);
+        void CreateRAWContext(string arqName);
+        void CreateM4AContext(string arqName);
+        void ConvertFrame();
 
     protected:
     private:
@@ -55,9 +67,9 @@ class Parser
         SwrContext *rawSwrContext, *m4aSwrContext;
         AVAudioFifo *fifo;
 
-        void CreateContextRAW();
-        void CreateContextM4A(string arqName);
-        void ConvertFrame();
+        AVFormatContext* CreateFormatContext(string arqName);
+        AVCodecContext*  CreateCodecContext(AVFormatContext* frmContext, int chanell, int SampleRate, AVSampleFormat SampleFormat, int BitRate, AVDictionary** outOptions);
+        SwrContext* CreateSwrContext(AVCodecContext *inCodecContext, AVCodecContext *outCodecContext);
 };
 
 #endif // PARSER_H
