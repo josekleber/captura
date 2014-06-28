@@ -9,10 +9,6 @@ Parser::~Parser()
     //dtor
 }
 
-
-
-
-
 // somente para teste
 static char *const get_error_text(const int error)
 {
@@ -23,14 +19,20 @@ static char *const get_error_text(const int error)
 
 
 
-AVFormatContext* Parser::getFormatContext()
+AVFormatContext* Parser::getFormatContext(bool isRAW)
 {
-    return rawFormatContext;
+    if (isRAW)
+        return rawFormatContext;
+    else
+        return m4aFormatContext;
 }
 
-AVCodecContext* Parser::getCodecContext()
+AVCodecContext* Parser::getCodecContext(bool isRAW)
 {
-    return rawCodecContext;
+    if (isRAW)
+        return rawCodecContext;
+    else
+        return m4aCodecContext;
 }
 
 AVCodecContext* Parser::getInCodecContext()
@@ -38,9 +40,12 @@ AVCodecContext* Parser::getInCodecContext()
     return inCodecContext;
 }
 
-SwrContext* Parser::getSwrContext()
+SwrContext* Parser::getSwrContext(bool isRAW)
 {
-    return rawSwrContext;
+    if (isRAW)
+        return rawSwrContext;
+    else
+        return m4aSwrContext;
 }
 
 unsigned char* Parser::ReadData(AVAudioFifo *fifo)
@@ -50,26 +55,24 @@ unsigned char* Parser::ReadData(AVAudioFifo *fifo)
     return NULL;
 }
 
-void Parser::CreateRAWContext(string arqName)
+void Parser::CreateContext(string arqName, bool isRaw, AVDictionary* options)
 {
-    AVDictionary* options = NULL;
-
-    rawFormatContext = CreateFormatContext(arqName);
-    rawCodecContext = CreateCodecContext(rawFormatContext, 1, 44100, AVSampleFormat::AV_SAMPLE_FMT_S16, 1411200, &options);
-    rawSwrContext = CreateSwrContext(inCodecContext, rawCodecContext);
+    if (isRaw)
+    {
+        rawFormatContext = CreateFormatContext(arqName, isRaw);
+        rawCodecContext = CreateCodecContext(rawFormatContext, 1, 44100, AVSampleFormat::AV_SAMPLE_FMT_S16, &options);
+        rawCodecContext->frame_size = 1024;
+        rawSwrContext = CreateSwrContext(inCodecContext, rawCodecContext);
+    }
+    else
+    {
+        m4aFormatContext = CreateFormatContext(arqName, isRaw);
+        m4aCodecContext = CreateCodecContext(m4aFormatContext, 1, 44100, AVSampleFormat::AV_SAMPLE_FMT_S16, &options);
+        m4aSwrContext = CreateSwrContext(inCodecContext, m4aCodecContext);
+    }
 }
 
-void Parser::CreateM4AContext(string arqName)
-{
-    AVDictionary* options = NULL;
-
-    m4aFormatContext = CreateFormatContext(arqName);
-    m4aCodecContext = CreateCodecContext(m4aFormatContext, 2, 44100, AVSampleFormat::AV_SAMPLE_FMT_S16, 640000, &options);
-    m4aSwrContext = CreateSwrContext(inCodecContext, m4aCodecContext);
-}
-
-
-void Parser::ConvertFrame()
+void Parser::ConvertFrames()
 {
     int err;
 
@@ -218,29 +221,39 @@ void Parser::SetInCodecContext(AVCodecContext* inContext)
     inCodecContext = inContext;
 }
 
-AVFormatContext* Parser::CreateFormatContext(string arqName)
+AVFormatContext* Parser::CreateFormatContext(string arqName, bool isRaw)
 {
     AVIOContext *ioContext = NULL;
     AVFormatContext *outFormatContext = NULL;
 
-    if (avio_open(&ioContext, arqName.c_str(), AVIO_FLAG_WRITE) < 0)
-        throw ConvertException() << errno_code(MIR_ERR_OPEN_OUTPUT_FILE);
     if (!(outFormatContext = avformat_alloc_context()))
         throw ConvertException() << errno_code(MIR_ERR_OPEN_FORMAT_CONTEXT);
-
-    outFormatContext->pb = ioContext;
 
     if (!(outFormatContext->oformat = av_guess_format(NULL, arqName.c_str(), NULL)))
         throw ConvertException() << errno_code(MIR_ERR_OPEN_OUTPUT_FORMAT);
 
-    int len;
-    for (len = 0; (arqName.c_str())[len] != 0; outFormatContext->filename[len] = (arqName.c_str())[len++]);
-    outFormatContext->filename[len] = 0;
+    if (isRaw)
+    {
+        outFormatContext->oformat->flags |= AVFMT_NOFILE;
+    }
+    else
+    {
+        outFormatContext->oformat->flags |= AVFMT_ALLOW_FLUSH;
+
+        if (avio_open(&ioContext, arqName.c_str(), AVIO_FLAG_WRITE) < 0)
+            throw ConvertException() << errno_code(MIR_ERR_OPEN_OUTPUT_FILE);
+        outFormatContext->pb = ioContext;
+
+
+        int len;
+        for (len = 0; (arqName.c_str())[len] != 0; outFormatContext->filename[len] = (arqName.c_str())[len++]);
+        outFormatContext->filename[len] = 0;
+    }
 
     return outFormatContext;
 }
 
-AVCodecContext* Parser::CreateCodecContext(AVFormatContext* frmContext, int chanell, int SampleRate, AVSampleFormat SampleFormat, int BitRate, AVDictionary** outOptions)
+AVCodecContext* Parser::CreateCodecContext(AVFormatContext* frmContext, int chanell, int SampleRate, AVSampleFormat SampleFormat, AVDictionary** outOptions)
 {
     AVCodec *outCodec = NULL;
     AVStream *outStream = NULL;
@@ -256,7 +269,6 @@ AVCodecContext* Parser::CreateCodecContext(AVFormatContext* frmContext, int chan
     outCodecContext->channel_layout = av_get_default_channel_layout(chanell);
     outCodecContext->sample_rate    = SampleRate;
     outCodecContext->sample_fmt     = SampleFormat;
-    outCodecContext->bit_rate       = BitRate;
 
     if (frmContext->oformat->flags & AVFMT_GLOBALHEADER)
         outCodecContext->flags |= CODEC_FLAG_GLOBAL_HEADER;
@@ -286,4 +298,35 @@ SwrContext* Parser::CreateSwrContext(AVCodecContext *inCodecContext, AVCodecCont
         throw ContextCreatorException() << errno_code(MIR_ERR_ALLOC_SWR_CONTEXT);
 
     return swrContext;
+}
+
+string Parser::getDateTime()
+{
+    struct tm *DtHr;
+    time_t t;
+    char strAux[20];
+
+    t = time(NULL);
+    DtHr = localtime(&t);
+
+    sprintf(strAux, "%d%02d%02d_%02d%02d%02d", DtHr->tm_year + 1900, DtHr->tm_mon + 1, DtHr->tm_mday, DtHr->tm_hour, DtHr->tm_min, DtHr->tm_sec);
+
+    return strAux;
+}
+
+unsigned int* Parser::CreateFingerPrint(vector<Filter> Filters, vector <uint8_t> Data, unsigned int* FingerPrintSize, pthread_mutex_t* MutexAccess, bool mltFFT)
+{
+    FingerPrint* fingerPrint = new FingerPrint(Filters);
+
+    uint8_t* convArray = (uint8_t*)calloc(1, Data.size());
+    for (int i = 0; i < Data.size(); i += 2)
+    {
+        convArray[i] = Data[i + 1] & 0xff;
+        convArray[i + 1] = Data[i] & 0xff;
+    }
+
+    unsigned int *bits = fingerPrint->Wav2Bits((short int*)convArray, Data.size() / 2, 44100, FingerPrintSize, MutexAccess, mltFFT);
+    free(convArray);
+
+    return bits;
 }

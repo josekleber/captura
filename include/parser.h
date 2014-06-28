@@ -17,6 +17,8 @@ extern "C"
     #include <libswresample/swresample.h>
 }
 
+#include <mir/fingerprint.h>
+
 #include "exceptionmir.h"
 #include "streamradio.h"
 
@@ -46,19 +48,22 @@ class Parser
         unsigned char* ReadData(AVAudioFifo *fifo);
         int WriteToArq();
 
-        AVFormatContext* getFormatContext();
-        AVCodecContext* getCodecContext();
+        string getDateTime();
+
+        AVFormatContext* getFormatContext(bool isRAW);
+        AVCodecContext* getCodecContext(bool isRAW);
         AVCodecContext* getInCodecContext();
-        SwrContext* getSwrContext();
+        SwrContext* getSwrContext(bool isRAW);
 
+        unsigned int* CreateFingerPrint(vector<Filter> Filters, vector <uint8_t> Data, unsigned int* FingerPrintSize, pthread_mutex_t* MutexAccess, bool mltFFT);
 
-
-// depois colocar como private
         void SetInCodecContext(AVCodecContext* inContext);
-        void CreateRAWContext(string arqName);
-        void CreateM4AContext(string arqName);
-        void ConvertFrame();
+        void CreateContext(string arqName, bool isRaw, AVDictionary* options);
+        void ConvertFrames();
 
+        AVFormatContext* CreateFormatContext(string arqName, bool isRaw);
+        AVCodecContext*  CreateCodecContext(AVFormatContext* frmContext, int chanell, int SampleRate, AVSampleFormat SampleFormat, AVDictionary** outOptions);
+        SwrContext* CreateSwrContext(AVCodecContext *inCodecContext, AVCodecContext *outCodecContext);
     protected:
     private:
         vector <unsigned char> bufRaw;
@@ -66,10 +71,6 @@ class Parser
         AVCodecContext *rawCodecContext, *m4aCodecContext, *inCodecContext;
         SwrContext *rawSwrContext, *m4aSwrContext;
         AVAudioFifo *fifo;
-
-        AVFormatContext* CreateFormatContext(string arqName);
-        AVCodecContext*  CreateCodecContext(AVFormatContext* frmContext, int chanell, int SampleRate, AVSampleFormat SampleFormat, int BitRate, AVDictionary** outOptions);
-        SwrContext* CreateSwrContext(AVCodecContext *inCodecContext, AVCodecContext *outCodecContext);
 };
 
 #endif // PARSER_H

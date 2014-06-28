@@ -175,6 +175,9 @@ public:
     */
     AVAudioFifo**getFIFO();
 
+int getFifoSize();
+int getFifoData(void **data, int nb_samples);
+
 protected:
 private:
     AVFormatContext *formatContext;
@@ -187,6 +190,8 @@ private:
     clock_t timer;
     EnumStatusConnect statusConnection;
     StreamType * streamType;
+
+bool lockFifo;
 
 
     /** \brief

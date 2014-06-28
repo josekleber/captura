@@ -11,7 +11,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option parameters="/home/nelson/Projetos/Musicas/66.mp3 /home/nelson/Projetos/Musicas/66_out_mp3.wav" />
+				<Option parameters="/home/nelson/Projetos/Musicas/66.mp3 /home/nelson/Projetos/Musicas/66_out_mp3.aac" />
 				<Compiler>
 					<Add option="-std=c++11" />
 					<Add option="-Wall" />
