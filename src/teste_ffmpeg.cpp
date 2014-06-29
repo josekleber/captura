@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <unistd.h>
 #include <boost/thread/thread.hpp>
+#include <fstream>
 
 extern "C"
 {
@@ -31,6 +32,7 @@ int Testes::ffmpeg_teste(string arqNameIn, string arqNameOut)
     int data_present;
     string arqName;
     vector <uint8_t> binOutput;
+    int maxFrames = 0;
 
 
     pthread_mutex_t mutex_acesso;
@@ -67,8 +69,9 @@ int Testes::ffmpeg_teste(string arqNameIn, string arqNameOut)
     outCodecContextRaw = objParser->getCodecContext(true);
     swrContextRaw = objParser->getSwrContext(true);
 
+    string PastaRaiz = "/home/nelson/Projetos/Musicas/Recortes/";
     arqDateTime = objParser->getDateTime();
-    arqName = "/home/nelson/Projetos/Musicas/66_out_" + arqDateTime + ".aac";
+    arqName = PastaRaiz + "Musicas/66_out_" + arqDateTime + ".aac";
     objParser->CreateContext(arqName, false, NULL);
     outFormatContextAAC = objParser->getFormatContext(false);
     outCodecContextAAC = objParser->getCodecContext(false);
@@ -82,15 +85,17 @@ av_dump_format(outFormatContextAAC, 0, arqNameOut.c_str(), 1);
     objThread = new boost::thread(boost::bind(&StreamRadio::read, objRadio));
     while (objRadio->getFifoSize() == 0){};
 
+    maxFrames = objRadio->getNumFrames(6);  // quantidades de frames para 5 s
+
     int szFifo;
     int finished = 0;
 
     avformat_write_header(outFormatContextAAC, NULL);
 
     int inFrameSize = inCodecContext->frame_size;
+    int ctrCnt = 0;
 
-int cnt = 0, ctrCnt = 0;
-FILE* fp = fopen("/home/nelson/Projetos/Musicas/66_out_mp3.bin", "wb");
+int cnt = 0;
     while(finished != 1)
     {
         int data_present = 0;
@@ -129,7 +134,6 @@ cnt++;
             {
                 for (int i = 0; i < outPacket.size; i++)
                     binOutput.push_back(outPacket.data[i]);
-                fwrite(outPacket.data, 1, outPacket.size, fp);
             }
 
             av_free_packet(&outPacket);
@@ -154,38 +158,38 @@ cnt++;
             if (data_present)
             {
                 av_write_frame(outFormatContextAAC, &outPacket);
-cout << "Pacote : " << cnt << "    Size : " << szFifo - inFrameSize << endl;
             }
 
 
 
 
+            // Controle de tempo, maxFrames tem a quantidade de frames necessarios para os recortes
+            ctrCnt++;
+            if (ctrCnt >= maxFrames)
+            {
+cout << "Pacote : " << cnt << "    Size : " << szFifo - inFrameSize << endl;
+                ctrCnt = 0;
 
-ctrCnt++;
-if (ctrCnt >= 2524)
-{
-    ctrCnt = 0;
+                unsigned int nbits;
+                unsigned int* bits = objParser->CreateFingerPrint(Filters, binOutput, &nbits, &mutex_acesso, true);
+                binOutput.clear();
 
-    unsigned int nbits;
-    unsigned int* bits = objParser->CreateFingerPrint(Filters, binOutput, &nbits, &mutex_acesso, true);
-    binOutput.clear();
+                std::ofstream outfile (PastaRaiz + "Fingerprints/66_out_fp_" + arqDateTime + ".bin",std::ofstream::binary);
+                outfile.write ((char*)bits, nbits * sizeof(unsigned int));
+                outfile.close();
 
-    FILE* out = fopen(("/home/nelson/Projetos/Musicas/66_out_fp_" + arqDateTime + ".bin").c_str(), "wb");
-    fwrite(bits, 1, nbits, out);
-    fclose(out);
+                arqDateTime = objParser->getDateTime();
 
-    av_write_trailer(outFormatContextAAC);
+                av_write_trailer(outFormatContextAAC);
 
-    av_free(outFormatContextAAC);
-    av_free(outCodecContextAAC);
+                av_free(outFormatContextAAC);
+                av_free(outCodecContextAAC);
 
-    arqDateTime = objParser->getDateTime();
 
-    outFormatContextAAC = objParser->CreateFormatContext("/home/nelson/Projetos/Musicas/66_out_" + arqDateTime + ".aac", false);
-    outCodecContextAAC = objParser->CreateCodecContext(outFormatContextAAC, 1, 44100, AVSampleFormat::AV_SAMPLE_FMT_S16, NULL);
-    avformat_write_header(outFormatContextAAC, NULL);
-
-}
+                outFormatContextAAC = objParser->CreateFormatContext(PastaRaiz + "Musicas/66_out_" + arqDateTime + ".aac", false);
+                outCodecContextAAC = objParser->CreateCodecContext(outFormatContextAAC, 1, 44100, AVSampleFormat::AV_SAMPLE_FMT_S16, NULL);
+                avformat_write_header(outFormatContextAAC, NULL);
+            }
 
 
 
@@ -207,7 +211,6 @@ do
             outPacket.data = NULL;
             outPacket.size = 0;
 
-cout << "Olha eu aqui" << endl;
             ret = avcodec_encode_audio2(outCodecContextAAC, &outPacket, NULL, &data_present);
 
             if (data_present)
@@ -219,6 +222,7 @@ cout << "Olha eu aqui" << endl;
 } while (data_present);
 
 
+cout << "Pacote : " << cnt << "    Size : " << szFifo << endl;
 
 
 
@@ -228,11 +232,10 @@ cout << "Olha eu aqui" << endl;
             unsigned int nbits;
             unsigned int* bits = objParser->CreateFingerPrint(Filters, binOutput, &nbits, &mutex_acesso, true);
 
-            FILE* out = fopen(("/home/nelson/Projetos/Musicas/66_out_fp_" + arqDateTime + ".bin").c_str(), "wb");
-            fwrite(bits, 1, nbits, out);
-            fclose(out);
-
-fclose(fp);
+            std::ofstream outfile (PastaRaiz + "Fingerprints/66_out_fp_" + arqDateTime + ".bin",std::ofstream::binary);
+            outfile.write ((char*)bits, nbits * sizeof(unsigned int));
+            outfile.close();
+sleep(1);
         }
     }
 

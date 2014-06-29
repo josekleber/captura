@@ -177,6 +177,7 @@ public:
 
 int getFifoSize();
 int getFifoData(void **data, int nb_samples);
+int getNumFrames(double sec);
 
 protected:
 private:
@@ -190,6 +191,7 @@ private:
     clock_t timer;
     EnumStatusConnect statusConnection;
     StreamType * streamType;
+    double duration;
 
 bool lockFifo;
 

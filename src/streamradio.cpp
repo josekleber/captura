@@ -9,6 +9,7 @@ StreamRadio::StreamRadio()
     stream = NULL;
     dictionary = NULL;
     fifo = NULL;
+    duration = 0;
     statusConnection = MIR_CONNETION_CLOSE;
  lockFifo = true;
 }
@@ -275,8 +276,11 @@ void StreamRadio::decodeAudioFrame(int *data, int *finished, AVPacket *inputPack
         printf("Could not decode frame (error '%d')\n", error);
         throw DecoderException() << errno_code(MIR_ERR_DECODE);
     }
-
-
+if (duration == 0)
+{
+    double time_base = av_q2d(formatContext->streams[0]->time_base);
+    duration = time_base * av_frame_get_pkt_duration(frame);
+}
 }
 
 void StreamRadio::addSamplesFIFO(uint8_t **inputSamples, const int frameSize)
@@ -323,4 +327,13 @@ int StreamRadio::getFifoData(void **data, int nb_samples)
     int ret = av_audio_fifo_read(fifo, data, nb_samples);
     lockFifo = false;
     return ret;
+}
+
+int StreamRadio::getNumFrames(double sec)
+{
+    int i = (int)round(sec / duration + 0.5);
+    if (duration != 0)
+        return (int)round(sec / duration + 0.5);
+    else
+        return 0;
 }
