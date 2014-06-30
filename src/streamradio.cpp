@@ -11,6 +11,7 @@ StreamRadio::StreamRadio()
     fifo = NULL;
     duration = 0;
     statusConnection = MIR_CONNETION_CLOSE;
+    isExit = false;
  lockFifo = true;
 }
 
@@ -20,7 +21,9 @@ StreamRadio::~StreamRadio()
     if ((formatContext))
         avformat_free_context(formatContext);
 
-    //TODO : matar todos os objetos de conexão
+    isExit = true;
+
+    sleep(10);
 }
 
 double StreamRadio::getConnectionTime()
@@ -203,7 +206,7 @@ void StreamRadio::readFrame()
     // inicia a FIFO
     initFIFO(&fifo);
 
-    while (isTrue && (finished == 0))
+    while (isTrue && (finished == 0) && !isExit)
     {
         frame = NULL;
         av_init_packet(&inputPacket);

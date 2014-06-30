@@ -1,7 +1,12 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#include <iostream>
+#include <cstdio>
+#include <unistd.h>
 #include <vector>
+#include <fstream>
+#include <boost/thread/thread.hpp>
 
 extern "C"
 {
@@ -55,22 +60,35 @@ class Parser
         AVCodecContext* getInCodecContext();
         SwrContext* getSwrContext(bool isRAW);
 
+        // variaveis necessarias para geracao do fingerprint
+        vector<Filter> Filters;
+        pthread_mutex_t* mutex_acesso;
+
         unsigned int* CreateFingerPrint(vector<Filter> Filters, vector <uint8_t> Data, unsigned int* FingerPrintSize, pthread_mutex_t* MutexAccess, bool mltFFT);
 
-        void SetInCodecContext(AVCodecContext* inContext);
+        void SetStreamRadio(StreamRadio* oRadio);
         void CreateContext(string arqName, bool isRaw, AVDictionary* options);
-        void ConvertFrames();
+        void ProcessFrames();
 
         AVFormatContext* CreateFormatContext(string arqName, bool isRaw);
-        AVCodecContext*  CreateCodecContext(AVFormatContext* frmContext, int chanell, int SampleRate, AVSampleFormat SampleFormat, AVDictionary** outOptions);
+        AVCodecContext*  CreateCodecContext(AVFormatContext* frmContext, int channel, int SampleRate, AVSampleFormat SampleFormat, AVDictionary** outOptions);
         SwrContext* CreateSwrContext(AVCodecContext *inCodecContext, AVCodecContext *outCodecContext);
     protected:
     private:
+        StreamRadio* objRadio;
+
+        bool isExit;
+
         vector <unsigned char> bufRaw;
         AVFormatContext *rawFormatContext, *m4aFormatContext;
         AVCodecContext *rawCodecContext, *m4aCodecContext, *inCodecContext;
         SwrContext *rawSwrContext, *m4aSwrContext;
-        AVAudioFifo *fifo;
+
+        AVFrame *inFrame;
+        AVFrame *outFrame;
+        AVPacket outPacket;
+
+        int EncodeFrames(bool isRAW);
 };
 
 #endif // PARSER_H

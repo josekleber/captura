@@ -192,6 +192,7 @@ private:
     EnumStatusConnect statusConnection;
     StreamType * streamType;
     double duration;
+    bool isExit;
 
 bool lockFifo;
 

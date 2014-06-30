@@ -3,6 +3,8 @@
 
 #include "streamradio.h"
 #include "threadpool.h"
+#include "parser.h"
+#include "database.h"
 
 class Testes
 {
@@ -12,6 +14,7 @@ class Testes
 
         int Threadpool();
         int ffmpeg_teste(string arqNameIn, string arqNameOut);
+        int ffmpeg_teste2();
 
     protected:
     private:
