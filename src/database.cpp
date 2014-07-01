@@ -1,16 +1,16 @@
 #include "database.h"
 
-database::database()
+Database::Database()
 {
     connectionString = (SQLCHAR*)"DRIVER={SQL Server Native Client 11.0};SERVER=192.168.1.20;DATABASE=producao;UID=mir;PWD=-mda8960;";
 }
 
-database::~database()
+Database::~Database()
 {
 
 }
 
-vector<UrlStream* >  database::getRadiosActive(string guid)
+vector<UrlStream* >  Database::getRadiosActive(string guid)
 {
     SQLCHAR retconstring[1024];
 
@@ -19,37 +19,40 @@ vector<UrlStream* >  database::getRadiosActive(string guid)
     vector<UrlStream*> urlstream ;
 
     if(SQL_SUCCESS!=SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &sqlEnvhandle))
-        throw;
+        throw SqlServerException() << errno_code(MIR_DB_ALLOC_ENV);
 
     if(SQL_SUCCESS!=SQLSetEnvAttr(sqlEnvhandle,SQL_ATTR_ODBC_VERSION, (SQLPOINTER)SQL_OV_ODBC3, 0))
-        throw;
+        throw SqlServerException() << errno_code(MIR_DB_SET_ENV);
 
     if(SQL_SUCCESS!=SQLAllocHandle(SQL_HANDLE_DBC, sqlEnvhandle, &sqlConnectionhandle))
-        throw;
+        throw SqlServerException() << errno_code(MIR_DB_ALLOC_HANDLE);
 
     //Abre conecção com SQL.
     RETCODE recode = SQLDriverConnect(sqlConnectionhandle, NULL, connectionString, SQL_NTS, retconstring, 1024, NULL, SQL_DRIVER_NOPROMPT);
 
     switch(recode)
-    //SQLExecute()
     {
-    case SQL_INVALID_HANDLE:
-        throw;
-    case SQL_ERROR:
-        throw;
-    default:
-        break;
+        case SQL_SUCCESS_WITH_INFO:
+            throw SqlServerException() << errno_code(MIR_DB_DRIVER_CONNECT);
+            logError(SQL_HANDLE_DBC, sqlConnectionhandle);
+            break;
+        case SQL_INVALID_HANDLE:
+        case SQL_ERROR:
+            throw SqlServerException() << errno_code(MIR_DB_DRIVER_CONNECT);
+            logError(SQL_HANDLE_DBC, sqlConnectionhandle);
+        default:
+            break;
     }
 
     if(SQL_SUCCESS != SQLAllocHandle(SQL_HANDLE_STMT, sqlConnectionhandle, &sqlStatementhandle))
     {
-        throw;
+        throw SqlServerException() << errno_code(MIR_DB_ALLOC_STMT);
     }
 
     //SQLExecute()
     if(SQL_SUCCESS != SQLExecDirect(sqlStatementhandle, (SQLCHAR*)query.c_str(), SQL_NTS))
     {
-        throw;
+        throw SqlServerException() << errno_code(MIR_DB_EXECUTE_QUERY);
     }
     else
     {
@@ -66,20 +69,21 @@ vector<UrlStream* >  database::getRadiosActive(string guid)
             UrlStream* us = new UrlStream();
             us->id = oid;
             us->radio = radio;
-            us->urlStream = string(address);
+            us->url = string(address);
 
             urlstream.push_back(us);
         }
     }
 
     SQLFreeHandle(SQL_HANDLE_STMT, sqlStatementhandle );
+    SQLDisconnect(sqlConnectionhandle);
     SQLFreeHandle(SQL_HANDLE_DBC, sqlConnectionhandle);
     SQLFreeHandle(SQL_HANDLE_ENV, sqlEnvhandle);
 
     return urlstream;
 }
 
-void database::saveLog(int radioId, CodeLog codeLog)
+void Database::saveLog(int radioId, CodeLog codeLog)
 {
     SQLCHAR retconstring[1024];
     string code= "";
@@ -103,44 +107,49 @@ void database::saveLog(int radioId, CodeLog codeLog)
     string query = "exec sp_RadioLog " + to_string(radioId) + ", '" + code + "', '" + getDateSqlString() + "'";
 
     if(SQL_SUCCESS!=SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &sqlEnvhandle))
-        throw;
+        throw SqlServerException() << errno_code(MIR_DB_ALLOC_ENV);
 
     if(SQL_SUCCESS!=SQLSetEnvAttr(sqlEnvhandle,SQL_ATTR_ODBC_VERSION, (SQLPOINTER)SQL_OV_ODBC3, 0))
-        throw;
+        throw SqlServerException() << errno_code(MIR_DB_SET_ENV);
 
     if(SQL_SUCCESS!=SQLAllocHandle(SQL_HANDLE_DBC, sqlEnvhandle, &sqlConnectionhandle))
-        throw;
+        throw SqlServerException() << errno_code(MIR_DB_ALLOC_HANDLE);
 
     //Abre conecção com SQL.
     RETCODE recode = SQLDriverConnect(sqlConnectionhandle, NULL, connectionString, SQL_NTS, retconstring, 1024, NULL, SQL_DRIVER_NOPROMPT);
 
     switch(recode)
     {
-    case SQL_INVALID_HANDLE:
-        throw;
-    case SQL_ERROR:
-        throw;
-    default:
-        break;
+        case SQL_SUCCESS_WITH_INFO:
+            throw SqlServerException() << errno_code(MIR_DB_DRIVER_CONNECT);
+            logError(SQL_HANDLE_DBC, sqlConnectionhandle);
+            break;
+        case SQL_INVALID_HANDLE:
+        case SQL_ERROR:
+            throw SqlServerException() << errno_code(MIR_DB_DRIVER_CONNECT);
+            logError(SQL_HANDLE_DBC, sqlConnectionhandle);
+        default:
+            break;
     }
 
-    if(SQL_SUCCESS!=SQLAllocHandle(SQL_HANDLE_STMT, sqlConnectionhandle, &sqlStatementhandle))
+    if(SQL_SUCCESS != SQLAllocHandle(SQL_HANDLE_STMT, sqlConnectionhandle, &sqlStatementhandle))
     {
-        throw;
+        throw SqlServerException() << errno_code(MIR_DB_ALLOC_STMT);
     }
 
-    if(SQL_SUCCESS!=SQLExecDirect(sqlStatementhandle, (SQLCHAR*)query.c_str(), SQL_NTS))
+    //SQLExecute()
+    if(SQL_SUCCESS != SQLExecDirect(sqlStatementhandle, (SQLCHAR*)query.c_str(), SQL_NTS))
     {
-        throw;
+        throw SqlServerException() << errno_code(MIR_DB_EXECUTE_QUERY);
     }
 
     SQLFreeHandle(SQL_HANDLE_STMT, sqlStatementhandle );
+    SQLDisconnect(sqlConnectionhandle);
     SQLFreeHandle(SQL_HANDLE_DBC, sqlConnectionhandle);
     SQLFreeHandle(SQL_HANDLE_ENV, sqlEnvhandle);
-
 }
 
-int database::insertCutHistory(int radio, string path, string dateTime )
+int Database::insertCutHistory(int radio, string path, string dateTime )
 {
     SQLCHAR retconstring[1024];
     int retornoCutHistoryId = 0;
@@ -148,98 +157,115 @@ int database::insertCutHistory(int radio, string path, string dateTime )
     string query = "SET NOCOUNT ON INSERT INTO CutHistory (radi_cd_radio, cuhi_tx_caminho_do_arquivo, cuhi_dt_hora_da_captura) OUTPUT inserted.cuhi_cd_cuthistory VALUES ( "+ to_string(radio) + ", '" +path+ "', '" +dateTime+ "')";
 
     if(SQL_SUCCESS!=SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &sqlEnvhandle))
-        throw;
+        throw SqlServerException() << errno_code(MIR_DB_ALLOC_ENV);
 
     if(SQL_SUCCESS!=SQLSetEnvAttr(sqlEnvhandle,SQL_ATTR_ODBC_VERSION, (SQLPOINTER)SQL_OV_ODBC3, 0))
-        throw;
+        throw SqlServerException() << errno_code(MIR_DB_SET_ENV);
 
     if(SQL_SUCCESS!=SQLAllocHandle(SQL_HANDLE_DBC, sqlEnvhandle, &sqlConnectionhandle))
-        throw;
+        throw SqlServerException() << errno_code(MIR_DB_ALLOC_HANDLE);
 
     //Abre conecção com SQL.
     RETCODE recode = SQLDriverConnect(sqlConnectionhandle, NULL, connectionString, SQL_NTS, retconstring, 1024, NULL, SQL_DRIVER_NOPROMPT);
 
-    switch(recode)
+     switch(recode)
     {
-    case SQL_INVALID_HANDLE:
-        throw;
-    case SQL_ERROR:
-        throw;
-    default:
-        break;
+        case SQL_SUCCESS_WITH_INFO:
+            throw SqlServerException() << errno_code(MIR_DB_DRIVER_CONNECT);
+            logError(SQL_HANDLE_DBC, sqlConnectionhandle);
+            break;
+        case SQL_INVALID_HANDLE:
+        case SQL_ERROR:
+            throw SqlServerException() << errno_code(MIR_DB_DRIVER_CONNECT);
+            logError(SQL_HANDLE_DBC, sqlConnectionhandle);
+        default:
+            break;
     }
 
-    if(SQL_SUCCESS!=SQLAllocHandle(SQL_HANDLE_STMT, sqlConnectionhandle, &sqlStatementhandle))
+    if(SQL_SUCCESS != SQLAllocHandle(SQL_HANDLE_STMT, sqlConnectionhandle, &sqlStatementhandle))
     {
-        throw;
+        throw SqlServerException() << errno_code(MIR_DB_ALLOC_STMT);
     }
 
-    if(SQL_SUCCESS!=SQLExecDirect(sqlStatementhandle, (SQLCHAR*)query.c_str(), SQL_NTS))
+    //SQLExecute()
+    if(SQL_SUCCESS != SQLExecDirect(sqlStatementhandle, (SQLCHAR*)query.c_str(), SQL_NTS))
     {
-        throw;
+        throw SqlServerException() << errno_code(MIR_DB_EXECUTE_QUERY);
     }
     else
     {
         if(SQLFetch(sqlStatementhandle)==SQL_SUCCESS)
             SQLGetData(sqlStatementhandle, 1, SQL_C_LONG, &retornoCutHistoryId, 0, NULL);
     }
-    return retornoCutHistoryId;
 
     SQLFreeHandle(SQL_HANDLE_STMT, sqlStatementhandle );
+    SQLDisconnect(sqlConnectionhandle);
     SQLFreeHandle(SQL_HANDLE_DBC, sqlConnectionhandle);
     SQLFreeHandle(SQL_HANDLE_ENV, sqlEnvhandle);
+
+    return retornoCutHistoryId;
 }
 
-void database::updateCutHistory(int cutHistoryId, int songRecognized, string dateTime)
+void Database::updateCutHistory(int cutHistoryId, int songRecognized, string dateTime)
 {
-    database::updateCutHistory(cutHistoryId, songRecognized, dateTime, false);
+    Database::updateCutHistory(cutHistoryId, songRecognized, dateTime, false);
 }
 
-void database::updateCutHistory(int cutHistoryId, int songRecognized, string dateTime, bool silenceDetect)
+void Database::updateCutHistory(int cutHistoryId, int songRecognized, string dateTime, bool silenceDetect)
 {
     if  (cutHistoryId == 0)
         return;
 
     SQLCHAR retconstring[1024];
-    int retornoCutHistoryId = 0;
+
     int silenceConvertToIntSql =  silenceDetect ? 1 : 0;
 
     string query = "UPDATE CutHistory SET  cuhi_dt_hora_da_processamento = '"+ dateTime +"', song_cd_oid = "+to_string(songRecognized)+" , cuhi_in_silencio = "+ to_string(silenceDetect) +" WHERE cuhi_cd_cuthistory = " + to_string(cutHistoryId);
 
-    if(SQL_SUCCESS!=SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &sqlEnvhandle))
-        throw;
+   if(SQL_SUCCESS!=SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &sqlEnvhandle))
+        throw SqlServerException() << errno_code(MIR_DB_ALLOC_ENV);
 
     if(SQL_SUCCESS!=SQLSetEnvAttr(sqlEnvhandle,SQL_ATTR_ODBC_VERSION, (SQLPOINTER)SQL_OV_ODBC3, 0))
-        throw;
+        throw SqlServerException() << errno_code(MIR_DB_SET_ENV);
 
     if(SQL_SUCCESS!=SQLAllocHandle(SQL_HANDLE_DBC, sqlEnvhandle, &sqlConnectionhandle))
-        throw;
+        throw SqlServerException() << errno_code(MIR_DB_ALLOC_HANDLE);
 
     //Abre conecção com SQL.
     RETCODE recode = SQLDriverConnect(sqlConnectionhandle, NULL, connectionString, SQL_NTS, retconstring, 1024, NULL, SQL_DRIVER_NOPROMPT);
 
     switch(recode)
     {
-    case SQL_INVALID_HANDLE:
-        throw;
-    case SQL_ERROR:
-        throw;
-    default:
-        break;
+        case SQL_SUCCESS_WITH_INFO:
+            throw SqlServerException() << errno_code(MIR_DB_DRIVER_CONNECT);
+            logError(SQL_HANDLE_DBC, sqlConnectionhandle);
+            break;
+        case SQL_INVALID_HANDLE:
+        case SQL_ERROR:
+            throw SqlServerException() << errno_code(MIR_DB_DRIVER_CONNECT);
+            logError(SQL_HANDLE_DBC, sqlConnectionhandle);
+        default:
+            break;
     }
 
-    if(SQL_SUCCESS!=SQLAllocHandle(SQL_HANDLE_STMT, sqlConnectionhandle, &sqlStatementhandle))
-        throw;
+    if(SQL_SUCCESS != SQLAllocHandle(SQL_HANDLE_STMT, sqlConnectionhandle, &sqlStatementhandle))
+    {
+        throw SqlServerException() << errno_code(MIR_DB_ALLOC_STMT);
+    }
 
-    if(SQL_SUCCESS!=SQLExecDirect(sqlStatementhandle, (SQLCHAR*)query.c_str(), SQL_NTS))
-        throw;
+    //SQLExecute()
+    if(SQL_SUCCESS != SQLExecDirect(sqlStatementhandle, (SQLCHAR*)query.c_str(), SQL_NTS))
+    {
+        throw SqlServerException() << errno_code(MIR_DB_EXECUTE_QUERY);
+    }
 
     SQLFreeHandle(SQL_HANDLE_STMT, sqlStatementhandle );
+    SQLDisconnect(sqlConnectionhandle);
     SQLFreeHandle(SQL_HANDLE_DBC, sqlConnectionhandle);
     SQLFreeHandle(SQL_HANDLE_ENV, sqlEnvhandle);
 }
 
-string database::getDateSqlString()
+string Database::getDateSqlString()
 {
     time_t rawtime;
     struct tm * timeinfo;
@@ -251,16 +277,13 @@ string database::getDateSqlString()
     return string(buffer);
 }
 
-bool database::isGuid(string guid)
-{
-    if(!guid.empty() && guid.size() == 36 && guid[9] == '-' && guid[14] == '-' && guid[19] == '-' && guid[24]== '-')
-        return true;
-}
-
-void database::showError(unsigned int handletype, const SQLHANDLE& handle)
+void Database::logError(unsigned int handletype, const SQLHANDLE& handle)
 {
     SQLCHAR sqlstate[1024];
     SQLCHAR message[1024];
+
     if(SQL_SUCCESS == SQLGetDiagRec(handletype, handle, 1, sqlstate, NULL, message, 1024, NULL))
-        cout<<"\nMessage: "<<message<<"\nSQLSTATE: "<<sqlstate<<endl;
+        cout<<"\nMessage: "<<message<<"\t SQLSTATE: "<<sqlstate<<endl;
+
+    return ;
 }

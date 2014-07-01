@@ -15,7 +15,7 @@ struct UrlStream
 {
     int id;
     int radio;
-    string urlStream;
+    string url;
 };
 enum CodeLog
 {
@@ -25,14 +25,18 @@ enum CodeLog
     CAPTURE_END
 };
 
+struct InvalidArgumentExecption : virtual BaseException {};
+
+struct SqlServerException : virtual BaseException {};
+
 /** \brief
 * Classe que se comunica com o sql server.
 */
-class database
+class Database
 {
     public:
-        database();
-        virtual ~database();
+        Database();
+        virtual ~Database();
 
         /** \brief
         * Pega data e hora atual em string com o padrão do SQL server (yyyy-MM-dd HH:mm:ss).
@@ -62,7 +66,6 @@ class database
         *                           MOT007 - Capturado com sucesso
         *                           MOT005 - Erro na captura
         *                           MOT002 - Parada na captura
-        *
         *
         * \exception
         */
@@ -115,10 +118,6 @@ class database
         */
         void updateCutHistory(int cutHistoryId, int songRecognized, string dateTime);
 
-    protected:
-        SQLCHAR* connectionString;
-    private:
-
         /** \brief
         * Pega os detalhes do erro da conexão com o banco de dados.
         *
@@ -127,19 +126,14 @@ class database
         *
         * \exception
         */
-        void showError(unsigned int handletype, const SQLHANDLE& handle);
+        void logError(unsigned int handletype, const SQLHANDLE& handle);
 
-        /** \brief
-        * Verificador de GUID
-        *
-        * \param guid           - GUID em string para verificar se a string passada é realmente um guid.
-        * \return               - retorna um booleano informando se realmente é um guid.
-        */
-        bool isGuid(string guid);
-
-        SQLHANDLE sqlEnvhandle;
+    protected:
+        SQLCHAR* connectionString;
+    private:
+        SQLHENV sqlEnvhandle;
         SQLHANDLE sqlConnectionhandle;
-        SQLHANDLE sqlStatementhandle;
+        SQLHSTMT sqlStatementhandle;
         SQLRETURN retCode;
 };
 
