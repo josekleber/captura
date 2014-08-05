@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <boost/thread/thread.hpp>
 #include <fstream>
+#include <configuration.h>
 
 extern "C"
 {
@@ -18,117 +19,90 @@ extern "C"
 
 #include "testes.h"
 
-#define JEAN
+#define NELSON
 
 #ifdef NELSON
-#include "streamradio.h"
-#include "parser.h"
+#include "threadpool.h"
+#include "database.h"
 
 int Testes::ffmpeg_teste(string radio1, string radio2)
 {
-    string arqName;
-    vector <uint8_t> binOutput;
-
-    pthread_mutex_t mutex_acesso;
-    pthread_mutex_init(&mutex_acesso, NULL);
     vector<Filter> Filters;
-    Filters = Filter::FilterLoad("/home/nelson/Projetos/mir/mrserver/Dados/boostextdescr.txt");
-
-    boost::thread* objThreadRadio1;
-    boost::thread* objThreadParser1;
-
-    boost::thread* objThreadRadio2;
-    boost::thread* objThreadParser2;
 
     av_register_all();
     avcodec_register_all();
     avformat_network_init();
 
-    Parser* objParser1 = new Parser;
-    objParser1->mutex_acesso = &mutex_acesso;
-    objParser1->Filters = Filters;
+    Configuration* config = new Configuration();
 
-    StreamRadio* objRadio1 = new StreamRadio;
+    Filter::FilterLoad(&Filters, config->FilterArqName);
 
-    objRadio1->open(radio1);
+    //Database* data = new Database(config->ConnectionString);
+    //vector<UrlStream*> urls = data->getRadiosActive(config->Listener);
 
-    objParser1->SetStreamRadio(objRadio1);
-    objParser1->CreateContext("eu.wav", true, NULL);
+    ThreadPool* objThreadPool = new ThreadPool;
+    objThreadPool->Filters = &Filters;
+    objThreadPool->ipRecognition = config->mrIP;
+    objThreadPool->portRecognition = config->mrPort;
+    objThreadPool->sqlConnString = config->ConnectionString;
+    objThreadPool->cutFolder = config->cutFolder;
 
-    Parser* objParser2 = new Parser;
-    objParser2->mutex_acesso = &mutex_acesso;
-    objParser2->Filters = Filters;
-
-    StreamRadio* objRadio2 = new StreamRadio;
-
-    objRadio2->open(radio2);
-
-    objParser2->SetStreamRadio(objRadio2);
-    objParser2->CreateContext("eu.wav", true, NULL);
-
-    objThreadRadio1 = new boost::thread(boost::bind(&StreamRadio::read, objRadio1));
-    sleep(2);
-    while (objRadio1->getFifoSize() == 0)
-    {
-        cout << objRadio1->getFifoSize() << endl;
-        sleep(2);
-    };
-    objThreadParser1 = new boost::thread(boost::bind(&Parser::ProcessFrames, objParser1));
-
-    objThreadRadio2 = new boost::thread(boost::bind(&StreamRadio::read, objRadio2));
-    sleep(2);
-    while (objRadio2->getFifoSize() == 0)
-    {
-        cout << objRadio2->getFifoSize() << endl;
-        sleep(2);
-    };
-    objThreadParser2 = new boost::thread(boost::bind(&Parser::ProcessFrames, objParser2));
+//    for(int i = 0; i > urls.size(); i++)
+//        objThreadPool->addThreads(urls[i]->url, urls[i]->radio);
+    objThreadPool->addThreads(radio1, 1);
 
     while (true);
+
+    return 0;
 }
 #endif // NELSON
 
 #ifdef JEAN
-int Testes::ffmpeg_teste2()
+int Testes::ffmpeg_teste(string teste1, string teste2)
 {
     string url;
 
     pthread_mutex_t mutex_acesso;
     pthread_mutex_init(&mutex_acesso, NULL);
     vector<Filter> Filters;
-    Filters = Filter::FilterLoad("/home/nelson/Projetos/mir/mrserver/Dados/boostextdescr.txt");
 
     av_register_all();
     avcodec_register_all();
     avformat_network_init();
 
+    Configuration* config = new Configuration();
 
+    Filter::FilterLoad(&Filters, config->FilterArqName);
 
+    Database* data = new Database(config->ConnectionString);
+    vector<UrlStream*> urls =data->getRadiosActive(config->Listener);
 
-
+    for(int i = 0; i > url.size(); i++)
     {
-        boost::thread* objThreadRadio;
-        boost::thread* objThreadParser;
 
-        Parser* objParser = new Parser;
-        objParser->mutex_acesso = &mutex_acesso;
-        objParser->Filters = Filters;
-
-        StreamRadio* objRadio = new StreamRadio;
-
-        objRadio->open(url);
-
-        objParser->SetStreamRadio(objRadio);
-        objParser->CreateContext("eu.wav", true, NULL);
-
-        objThreadRadio = new boost::thread(boost::bind(&StreamRadio::read, objRadio));
-        sleep(2);
-        while (objRadio->getFifoSize() == 0)
-        {
-            cout << objRadio->getFifoSize() << endl;
-            sleep(2);
-        };
-        objThreadParser = new boost::thread(boost::bind(&Parser::ProcessFrames, objParser));
+        cout << urls[i]->url << endl;
+//        boost::thread* objThreadRadio;
+//        boost::thread* objThreadParser;
+//
+//        Parser* objParser = new Parser;
+//        objParser->mutex_acesso = &mutex_acesso;
+//        objParser->Filters = Filters;
+//
+//        StreamRadio* objRadio = new StreamRadio;
+//
+//        objRadio->open(url);
+//
+//        objParser->SetStreamRadio(objRadio);
+//        objParser->CreateContext("eu.wav", true, NULL);
+//
+//        objThreadRadio = new boost::thread(boost::bind(&StreamRadio::read, objRadio));
+//        sleep(2);
+//        while (objRadio->getFifoSize() == 0)
+//        {
+//            cout << objRadio->getFifoSize() << endl;
+//            sleep(2);
+//        };
+//        objThreadParser = new boost::thread(boost::bind(&Parser::ProcessFrames, objParser));
     }
 
     while (true);

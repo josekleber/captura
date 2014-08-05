@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <vector>
 #include <fstream>
+#include <dirent.h>
 #include <boost/thread/thread.hpp>
 
 extern "C"
@@ -23,14 +24,22 @@ extern "C"
 }
 
 #include <mir/fingerprint.h>
+#include <mir/tcpclient.h>
 
 #include "exceptionmir.h"
 #include "streamradio.h"
+#include "database.h"
 
 using namespace std;
 
 struct ContextCreatorException : virtual BaseException {};
 struct ConvertException : virtual BaseException {};
+
+struct arqData_
+{
+    char arqName[26];
+    uint8_t data[2048];
+};
 
 class Parser
 {
@@ -53,22 +62,24 @@ class Parser
         unsigned char* ReadData(AVAudioFifo *fifo);
         int WriteToArq();
 
-        string getDateTime();
-
         AVFormatContext* getFormatContext(bool isRAW);
         AVCodecContext* getCodecContext(bool isRAW);
         AVCodecContext* getInCodecContext();
         SwrContext* getSwrContext(bool isRAW);
 
         // variaveis necessarias para geracao do fingerprint
-        vector<Filter> Filters;
-        pthread_mutex_t* mutex_acesso;
+        vector<Filter> *Filters;
+        string ipRecognition;
+        string portRecognition;
+        string sqlConnString;
+        string cutFolder;
 
-        unsigned int* CreateFingerPrint(vector<Filter> Filters, vector <uint8_t> Data, unsigned int* FingerPrintSize, pthread_mutex_t* MutexAccess, bool mltFFT);
+        unsigned int* CreateFingerPrint(vector <uint8_t> Data, unsigned int* FingerPrintSize, bool mltFFT);
 
-        void SetStreamRadio(StreamRadio* oRadio);
+        void SetStreamRadio(unsigned int idxRadio, StreamRadio* oRadio);
         void CreateContext(string arqName, bool isRaw, AVDictionary* options);
         void ProcessFrames();
+        void ProcessOutput();
 
         AVFormatContext* CreateFormatContext(string arqName, bool isRaw);
         AVCodecContext*  CreateCodecContext(AVFormatContext* frmContext, int channel, int SampleRate, AVSampleFormat SampleFormat, AVDictionary** outOptions);
@@ -77,6 +88,10 @@ class Parser
     private:
         StreamRadio* objRadio;
 
+        unsigned int idRadio;
+
+        TCPClient* objClient;
+
         bool isExit;
 
         vector <unsigned char> bufRaw;
@@ -84,11 +99,30 @@ class Parser
         AVCodecContext *rawCodecContext, *m4aCodecContext, *inCodecContext;
         SwrContext *rawSwrContext, *m4aSwrContext;
 
-        AVFrame *inFrame;
-        AVFrame *outFrame;
-        AVPacket outPacket;
+        AVFrame *rawInFrame;
+        AVFrame *rawOutFrame;
+        AVPacket rawOutPacket;
+
+        AVFrame *m4aInFrame;
+        AVFrame *m4aOutFrame;
+        AVPacket m4aOutPacket;
+
+        int maxFrames;
+
+        bool lockFifo;
+        AVAudioFifo *arqFifo = NULL;
+        int cntDayCut;
+        void initFIFO();
+        void addSamplesFIFO(uint8_t **inputSamples, const int frameSize);
+        int getFifoData(void **data, int nb_samples);
+        int getFifoSize();
 
         int EncodeFrames(bool isRAW);
+
+        string getDateTime();
+        string getDate();
+        string getTime();
+        string getSaveCutDir();
 };
 
 #endif // PARSER_H

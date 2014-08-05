@@ -20,7 +20,6 @@ int main(int argc, char **argv)
     radio2 = "http://wms5.fabricahost.com.br:8386/;stream.nsv";                          // mp3
 
 //    objTestes->ffmpeg_teste(radio1, radio2);
-    objTestes->ffmpeg_teste2();
 
     return 0;
 }

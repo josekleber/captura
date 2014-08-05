@@ -19,18 +19,17 @@ void ThreadPool::addThreads(string uriRadio, int id)
     objThreadControl->idThread = id;
 
     objThreadControl->objCapture = new ThreadCapture;
-    objThreadControl->objCapture->slqConnString = slqConnString;
     objThreadControl->objCapture->ipRecognition = ipRecognition;
     objThreadControl->objCapture->portRecognition = portRecognition;
+    objThreadControl->objCapture->sqlConnString = sqlConnString;
     objThreadControl->objCapture->uriRadio = uriRadio;
-
-//    objThreadControl->uriRadio = uriRadio;
+    objThreadControl->objCapture->idThread = id;
+    objThreadControl->objCapture->Filters = Filters;
+    objThreadControl->objCapture->cutFolder = cutFolder;
 
     objThreadControl->objThread = new boost::thread(boost::bind(&ThreadCapture::thrRun, objThreadControl->objCapture));
-//    objThreadControl->objThread->join();
     objThreadControl->isStop = false;
 
- //   ctrlThreads.push_back(objThreadControl);
     ctrlThreads[id] = objThreadControl;
 }
 

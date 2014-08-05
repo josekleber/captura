@@ -3,6 +3,8 @@
 Parser::Parser()
 {
     isExit = false;
+    lockFifo = true;
+    cntDayCut = 0;
 }
 
 Parser::~Parser()
@@ -79,16 +81,25 @@ int Parser::EncodeFrames(bool isRAW)
 
     AVCodecContext* CodecContext;
     SwrContext* swrContext;
+    AVFrame* inFrame;
+    AVFrame* outFrame;
+    AVPacket* outPacket;
 
     if (isRAW)
     {
         CodecContext = rawCodecContext;
         swrContext = rawSwrContext;
+        inFrame = rawInFrame;
+        outFrame = rawOutFrame;
+        outPacket = &rawOutPacket;
     }
     else
     {
         CodecContext = m4aCodecContext;
         swrContext = m4aSwrContext;
+        inFrame = m4aInFrame;
+        outFrame = m4aOutFrame;
+        outPacket = &m4aOutPacket;
     }
 
     outFrame->nb_samples     = CodecContext->frame_size;
@@ -97,13 +108,13 @@ int Parser::EncodeFrames(bool isRAW)
     outFrame->sample_rate    = CodecContext->sample_rate;
     av_frame_get_buffer(outFrame, 0);
 
-    swr_convert(swrContext, (uint8_t**)outFrame->extended_data, outFrame->nb_samples, (const uint8_t**)inFrame->data, inFrame->nb_samples);
+    swr_convert(swrContext, (uint8_t**)outFrame->data, outFrame->nb_samples, (const uint8_t**)inFrame->data, inFrame->nb_samples);
 
-    av_init_packet(&outPacket);
-    outPacket.data = NULL;
-    outPacket.size = 0;
+    av_init_packet(outPacket);
+    outPacket->data = NULL;
+    outPacket->size = 0;
 
-    int ret = avcodec_encode_audio2(CodecContext, &outPacket, outFrame, &haveData);
+    int ret = avcodec_encode_audio2(CodecContext, outPacket, outFrame, &haveData);
 
     av_frame_unref(outFrame);
 
@@ -116,27 +127,20 @@ void Parser::ProcessFrames()
     int szFifo;
     int ctrCnt = 0;
     vector <uint8_t> binOutput;
-    int maxFrames = objRadio->getNumFrames(6);
+    arqData_ arqData;
 
-    outFrame = av_frame_alloc();
-    inFrame = av_frame_alloc();
+    while ((maxFrames = objRadio->getNumFrames(5.5)) == 0);
 
-string PastaRaiz;
-string arqDateTime;
-PastaRaiz = "/home/nelson/Projetos/Musicas/Recortes/";
-arqDateTime = getDateTime();
-int cnt = 0;
-int qntRecortes = 0;
+    rawOutFrame = av_frame_alloc();
+    rawInFrame = av_frame_alloc();
+
+    objClient = new TCPClient(ipRecognition, portRecognition);
+
 clock_t start;
 start = clock();
-int finished = 0;
 
-//do
-//{
-//    szFifo = objRadio->getFifoSize();
-//    cout << szFifo << endl;
-//    sleep(2);
-//} while(szFifo != objRadio->getFifoSize());
+    sprintf(arqData.arqName, "%05d-%05d-%s", this->idRadio, cntDayCut, getDateTime().c_str());
+    initFIFO();
 
     while(!isExit)
     {
@@ -146,118 +150,99 @@ int finished = 0;
         if (szFifo >= inFrameSize)
         {
 // carregando dados da FIFO
-            inFrame->nb_samples     = FFMIN(szFifo, inFrameSize);
-            inFrame->channel_layout = inCodecContext->channel_layout;
-            inFrame->format         = inCodecContext->sample_fmt;
-            inFrame->sample_rate    = inCodecContext->sample_rate;
-            av_frame_get_buffer(inFrame, 0);
+            rawInFrame->nb_samples     = FFMIN(szFifo, inFrameSize);
+            rawInFrame->channel_layout = inCodecContext->channel_layout;
+            rawInFrame->format         = inCodecContext->sample_fmt;
+            rawInFrame->sample_rate    = inCodecContext->sample_rate;
+            av_frame_get_buffer(rawInFrame, 0);
 
-            objRadio->getFifoData((void**)inFrame->data, inFrame->nb_samples);
-cnt++;
-//cout << "Pacote : " << cnt << "    Size : " << szFifo - inFrameSize << endl;
+            objRadio->getFifoData((void**)rawInFrame->data, rawInFrame->nb_samples);
 
 // conversao para RAW
             EncodeFrames(true);
 
             if (EncodeFrames(true))
             {
-                for (int i = 0; i < outPacket.size; i++)
-                    binOutput.push_back(outPacket.data[i]);
+                for (int i = 0; i < rawOutPacket.size; i++)
+                    binOutput.push_back(rawOutPacket.data[i]);
             }
 
-            av_free_packet(&outPacket);
+            av_free_packet(&rawOutPacket);
 
-//// conversao para AAC
-//            if (EncodeFrames(false))
-//            {
-//                av_write_frame(m4aFormatContext, &outPacket);
-//            }
-//
-//            av_free_packet(&outPacket);
-
+// conversao para AAC
+//            for (int i = 0; i < inFrame->nb_samples; arqData.data[i] = inFrame->data[i++]);
+//            addSamplesFIFO((uint8_t*)&arqData, inFrame->nb_samples + 26);
+//            addSamplesFIFO((uint8_t**)&rawInFrame->data, rawInFrame->nb_samples);
 
 // Controle de tempo, maxFrames tem a quantidade de frames necessarios para os recortes
             ctrCnt++;
             if (ctrCnt >= maxFrames)
             {
-qntRecortes++;
+                cntDayCut++;
                 ctrCnt = 0;
+                while ((maxFrames = objRadio->getNumFrames(5.5)) == 0);    // atualizando a quantidade max de frames
+
+                uint8_t* conv;
+                int pos = 0;
+                int freq = inCodecContext->sample_rate;
 
 // gerando fingerprints
                 unsigned int nbits;
-                unsigned int pp = binOutput.size();
-                unsigned int* bits = CreateFingerPrint(Filters, binOutput, &nbits, mutex_acesso, true);
+                unsigned int* bits = CreateFingerPrint(binOutput, &nbits, true);
                 binOutput.clear();
 
-std::ofstream outfile (PastaRaiz + "Fingerprints/" + to_string(qntRecortes) + "-66_out_fp_" + arqDateTime + ".bin",std::ofstream::binary);
-outfile.write ((char*)bits, nbits * sizeof(unsigned int));
-outfile.close();
+                string strDateTime = getDateTime();
 
-arqDateTime = getDateTime();
+//                Database* objDb = new Database(sqlConnString);
+//                long idSlice = objDb->insertCutHistory(this->idRadio, getSaveCutDir(), strDateTime);
+                long idSlice = cntDayCut;
 
-//// finalizando arquivo AAC
-//                av_write_trailer(m4aFormatContext);
-//
-//                av_free(m4aFormatContext);
-//                av_free(m4aCodecContext);
-//
-//
-//                m4aFormatContext = CreateFormatContext(PastaRaiz + "Musicas/" + to_string(qntRecortes + 1) + "-66_out_" + arqDateTime + ".aac", false);
-//                m4aCodecContext = CreateCodecContext(m4aFormatContext, 1, 44100, AVSampleFormat::AV_SAMPLE_FMT_S16, NULL);
-//                avformat_write_header(m4aFormatContext, NULL);
+                uint8_t* buff  = new uint8_t[4 * nbits + 16];
 
-cout << "Recorte : " << qntRecortes << "    Pacote : " << cnt << "    Size : " << szFifo - inFrameSize << "    Tempo de processamento : " << (float)(clock() - start)/CLOCKS_PER_SEC << endl;
+                conv = (uint8_t*)&this->idRadio;
+                for (int i = 0; i < 4; buff[pos++] = conv[i++]);
+
+                conv = (uint8_t*)&idSlice;
+                for (int i = 0; i < 4; buff[pos++] = conv[i++]);
+
+                conv = (uint8_t*)&freq;
+                for (int i = 0; i < 4; buff[pos++] = conv[i++]);
+
+                conv = (uint8_t*)&nbits;
+                for (int i = 0; i < 4; buff[pos++] = conv[i++]);
+
+                for (int j = 0; j < nbits; j++)
+                {
+                    conv = (uint8_t*)&bits[j];
+                    for (int i = 0; i < 4; buff[pos++] = conv[i++]);
+                }
+
+                try
+                {
+                    objClient->Send(buff, 4 * nbits + 16);
+                }
+                catch (exception& e)
+                {
+                    cerr << e.what() << endl;
+                }
+
+                delete[] buff;
+
+cout << "Radio : " << this->idRadio << "    Recorte : " << cntDayCut << "    Size : " << szFifo - inFrameSize << "    Tempo de processamento : " << (float)(clock() - start)/CLOCKS_PER_SEC << endl;
 start = clock();
             }
 
-            av_frame_unref(inFrame);
+            av_frame_unref(rawInFrame);
         }
-/**
-        else
-        {
-            finished = 1;
-qntRecortes++;
-
-// finalizando o ultimo fingerprint
-            unsigned int nbits;
-            unsigned int *bits = CreateFingerPrint(Filters, binOutput, &nbits, mutex_acesso, true);
-
-            std::ofstream outfile (PastaRaiz + "Fingerprints/" + to_string(qntRecortes) + "-66_out_fp_" + arqDateTime + ".bin",std::ofstream::binary);
-            outfile.write ((char*)bits, nbits * sizeof(unsigned int));
-            outfile.close();
-
-//// limpando fila do AAC
-//do
-//{
-//    av_init_packet(&outPacket);
-//    outPacket.data = NULL;
-//    outPacket.size = 0;
-//
-//    avcodec_encode_audio2(m4aCodecContext, &outPacket, NULL, &data_present);
-//
-//    if (data_present)
-//    {
-//        av_write_frame(m4aFormatContext, &outPacket);
-//    }
-//
-//    av_free_packet(&outPacket);
-//} while (data_present);
-//
-//            av_write_trailer(m4aFormatContext);
-
-cout << "Recorte : " << qntRecortes << "    Pacote : " << cnt << "    Size : " << szFifo << "    Tempo de processamento : " << (float)(clock() - start)/CLOCKS_PER_SEC << endl;
-        }
-/**/
     }
 
-    av_frame_free(&inFrame);
-    av_frame_free(&outFrame);
-
-cout << "Fim" << endl;
+    av_frame_free(&rawInFrame);
+    av_frame_free(&rawOutFrame);
 }
 
-void Parser::SetStreamRadio(StreamRadio* oRadio)
+void Parser::SetStreamRadio(unsigned int idxRadio, StreamRadio* oRadio)
 {
+    idRadio = idxRadio;
     objRadio = oRadio;
 
     inCodecContext = objRadio->getCodecContext();
@@ -351,12 +336,71 @@ string Parser::getDateTime()
     t = time(NULL);
     DtHr = localtime(&t);
 
-    sprintf(strAux, "%d%02d%02d_%02d%02d%02d", DtHr->tm_year + 1900, DtHr->tm_mon + 1, DtHr->tm_mday, DtHr->tm_hour, DtHr->tm_min, DtHr->tm_sec);
+    sprintf(strAux, "%02d%02d%02d_%02d%02d%02d", DtHr->tm_year - 100, DtHr->tm_mon + 1, DtHr->tm_mday, DtHr->tm_hour, DtHr->tm_min, DtHr->tm_sec);
 
     return strAux;
 }
 
-unsigned int* Parser::CreateFingerPrint(vector<Filter> Filters, vector <uint8_t> Data, unsigned int* FingerPrintSize, pthread_mutex_t* MutexAccess, bool mltFFT)
+string Parser::getDate()
+{
+    struct tm *DtHr;
+    time_t t;
+    char strAux[20];
+
+    t = time(NULL);
+    DtHr = localtime(&t);
+
+    sprintf(strAux, "%02d%02d%02d", DtHr->tm_year - 100, DtHr->tm_mon + 1, DtHr->tm_mday);
+
+    return strAux;
+}
+
+string Parser::getTime()
+{
+    struct tm *DtHr;
+    time_t t;
+    char strAux[20];
+
+    t = time(NULL);
+    DtHr = localtime(&t);
+
+    sprintf(strAux, "%02d", DtHr->tm_hour);
+
+    return strAux;
+}
+
+string Parser::getSaveCutDir()
+{
+    DIR *dir;
+    char strAux[10];
+
+    string ret = cutFolder + "/" + getDate();
+    if ((dir = opendir(ret.c_str())) == NULL)
+    {
+        cntDayCut = 0;
+        mkdir(ret.c_str(), 0777);
+    }
+    else
+        closedir(dir);
+
+    ret += "/" + getTime();
+    if ((dir = opendir(ret.c_str())) == NULL)
+        mkdir(ret.c_str(), 0777);
+    else
+        closedir(dir);
+
+    sprintf(strAux, "%05d", this->idRadio);
+    ret += "/" + string(strAux);
+
+    if ((dir = opendir(ret.c_str())) == NULL)
+        mkdir(ret.c_str(), 0777);
+    else
+        closedir(dir);
+
+    return ret;
+}
+
+unsigned int* Parser::CreateFingerPrint(vector <uint8_t> Data, unsigned int* FingerPrintSize, bool mltFFT)
 {
     FingerPrint* fingerPrint = new FingerPrint(Filters);
     unsigned int len = Data.size();
@@ -367,8 +411,133 @@ unsigned int* Parser::CreateFingerPrint(vector<Filter> Filters, vector <uint8_t>
         convArray[i] = Data[i + 1] & 0xff;
         convArray[i + 1] = Data[i] & 0xff;
     }
-    unsigned int *bits = fingerPrint->Wav2Bits((short int*)convArray, len / 2, 44100, FingerPrintSize, MutexAccess, mltFFT);
+
+    unsigned int *bits = fingerPrint->Wav2Bits((short int*)convArray, len / 2, 44100, FingerPrintSize, mltFFT);
     free(convArray);
 
     return bits;
+}
+
+void Parser::initFIFO()
+{
+    /** Create the FIFO buffer based on the specified output sample format.
+       nb_samples  initial allocation size, in samples */
+
+
+    if (!(arqFifo = av_audio_fifo_alloc(inCodecContext->sample_fmt, inCodecContext->channels, 1)))
+    {
+        printf("FIFO não pode ser alocado.\n");
+        throw BadAllocException() << errno_code(AVERROR(ENOMEM));
+    }
+
+    lockFifo = false;
+}
+
+void Parser::addSamplesFIFO(uint8_t **inputSamples, const int frameSize)
+{
+    int error;
+
+    /**
+     * Make the FIFO as large as it needs to be to hold both,
+     * the old and the new samples.
+     */
+    while (lockFifo);
+    lockFifo = true;
+
+    if ((error = av_audio_fifo_realloc(arqFifo, av_audio_fifo_size(arqFifo) + frameSize)) < 0)
+    {
+        printf("Could not reallocate FIFO\n");
+    }
+
+    /** Store the new samples in the FIFO buffer. */
+    if (av_audio_fifo_write(arqFifo, (void **)inputSamples,
+                            frameSize) < frameSize)
+    {
+        printf("Could not write data to FIFO\n");
+    }
+
+    lockFifo = false;
+}
+
+int Parser::getFifoData(void **data, int nb_samples)
+{
+    while (lockFifo);
+    lockFifo = true;
+
+    int ret = av_audio_fifo_read(arqFifo, data, nb_samples);
+
+    lockFifo = false;
+
+    return ret;
+}
+
+int Parser::getFifoSize()
+{
+    while (lockFifo);
+    lockFifo = true;
+    int ret = av_audio_fifo_size(arqFifo);
+    lockFifo = false;
+    return ret;
+}
+
+void Parser::ProcessOutput()
+{
+    arqData_ arqData;
+    string arqAtual = "";
+    string arqName;
+    char chrArqName[28];
+
+    int ctrCnt = 1000000;
+
+    m4aOutFrame = av_frame_alloc();
+    m4aInFrame = av_frame_alloc();
+
+    while (true)
+    {
+        if (getFifoSize() > 0)
+        {
+            m4aInFrame->nb_samples     = inCodecContext->frame_size;
+            m4aInFrame->channel_layout = inCodecContext->channel_layout;
+            m4aInFrame->format         = inCodecContext->sample_fmt;
+            m4aInFrame->sample_rate    = inCodecContext->sample_rate;
+            av_frame_get_buffer(m4aInFrame, 0);
+
+            getFifoData((void**)m4aInFrame->data, inCodecContext->frame_size);
+//            getFifoData((void**)&arqData, inCodecContext->frame_size + 26);
+//            arqName = arqData.arqName;
+
+//            if (arqAtual != arqFifo)
+            if (ctrCnt >= maxFrames)
+            {
+                ctrCnt = 0;
+                // novo recorte, fecha o atual e abre o novo
+                if (arqAtual != "")
+                {
+                    av_write_trailer(m4aFormatContext);
+
+                    av_free(m4aFormatContext);
+                    av_free(m4aCodecContext);
+                    av_free(m4aSwrContext);
+                }
+                else
+                {
+                    sprintf(chrArqName, "%05d-%05d-%s", this->idRadio, cntDayCut, getDateTime().c_str());
+                    arqName = chrArqName;
+                }
+
+                CreateContext(getSaveCutDir() + "/" + arqName + ".mp3", false, NULL);
+                avformat_write_header(m4aFormatContext, NULL);
+
+                arqAtual = arqName;
+            }
+
+            if (EncodeFrames(false))
+            {
+                ctrCnt++;
+                av_write_frame(m4aFormatContext, &m4aOutPacket);
+            }
+
+            av_free_packet(&m4aOutPacket);
+        }
+    }
 }

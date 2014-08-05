@@ -5,40 +5,37 @@
 #include <stdio.h>
 #include <thread>
 #include <chrono>
+
 #include "threadcapture.h"
-
-
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/thread/thread.hpp>
-
-
 
 struct ctrlThread
 {
     bool isStop;
     int idThread;
     string uriRadio;
-    ThreadCapture* objCapture;
-    boost::thread* objThread;
+    ThreadCapture *objCapture;
+    boost::thread *objThread;
 };
 
 
 class ThreadPool
 {
     public:
-
-        int ppp = 0;
         /** Default constructor */
         ThreadPool();
         /** Default destructor */
         virtual ~ThreadPool();
 
-        string slqConnString;
         string ipRecognition;
         string portRecognition;
+        string sqlConnString;
 
-        vector<Filter> Filters;
+        string cutFolder;
+
+        vector<Filter> *Filters;
 
         void addThreads(string uriRadio, int id);
         void stopThread(int id);
@@ -47,7 +44,6 @@ class ThreadPool
         void TesteThread(int cnt);
     protected:
     private:
-        //vector<ctrlThread*> ctrlThreads;
         map<unsigned int, ctrlThread*> ctrlThreads;
 };
 

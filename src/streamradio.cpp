@@ -12,7 +12,7 @@ StreamRadio::StreamRadio()
     duration = 0;
     statusConnection = MIR_CONNETION_CLOSE;
     isExit = false;
- lockFifo = true;
+    lockFifo = true;
 }
 
 StreamRadio::~StreamRadio()
@@ -215,52 +215,52 @@ void StreamRadio::readFrame()
         inputPacket.data = NULL;
         inputPacket.size = 0;
 
-try
-{
-        if (!(frame = av_frame_alloc()))
-            throw BadAllocException() <<errno_code(MIR_ERR_BADALLOC_CONTEXT);
-
-        // Lê um frame do áudio e coloca no pacote temporário.
-        if ((error = av_read_frame(formatContext, &inputPacket)) < 0)
-        {
-            // Se for final de arquivo ( em caso de arquivo ).
-            if (error == AVERROR_EOF)
-//                break;
-                finished = 1;
-            else
-                throw FrameReadException() <<errno_code(MIR_ERR_FRAME_READ);
-        }
-
-if (!finished)
-{
         try
         {
-            // decodifica o frame
-            decodeAudioFrame(&data,&finished,&inputPacket);
+            if (!(frame = av_frame_alloc()))
+                throw BadAllocException() <<errno_code(MIR_ERR_BADALLOC_CONTEXT);
 
-            /**
-            * Se o decodificador não terminar de processar os dados, esta função será chamada novamente.
-            */
-            if (finished && data)
-                finished = 0;
+            // Lê um frame do áudio e coloca no pacote temporário.
+            if ((error = av_read_frame(formatContext, &inputPacket)) < 0)
+            {
+                // Se for final de arquivo ( em caso de arquivo ).
+                if (error == AVERROR_EOF)
+//                break;
+                    finished = 1;
+                else
+                    throw FrameReadException() <<errno_code(MIR_ERR_FRAME_READ);
+            }
 
-            // libera memória do pacote temporário
-            av_free_packet(&inputPacket);
+            if (!finished)
+            {
+                try
+                {
+                    // decodifica o frame
+                    decodeAudioFrame(&data,&finished,&inputPacket);
 
+                    /**
+                    * Se o decodificador não terminar de processar os dados, esta função será chamada novamente.
+                    */
+                    if (finished && data)
+                        finished = 0;
+
+                    // libera memória do pacote temporário
+                    av_free_packet(&inputPacket);
+
+                }
+                catch(DecoderException ex)
+                {
+                    av_free_packet(&inputPacket);
+                }
+
+                // Adiciona ao FIFO
+                addSamplesFIFO(frame->extended_data, frame->nb_samples);
+            }
         }
-        catch(DecoderException ex)
+        catch (...)
         {
-            av_free_packet(&inputPacket);
+            cout << "Ocorreu um erro no stream de entrada" << endl;
         }
-
-        // Adiciona ao FIFO
-        addSamplesFIFO(frame->extended_data, frame->nb_samples);
-}
-}
-catch (...)
-{
-    cout << "Ocorreu um erro no stream de entrada" << endl;
-}
     }
 }
 
@@ -279,11 +279,12 @@ void StreamRadio::decodeAudioFrame(int *data, int *finished, AVPacket *inputPack
         printf("Could not decode frame (error '%d')\n", error);
         throw DecoderException() << errno_code(MIR_ERR_DECODE);
     }
-if (duration == 0)
-{
-    double time_base = av_q2d(formatContext->streams[0]->time_base);
-    duration = time_base * av_frame_get_pkt_duration(frame);
-}
+
+    if (duration == 0)
+    {
+        double time_base = av_q2d(formatContext->streams[0]->time_base);
+        duration = time_base * av_frame_get_pkt_duration(frame);
+    }
 }
 
 void StreamRadio::addSamplesFIFO(uint8_t **inputSamples, const int frameSize)
@@ -294,8 +295,8 @@ void StreamRadio::addSamplesFIFO(uint8_t **inputSamples, const int frameSize)
      * Make the FIFO as large as it needs to be to hold both,
      * the old and the new samples.
      */
-while (lockFifo);
-lockFifo = true;
+    while (lockFifo);
+    lockFifo = true;
     if ((error = av_audio_fifo_realloc(fifo, av_audio_fifo_size(fifo) + frameSize)) < 0)
     {
         printf("Could not reallocate FIFO\n");
@@ -307,7 +308,7 @@ lockFifo = true;
     {
         printf("Could not write data to FIFO\n");
     }
-lockFifo = false;
+    lockFifo = false;
 }
 
 AVAudioFifo** StreamRadio::getFIFO()

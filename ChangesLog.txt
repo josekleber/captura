@@ -1,0 +1,11 @@
+05 agosto 2014
+   released version 1.0.2 of captura
+
+     Change log:
+        -Added: Implementação da classe Connect
+        -Added: Adicionando Boost
+        -Added: Adicionando estrutura de tratamento de exceções
+        -Added: Dicionário de opções implementado
+        -Added: forçando o uso de TCP com RTSP
+        -Added: Merge com implementação de socket
+

@@ -5,10 +5,11 @@
 #include <stdio.h>
 #include <mir/filter.h>
 
-
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/thread/thread.hpp>
 
+#include "streamradio.h"
+#include "parser.h"
 
 using namespace std;
 
@@ -23,14 +24,17 @@ class ThreadCapture
         virtual ~ThreadCapture();
 
         string uriRadio;
-        string slqConnString;
+
         string ipRecognition;
         string portRecognition;
+        string sqlConnString;
+
+        string cutFolder;
 
         int status;
-        int idThread;
+        int idThread;   // igual a idRadio
 
-        vector<Filter>* Filters;
+        vector<Filter> *Filters;
 
         /** \brief Thread de um canal. cria o objeto MRServer e acerta os parametros
          *
