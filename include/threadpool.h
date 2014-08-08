@@ -39,9 +39,8 @@ class ThreadPool
 
         void addThreads(string uriRadio, int id);
         void stopThread(int id);
-
-
-        void TesteThread(int cnt);
+        string getUrlRadio(int id);
+        map<unsigned int, string> getActiveThread();
     protected:
     private:
         map<unsigned int, ctrlThread*> ctrlThreads;

@@ -1,14 +1,17 @@
-#include "testes.h"
+#include "main.h"
 
 int main(int argc, char **argv)
 {
+    printf("\033[0m \033[2J\033[1;1H");
+    printf("Captura Version: %s\n", prgVersion);
+
     Testes* objTestes = new Testes();
 
     string radio1, radio2;
 
     radio1 = "/home/nelson/Projetos/Musicas/66.mp3";
-    radio1 = "mmsh://radio.tokhost.com.br/germaniafm";  // ******* Erro
-    radio1 = "http://wms5.fabricahost.com.br:8386/;stream.nsv";                          // mp3
+//    radio1 = "mmsh://radio.tokhost.com.br/germaniafm";  // ******* Erro
+//    radio1 = "http://wms5.fabricahost.com.br:8386/;stream.nsv";                          // mp3
     radio1 = "http://184-107-102-140.webnow.net.br:80/98fm.aac";                         // aac
 //    radio1 = "http://livestream-f.akamaihd.net/3172111_1948081_f9882103_1_1756@103114";  // h24      ***** ERRO
 //    radio1 = "rtmp://media.sgr.globo.com:80/VideoMusicais/beat98.sdp";                   // flv      ***** Erro
@@ -19,7 +22,7 @@ int main(int argc, char **argv)
 //    radio2 = "/home/nelson/Projetos/Musicas/66_out_mp3.aac";
     radio2 = "http://wms5.fabricahost.com.br:8386/;stream.nsv";                          // mp3
 
-//    objTestes->ffmpeg_teste(radio1, radio2);
+    objTestes->ffmpeg_teste(radio1);
 
     return 0;
 }

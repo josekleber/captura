@@ -90,8 +90,6 @@ class Parser
 
         unsigned int idRadio;
 
-        TCPClient* objClient;
-
         bool isExit;
 
         vector <unsigned char> bufRaw;
@@ -111,7 +109,8 @@ class Parser
 
         bool lockFifo;
         AVAudioFifo *arqFifo = NULL;
-        int cntDayCut;
+        int cntRawDayCut;
+        int cntM4aDayCut;
         void initFIFO();
         void addSamplesFIFO(uint8_t **inputSamples, const int frameSize);
         int getFifoData(void **data, int nb_samples);

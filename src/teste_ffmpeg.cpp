@@ -25,7 +25,7 @@ extern "C"
 #include "threadpool.h"
 #include "database.h"
 
-int Testes::ffmpeg_teste(string radio1, string radio2)
+int Testes::ffmpeg_teste(string radio1)
 {
     vector<Filter> Filters;
 

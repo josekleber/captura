@@ -5,6 +5,7 @@
 #include "threadpool.h"
 #include "parser.h"
 #include "database.h"
+#include "configuration.h"
 
 class Testes
 {
@@ -13,7 +14,7 @@ class Testes
         virtual ~Testes();
 
         int Threadpool();
-        int ffmpeg_teste(string arqNameIn, string arqNameOut);
+        int ffmpeg_teste(string arqNameIn);
         int ffmpeg_teste2();
 
     protected:

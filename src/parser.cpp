@@ -4,7 +4,8 @@ Parser::Parser()
 {
     isExit = false;
     lockFifo = true;
-    cntDayCut = 0;
+    cntRawDayCut = 0;
+    cntM4aDayCut = 0;
 }
 
 Parser::~Parser()
@@ -108,7 +109,7 @@ int Parser::EncodeFrames(bool isRAW)
     outFrame->sample_rate    = CodecContext->sample_rate;
     av_frame_get_buffer(outFrame, 0);
 
-    swr_convert(swrContext, (uint8_t**)outFrame->data, outFrame->nb_samples, (const uint8_t**)inFrame->data, inFrame->nb_samples);
+    swr_convert(swrContext, (uint8_t**)outFrame->extended_data, outFrame->nb_samples, (const uint8_t**)inFrame->data, inFrame->nb_samples);
 
     av_init_packet(outPacket);
     outPacket->data = NULL;
@@ -129,17 +130,15 @@ void Parser::ProcessFrames()
     vector <uint8_t> binOutput;
     arqData_ arqData;
 
-    while ((maxFrames = objRadio->getNumFrames(5.5)) == 0);
+    while ((maxFrames = objRadio->getNumFrames(5)) == 0);
 
     rawOutFrame = av_frame_alloc();
     rawInFrame = av_frame_alloc();
 
-    objClient = new TCPClient(ipRecognition, portRecognition);
-
 clock_t start;
 start = clock();
 
-    sprintf(arqData.arqName, "%05d-%05d-%s", this->idRadio, cntDayCut, getDateTime().c_str());
+    sprintf(arqData.arqName, "%05d-%05d-%s", this->idRadio, cntRawDayCut, getDateTime().c_str());
     initFIFO();
 
     while(!isExit)
@@ -158,9 +157,10 @@ start = clock();
 
             objRadio->getFifoData((void**)rawInFrame->data, rawInFrame->nb_samples);
 
-// conversao para RAW
-            EncodeFrames(true);
+// conversao para AAC
+            addSamplesFIFO((uint8_t**)&rawInFrame->data, rawInFrame->nb_samples);
 
+// conversao para RAW
             if (EncodeFrames(true))
             {
                 for (int i = 0; i < rawOutPacket.size; i++)
@@ -169,18 +169,14 @@ start = clock();
 
             av_free_packet(&rawOutPacket);
 
-// conversao para AAC
-//            for (int i = 0; i < inFrame->nb_samples; arqData.data[i] = inFrame->data[i++]);
-//            addSamplesFIFO((uint8_t*)&arqData, inFrame->nb_samples + 26);
-//            addSamplesFIFO((uint8_t**)&rawInFrame->data, rawInFrame->nb_samples);
-
 // Controle de tempo, maxFrames tem a quantidade de frames necessarios para os recortes
             ctrCnt++;
+
             if (ctrCnt >= maxFrames)
             {
-                cntDayCut++;
+                cntRawDayCut++;
                 ctrCnt = 0;
-                while ((maxFrames = objRadio->getNumFrames(5.5)) == 0);    // atualizando a quantidade max de frames
+                while ((maxFrames = objRadio->getNumFrames(5)) == 0);    // atualizando a quantidade max de frames
 
                 uint8_t* conv;
                 int pos = 0;
@@ -195,7 +191,7 @@ start = clock();
 
 //                Database* objDb = new Database(sqlConnString);
 //                long idSlice = objDb->insertCutHistory(this->idRadio, getSaveCutDir(), strDateTime);
-                long idSlice = cntDayCut;
+                long idSlice = cntRawDayCut;
 
                 uint8_t* buff  = new uint8_t[4 * nbits + 16];
 
@@ -219,7 +215,17 @@ start = clock();
 
                 try
                 {
-                    objClient->Send(buff, 4 * nbits + 16);
+                    boost::asio::io_service IO_Service;
+                    tcp::resolver Resolver(IO_Service);
+                    tcp::resolver::query Query(ipRecognition, portRecognition);
+                    tcp::resolver::iterator EndPointIterator = Resolver.resolve(Query);
+
+                    TCPClient* objClient = new TCPClient(IO_Service, EndPointIterator);
+
+                    boost::thread ClientThread(boost::bind(&boost::asio::io_service::run, &IO_Service));
+                    ClientThread.join();
+
+                    objClient->Send(buff, pos);
                 }
                 catch (exception& e)
                 {
@@ -228,7 +234,7 @@ start = clock();
 
                 delete[] buff;
 
-cout << "Radio : " << this->idRadio << "    Recorte : " << cntDayCut << "    Size : " << szFifo - inFrameSize << "    Tempo de processamento : " << (float)(clock() - start)/CLOCKS_PER_SEC << endl;
+cout << "Radio : " << this->idRadio << "    Recorte : " << cntRawDayCut << "    Size : " << szFifo - inFrameSize << "    Tempo de processamento : " << (float)(clock() - start)/CLOCKS_PER_SEC << endl;
 start = clock();
             }
 
@@ -377,7 +383,8 @@ string Parser::getSaveCutDir()
     string ret = cutFolder + "/" + getDate();
     if ((dir = opendir(ret.c_str())) == NULL)
     {
-        cntDayCut = 0;
+        cntRawDayCut = 0;
+        cntM4aDayCut = 0;
         mkdir(ret.c_str(), 0777);
     }
     else
@@ -519,11 +526,10 @@ void Parser::ProcessOutput()
                     av_free(m4aCodecContext);
                     av_free(m4aSwrContext);
                 }
-                else
-                {
-                    sprintf(chrArqName, "%05d-%05d-%s", this->idRadio, cntDayCut, getDateTime().c_str());
-                    arqName = chrArqName;
-                }
+
+                cntM4aDayCut++;
+                sprintf(chrArqName, "%05d-%05d-%s", this->idRadio, cntM4aDayCut, getDateTime().c_str());
+                arqName = chrArqName;
 
                 CreateContext(getSaveCutDir() + "/" + arqName + ".mp3", false, NULL);
                 avformat_write_header(m4aFormatContext, NULL);
@@ -533,9 +539,9 @@ void Parser::ProcessOutput()
 
             if (EncodeFrames(false))
             {
-                ctrCnt++;
                 av_write_frame(m4aFormatContext, &m4aOutPacket);
             }
+            ctrCnt++;
 
             av_free_packet(&m4aOutPacket);
         }

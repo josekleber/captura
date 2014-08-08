@@ -11,37 +11,9 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option parameters="/home/nelson/Projetos/Musicas/66.mp3 /home/nelson/Projetos/Musicas/66_out_mp3.aac" />
 				<Compiler>
-					<Add option="-std=c++11" />
 					<Add option="-Wall" />
-					<Add option="-g" />
-					<Add directory="include" />
-					<Add directory="/usr/local/include/mir/" />
 				</Compiler>
-				<Linker>
-					<Add option="-lz" />
-					<Add option="-lm" />
-					<Add option="-lpthread" />
-					<Add option="-lmp3lame" />
-					<Add option="-lx264" />
-					<Add option="-lvorbis" />
-					<Add option="-lfdk-aac" />
-					<Add option="-lfaac" />
-					<Add option="-lodbc" />
-					<Add library="/usr/local/lib/libavcodec.so" />
-					<Add library="/usr/local/lib/libavdevice.so" />
-					<Add library="/usr/local/lib/libavfilter.so" />
-					<Add library="/usr/local/lib/libavformat.so" />
-					<Add library="/usr/local/lib/libavutil.so" />
-					<Add library="/usr/local/lib/libswresample.so" />
-					<Add library="/usr/local/lib/libswscale.so" />
-					<Add library="/usr/local/lib/libboost_system.so" />
-					<Add library="/usr/local/lib/libboost_thread.so" />
-					<Add library="/usr/local/lib/mir/fingerprint.so" />
-					<Add library="/usr/local/lib/mir/fingerprint.so" />
-					<Add library="/usr/local/lib/mir/libSkyLibs.so" />
-				</Linker>
 			</Target>
 			<Target title="Release">
 				<Option output="bin/Release/captura" prefix_auto="1" extension_auto="1" />
@@ -50,7 +22,6 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O2" />
-					<Add directory="include" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -58,14 +29,39 @@
 			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-std=c++11" />
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
+			<Add directory="include" />
 		</Compiler>
+		<Linker>
+			<Add option="-lz" />
+			<Add option="-lm" />
+			<Add option="-lpthread" />
+			<Add option="-lmp3lame" />
+			<Add option="-lx264" />
+			<Add option="-lvorbis" />
+			<Add option="-lfdk-aac" />
+			<Add option="-lfaac" />
+			<Add option="-lodbc" />
+			<Add library="/usr/local/lib/libavcodec.so" />
+			<Add library="/usr/local/lib/libavdevice.so" />
+			<Add library="/usr/local/lib/libavfilter.so" />
+			<Add library="/usr/local/lib/libavformat.so" />
+			<Add library="/usr/local/lib/libavutil.so" />
+			<Add library="/usr/local/lib/libswresample.so" />
+			<Add library="/usr/local/lib/libswscale.so" />
+			<Add library="/usr/local/lib/libboost_system.so" />
+			<Add library="/usr/local/lib/libboost_thread.so" />
+			<Add library="/usr/local/lib/mir/libSkyLibs.so" />
+		</Linker>
+		<Unit filename="config.ini" />
 		<Unit filename="include/aacdata.h" />
 		<Unit filename="include/configuration.h" />
 		<Unit filename="include/database.h" />
 		<Unit filename="include/exceptionmir.h" />
 		<Unit filename="include/logger.h" />
+		<Unit filename="include/main.h" />
 		<Unit filename="include/parser.h" />
 		<Unit filename="include/queuehandler.h" />
 		<Unit filename="include/rawdata.h" />
@@ -75,6 +71,7 @@
 		<Unit filename="include/threadpool.h" />
 		<Unit filename="include/version.h" />
 		<Unit filename="src/aacdata.cpp" />
+		<Unit filename="src/configuration.cpp" />
 		<Unit filename="src/database.cpp" />
 		<Unit filename="src/logger.cpp" />
 		<Unit filename="src/main.cpp" />
@@ -82,7 +79,6 @@
 		<Unit filename="src/rawdata.cpp" />
 		<Unit filename="src/streamradio.cpp" />
 		<Unit filename="src/teste_ffmpeg.cpp" />
-		<Unit filename="src/teste_thread.cpp" />
 		<Unit filename="src/testes.cpp" />
 		<Unit filename="src/threadcapture.cpp" />
 		<Unit filename="src/threadpool.cpp" />

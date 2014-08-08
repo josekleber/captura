@@ -19,6 +19,7 @@ void ThreadPool::addThreads(string uriRadio, int id)
     objThreadControl->idThread = id;
 
     objThreadControl->objCapture = new ThreadCapture;
+
     objThreadControl->objCapture->ipRecognition = ipRecognition;
     objThreadControl->objCapture->portRecognition = portRecognition;
     objThreadControl->objCapture->sqlConnString = sqlConnString;
@@ -39,14 +40,14 @@ void ThreadPool::stopThread(int id)
     objThreadControl->objCapture->thrClose();
 }
 
-void ThreadPool::TesteThread(int cnt)
+string ThreadPool::getUrlRadio(int id)
 {
-    for (int i = 1; i <= cnt; i++)
-        this->addThreads("Thread numero " + std::to_string(i), i);
+    return "";
+}
 
-    for (int i = cnt; i > 0; i--)
-    {
-        sleep(2);
-        this->stopThread(i);
-    }
+map<unsigned int, string> ThreadPool::getActiveThread()
+{
+    map<unsigned int, string> lstRadios;
+
+    return lstRadios;
 }
