@@ -42,12 +42,22 @@ void ThreadPool::stopThread(int id)
 
 string ThreadPool::getUrlRadio(int id)
 {
-    return "";
+    std::map<unsigned int, ctrlThread*>::iterator itAux;
+
+    itAux = ctrlThreads.find(id);
+
+    if (itAux != ctrlThreads.end())
+        return itAux->second->uriRadio;
+    else
+        return "";
 }
 
-map<unsigned int, string> ThreadPool::getActiveThread()
+vector <int32_t> ThreadPool::getActiveThread()
 {
-    map<unsigned int, string> lstRadios;
+    vector <int32_t> lstRadios;
+
+    for (map<unsigned int, ctrlThread*>::iterator it = ctrlThreads.begin(); it != ctrlThreads.end(); ++it)
+        lstRadios.push_back(it->second->idThread);
 
     return lstRadios;
 }

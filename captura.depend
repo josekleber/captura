@@ -4192,7 +4192,7 @@
 	<boost/date_time/posix_time/posix_time.hpp>
 	<boost/thread/thread.hpp>
 
-1407522952 /usr/local/include/mir/filter.h
+1407558595 /usr/local/include/mir/filter.h
 	<stdio.h>
 	<stdlib.h>
 	<complex>
@@ -7164,7 +7164,7 @@
 1407501259 source:/home/nelson/Projetos/mir/captura/src/threadpool.cpp
 	"threadpool.h"
 
-1407501022 /home/nelson/Projetos/mir/captura/include/threadpool.h
+1407560453 /home/nelson/Projetos/mir/captura/include/threadpool.h
 	<stdlib.h>
 	<stdio.h>
 	<thread>
@@ -7188,7 +7188,7 @@
 	<libavcodec/avcodec.h>
 	<libavutil/audio_fifo.h>
 
-1407521714 source:/home/nelson/Projetos/mir/captura/src/parser.cpp
+1407525123 source:/home/nelson/Projetos/mir/captura/src/parser.cpp
 	"parser.h"
 
 1407520677 /home/nelson/Projetos/mir/captura/include/parser.h
@@ -7341,7 +7341,7 @@
 	"streamradio.h"
 	"database.h"
 
-1407522952 /usr/local/include/mir/fingerprint.h
+1407558595 /usr/local/include/mir/fingerprint.h
 	<complex>
 	<fftw3.h>
 	<stdio.h>
@@ -7400,11 +7400,11 @@
 	"threadpool.h"
 	"database.h"
 
-1407522952 /usr/local/include/mir/exceptionclass.h
+1407558595 /usr/local/include/mir/exceptionclass.h
 	<string>
 	<exception>
 
-1407522952 /usr/local/include/mir/tcpclient.h
+1407558595 /usr/local/include/mir/tcpclient.h
 	<cstdlib>
 	<deque>
 	<iostream>
