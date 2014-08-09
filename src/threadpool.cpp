@@ -36,8 +36,17 @@ void ThreadPool::addThreads(string uriRadio, int id)
 
 void ThreadPool::stopThread(int id)
 {
-    ctrlThread* objThreadControl = ctrlThreads[id];
-    objThreadControl->objCapture->thrClose();
+
+    std::map<unsigned int, ctrlThread*>::iterator itAux;
+    ctrlThread* objThreadControl;
+
+    itAux = ctrlThreads.find(id);
+
+    if (itAux != ctrlThreads.end())
+    {
+        objThreadControl = itAux->second;
+        objThreadControl->objCapture->thrClose();
+    }
 }
 
 string ThreadPool::getUrlRadio(int id)
