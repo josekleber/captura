@@ -9,7 +9,9 @@ Configuration::Configuration()
 
     FilterArqName = pt.get<std::string>("Filters.FileName");
 
-    ConnectionString = pt.get<std::string>("Database.ConnectionString");
+    ConnectionStringSQL = pt.get<std::string>("Database.ConnectionStringSQL");
+
+    ConnectionStringMySQL = pt.get<std::string>("Database.ConnectionStringMYSQL");
 
     Listener = pt.get<std::string>("Settings.Listener");
 

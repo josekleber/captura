@@ -44,7 +44,7 @@ int Testes::ffmpeg_teste(string radio1)
     objThreadPool->Filters = &Filters;
     objThreadPool->ipRecognition = config->mrIP;
     objThreadPool->portRecognition = config->mrPort;
-    objThreadPool->sqlConnString = config->ConnectionString;
+    objThreadPool->sqlConnString = config->ConnectionStringSQL;
     objThreadPool->cutFolder = config->cutFolder;
 
 //    for(int i = 0; i > urls.size(); i++)

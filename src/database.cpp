@@ -1,8 +1,9 @@
 #include "database.h"
 
-Database::Database()
+Database::Database(std::string sqlConnect)
 {
-    connectionString = (SQLCHAR*)"DRIVER={SQL Server Native Client 11.0};SERVER=192.168.1.20;DATABASE=producao;UID=mir;PWD=-mda8960;";
+    //connectionString = (SQLCHAR*)"DRIVER={SQL Server Native Client 11.0};SERVER=192.168.1.20;DATABASE=producao;UID=mir;PWD=-mda8960;";
+    connectionString = (SQLCHAR*)sqlConnect.c_str();
 }
 
 Database::~Database()
@@ -32,10 +33,6 @@ vector<UrlStream* >  Database::getRadiosActive(string guid)
 
     switch(recode)
     {
-        case SQL_SUCCESS_WITH_INFO:
-            throw SqlServerException() << errno_code(MIR_DB_DRIVER_CONNECT);
-            logError(SQL_HANDLE_DBC, sqlConnectionhandle);
-            break;
         case SQL_INVALID_HANDLE:
         case SQL_ERROR:
             throw SqlServerException() << errno_code(MIR_DB_DRIVER_CONNECT);

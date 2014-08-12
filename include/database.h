@@ -35,7 +35,7 @@ struct SqlServerException : virtual BaseException {};
 class Database
 {
     public:
-        Database();
+        Database(std::string sqlConnect);
         virtual ~Database();
 
         /** \brief

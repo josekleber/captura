@@ -10,8 +10,12 @@ class Configuration
         Configuration();
 
         std::string FilterArqName;
-        std::string ConnectionString;
+        std::string ConnectionStringSQL;
+        std::string ConnectionStringMySQL;
         std::string Listener;
+        std::string StreamList;
+        /** \brief Tempo, em minutos, em que serão verificadas alterações nos streams */
+        int UpdateTimer;
 
         std::string mrIP;
         std::string mrPort;
