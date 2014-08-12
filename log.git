@@ -1,0 +1,301 @@
+commit fe65fa745582f9878c9d881a984eb5bdd892c709
+Author: njnaga <njnaga@ig.com.br>
+Date:   Sat Aug 9 02:28:11 2014 -0300
+
+    faltou atualizar um metodo
+
+commit af46ca4b76b42d00ccc99e4976aa477115400650
+Author: njnaga <njnaga@ig.com.br>
+Date:   Sat Aug 9 02:04:59 2014 -0300
+
+    Adicao de metodos para pegar a url de uma radio e a lista de radios em uso
+
+commit f9925d5fcefe484f1b7d136b84f8ab6d2726c0a8
+Author: njnaga <njnaga@ig.com.br>
+Date:   Fri Aug 8 17:03:56 2014 -0300
+
+    Alteracoes no scket
+    Gravacao de mp3
+
+commit dc6024ea6d43c033906d1139ef3361866548bfed
+Author: josekleber <josekleber@outlook.com>
+Date:   Tue Aug 5 15:47:22 2014 -0300
+
+    merge.
+    
+    inclusão de sockets;
+    SkyLibs;
+    Ajustes nas chamadas do SQL.
+
+commit 613140eae94a29ca4a24cbb4626af1b8d494c82b
+Author: kleber <kleber@Dell-XPS>
+Date:   Tue Aug 5 10:15:29 2014 -0300
+
+    testes de acesso as rádios
+
+commit c0ddf8c62e0cb7b22b224b6270f21f75aff9fecb
+Author: jean <jean@homologa>
+Date:   Tue Jul 1 15:59:53 2014 -0300
+
+    Melhorado exceções que SQL server pode retornar.
+
+commit 8d7568774c5eddd770457e576e39dd606aa41d95
+Author: jean <jean@homologa>
+Date:   Mon Jun 30 21:03:52 2014 -0300
+
+    ppp
+
+commit f18e0a415f3da09730481b75d802d004c38b77c3
+Author: nelson <nelson@UxDesenv>
+Date:   Mon Jun 30 20:27:57 2014 -0300
+
+    Versao melhorada de aquisicao.
+    Le um stream, e cria os fingerprints
+
+commit f9ac499b692f091ed7b82b41940a26de5033e1bd
+Author: nelson <nelson@UxDesenv>
+Date:   Sat Jun 28 22:09:23 2014 -0300
+
+    Essa versao ja faz recortes de 5 segundos
+
+commit 20ba77fd9b34b2b54ecc45d569453c4ff98b7446
+Author: nelson <nelson@UxDesenv>
+Date:   Sat Jun 28 18:08:24 2014 -0300
+
+    Primeira versao com o uso da classe fingerprint.
+
+commit 27c40978d7581f9a234e63dbeb9c988ada3a1b56
+Author: nelson <nelson@UxDesenv>
+Date:   Fri Jun 27 09:07:31 2014 -0300
+
+    arquivos adicionados para poder testar as classes.
+    
+    as rotinas estavam no main, porem como todos necessitavam de testes
+    especificos, as rotinas foram movidos do main para esses novos arquivos
+
+commit bd6f4a05cd2c1e2fdc18ffe670a4e88efb11a92d
+Author: nelson <nelson@UxDesenv>
+Date:   Fri Jun 27 09:04:13 2014 -0300
+
+    acertos nas rotinas (para testes)
+
+commit 8ebbb24bfcbd0668d2634ec75b5249dfeb5b11d4
+Author: nelson <nelson@UxDesenv>
+Date:   Fri Jun 27 09:03:22 2014 -0300
+
+    mudancas para acertar a interface com outras classes
+
+commit b234e7a6f05db40ac926827f14570b684c2b727c
+Author: nelson <nelson@UxDesenv>
+Date:   Fri Jun 27 09:02:34 2014 -0300
+
+    Inclusao de rotinas para criar os dados transformados em raw e aac
+
+commit f9f815fc0523a8a692c8ebe8285f026799a2a88d
+Author: nelson <nelson@UxDesenv>
+Date:   Wed Jun 25 16:16:23 2014 -0300
+
+    Tentando subir
+
+commit 7bf0dbcadc177a84462ee14fdc3fd6687b585524
+Author: nelson <nelson@UxDesenv>
+Date:   Wed Jun 25 16:10:12 2014 -0300
+
+    outros
+
+commit cc079e667317653e3afe696f17236511f80cdb44
+Author: nelson <nelson@UxDesenv>
+Date:   Wed Jun 25 16:07:35 2014 -0300
+
+    acertos simples
+
+commit 29aaac3e623a12fa4d934e5e0d5692b7fc7c9a06
+Author: nelson <nelson@UxDesenv>
+Date:   Wed Jun 25 16:06:59 2014 -0300
+
+    Inclusao de rotinas para processar dados vindo pelo ffmpeg
+
+commit 0cc7451489f9566d5d3cecafc36191cad9104011
+Author: josekleber <josekleber@outlook.com>
+Date:   Tue Jun 24 18:47:30 2014 -0300
+
+    adicionado getFIFO
+
+commit d329cf9a3a6fbae3fb5f61e3796beaca60301e6b
+Author: josekleber <josekleber@outlook.com>
+Date:   Tue Jun 24 18:11:45 2014 -0300
+
+    adição do FIFO na classe StreamRadio
+
+commit 9f6c78bb3501b9c6a639f8b93917eee313d76ede
+Author: nelson <nelson@UxDesenv>
+Date:   Mon Jun 23 21:39:06 2014 -0300
+
+    Mudanças para fazer o encode dos dados
+
+commit 60b4b7f21fb30b2c7dbb996a70895a4bc4c2d532
+Author: nelson <nelson@UxDesenv>
+Date:   Mon Jun 23 21:38:04 2014 -0300
+
+    acerto no controle de threads
+
+commit 788a2b970c55f8de30c9c04219f1694671f53106
+Author: jean <jean@homologa>
+Date:   Mon Jun 23 14:23:52 2014 -0300
+
+    Adicionado classe que se comunica como banco de dados SQL server.
+
+commit 638f09891daec093ae9d82450cec977f4b2bf3a8
+Author: josekleber <josekleber@outlook.com>
+Date:   Fri Jun 20 20:15:02 2014 -0300
+
+    implementação de exemplo de SRWSAMPLE
+
+commit 91d26b0c88def7dba2c33490c369227247618ca1
+Author: nelson <nelson@UxDesenv>
+Date:   Wed Jun 18 14:44:53 2014 -0300
+
+    Acrescentado biblioteca do finger print e classe para o thread
+
+commit 8c8e6197ffe88dd21a3b0b18bddb84e6cc4bf83d
+Author: josekleber <josekleber@outlook.com>
+Date:   Wed Jun 18 14:27:46 2014 -0300
+
+    adicionando referências do Boost
+
+commit 6d17875082f81cf523933bc41a90bf8c2ecda27f
+Author: jean <jean@homologa>
+Date:   Wed Jun 18 13:34:41 2014 -0300
+
+    inclusão da classe do banco de dados
+
+commit 62bd46975e1c0ecdfbb6f83c798fa25746fbfec4
+Author: nelson <nelson@UxDesenv>
+Date:   Wed Jun 18 12:51:28 2014 -0300
+
+    teste Nelson 3
+
+commit e193af95d73578073feb2061d71008a06ebd2550
+Author: josekleber <josekleber@outlook.com>
+Date:   Wed Jun 18 12:39:27 2014 -0300
+
+    teste kleber
+
+commit 424dd42cad7126859b988615febf048f401008ae
+Author: nelson <nelson@UxDesenv>
+Date:   Wed Jun 18 12:36:42 2014 -0300
+
+    teste Nelson
+
+commit 813813085a62834a4dd672bc015c5943e5810d36
+Author: josekleber <josekleber@outlook.com>
+Date:   Wed Jun 18 12:30:08 2014 -0300
+
+    teste
+
+commit 696810056019fc32abd55c243c7c11272d7002e6
+Author: josekleber <josekleber@outlook.com>
+Date:   Wed Jun 18 12:11:47 2014 -0300
+
+    inclusão de referencias do boost e adicionando classe threadcapture
+
+commit 9ea7a35782b3f3ee8c1ecfb91b32383896dcefb0
+Author: josekleber <josekleber@outlook.com>
+Date:   Wed Jun 18 10:29:08 2014 -0300
+
+    mais do mesmo
+
+commit a80141521f604e5e959162a19abe0de62796d57b
+Author: josekleber <josekleber@outlook.com>
+Date:   Wed Jun 18 10:06:09 2014 -0300
+
+    correção do header do streamradio e comentando um header que apontava
+    para máquina local
+
+commit d482fe2fe0aba681eb3d057bd1a185c414f9a0d9
+Author: josekleber <josekleber@outlook.com>
+Date:   Wed Jun 18 09:39:58 2014 -0300
+
+    inclusão do tratamento de exceção de codec não suportado
+
+commit 57c8dd6a6e52c316fffa3859a2cbac9ec55d0b73
+Merge: b954a78 a726d98
+Author: JK <josekleber@users.noreply.github.com>
+Date:   Tue Jun 17 13:11:18 2014 -0300
+
+    Merge pull request #2 from josekleber/rabbitmq-client
+    
+    Inclusao das classes para uso de threads
+
+commit b954a782d0f4dffb536ef9a7f091d56b0ee25b70
+Merge: a4b82fe ec6b128
+Author: JK <josekleber@users.noreply.github.com>
+Date:   Tue Jun 17 13:06:42 2014 -0300
+
+    Merge pull request #1 from josekleber/origin/rabbitmq-client
+    
+    Origin/rabbitmq client
+
+commit a726d9873092065886db33d79968088cab3283ac
+Author: nelson <nelson@UxDesenv>
+Date:   Mon Jun 16 16:56:26 2014 -0300
+
+    Inclusao das classes para uso de threads
+
+commit ec6b128f06b7715efd4ec7e2ec1bd5a35fd61a94
+Author: josekleber <josekleber@outlook.com>
+Date:   Mon Jun 16 16:27:45 2014 -0300
+
+    alterações na captura e implementação de exemplo de uso.
+    
+    alguns fontes foram renomeados
+
+commit b4fa76824299a82c1bb2bdea18864043feeb67fc
+Merge: a4b82fe 2bc8129
+Author: josekleber <josekleber@outlook.com>
+Date:   Thu Jun 12 14:15:39 2014 -0300
+
+    Merge remote-tracking branch 'origin/gh-pages'
+
+commit a4b82fe60ea7f40d784979612e7df79c5fb48efb
+Author: josekleber <josekleber@outlook.com>
+Date:   Thu Jun 12 13:55:14 2014 -0300
+
+    remove duplicate folder
+
+commit 96898624d1cf0e546eb4d2b5e5c73bb6cb00bcb2
+Merge: 967cdbd cd64c29
+Author: josekleber <josekleber@outlook.com>
+Date:   Thu Jun 12 13:45:12 2014 -0300
+
+    Merge branch 'master' of https://github.com/josekleber/captura
+
+commit 967cdbd9d40a5ea80121306b3af2a8d94176e3c2
+Author: josekleber <josekleber@outlook.com>
+Date:   Thu Jun 12 13:38:07 2014 -0300
+
+    add sources. initial version
+
+commit 30168c9f7fda5be2afc9ee5ae4cd4f846d5bd742
+Author: josekleber <josekleber@outlook.com>
+Date:   Thu Jun 12 12:56:16 2014 -0300
+
+    adding sources. initial version
+
+commit 2bc81297004b1853238e01c153a8cbd1b5fd19ac
+Author: josekleber <josekleber@users.noreply.github.com>
+Date:   Thu Jun 12 12:37:01 2014 -0300
+
+    Create gh-pages branch via GitHub
+
+commit 15365db7b7dc2be18e3e8a180c946b16d272f61c
+Author: josekleber <josekleber@users.noreply.github.com>
+Date:   Thu Jun 12 12:33:10 2014 -0300
+
+    Create gh-pages branch via GitHub
+
+commit cd64c298ab0cfb8f8b0625056f08a1f80b3caccd
+Author: josekleber <josekleber@outlook.com>
+Date:   Thu Jun 12 12:28:10 2014 -0300
+
+    Initial commit
