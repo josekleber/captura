@@ -7123,10 +7123,10 @@
 
 1407267809 /home/nelson/Projetos/mir/captura/include/aacdata.h
 
-1407267809 source:/home/nelson/Projetos/mir/captura/src/database.cpp
+1407888080 source:/home/nelson/Projetos/mir/captura/src/database.cpp
 	"database.h"
 
-1407267809 /home/nelson/Projetos/mir/captura/include/database.h
+1407888080 /home/nelson/Projetos/mir/captura/include/database.h
 	"exceptionmir.h"
 	<time.h>
 	<iostream>
@@ -7161,7 +7161,7 @@
 	"streamradio.h"
 	"parser.h"
 
-1407501259 source:/home/nelson/Projetos/mir/captura/src/threadpool.cpp
+1407561951 source:/home/nelson/Projetos/mir/captura/src/threadpool.cpp
 	"threadpool.h"
 
 1407560453 /home/nelson/Projetos/mir/captura/include/threadpool.h
@@ -7173,8 +7173,14 @@
 	<boost/date_time/posix_time/posix_time.hpp>
 	<boost/thread/thread.hpp>
 
-1407523354 source:/home/nelson/Projetos/mir/captura/src/main.cpp
-	"main.h"
+1407888080 source:/home/nelson/Projetos/mir/captura/src/main.cpp
+	"testes.h"
+	"configuration.h"
+	"database.h"
+	"threadpool.h"
+	<mir/filter.h>
+	<iostream>
+	<boost/filesystem.hpp>
 
 1403569888 /home/nelson/Projetos/mir/captura/include/queuehandler.h
 	<amqpcpp.h>
@@ -7233,7 +7239,7 @@
 	"database.h"
 	"configuration.h"
 
-1407502795 source:/home/nelson/Projetos/mir/captura/src/teste_ffmpeg.cpp
+1407888080 source:/home/nelson/Projetos/mir/captura/src/teste_ffmpeg.cpp
 	<iostream>
 	<cstdio>
 	<unistd.h>
@@ -11218,10 +11224,10 @@
 	<stdio.h>
 	<stddef.h>
 
-1407267809 /home/nelson/Projetos/mir/captura/include/configuration.h
+1407888080 /home/nelson/Projetos/mir/captura/include/configuration.h
 	<iostream>
 
-1407267809 source:/home/nelson/Projetos/mir/captura/src/configuration.cpp
+1407888080 source:/home/nelson/Projetos/mir/captura/src/configuration.cpp
 	"configuration.h"
 	<boost/property_tree/ptree.hpp>
 	<boost/property_tree/ini_parser.hpp>
@@ -12236,4 +12242,236 @@
 
 1407455541 source:/home/nelson/Projetos/mir/captura/src/tcpclient.cpp
 	"tcpclient.h"
+
+1407862177 source:/home/kleber/mir/git/src/aacdata.cpp
+	"aacdata.h"
+
+1407862177 /home/kleber/mir/git/include/aacdata.h
+
+1407870214 source:/home/kleber/mir/git/src/configuration.cpp
+	"configuration.h"
+	<boost/property_tree/ptree.hpp>
+	<boost/property_tree/ini_parser.hpp>
+
+1407867108 /home/kleber/mir/git/include/configuration.h
+	<iostream>
+
+1407867119 source:/home/kleber/mir/git/src/database.cpp
+	"database.h"
+
+1407870249 /home/kleber/mir/git/include/database.h
+	"exceptionmir.h"
+	<time.h>
+	<iostream>
+	<list>
+	<sql.h>
+	<sqltypes.h>
+	<sqlext.h>
+	<vector>
+
+1407862177 /home/kleber/mir/git/include/exceptionmir.h
+	<boost/exception/all.hpp>
+
+1407862177 source:/home/kleber/mir/git/src/logger.cpp
+	"logger.h"
+
+1407862177 /home/kleber/mir/git/include/logger.h
+
+1407867052 source:/home/kleber/mir/git/src/main.cpp
+	"testes.h"
+	"configuration.h"
+	"database.h"
+	"threadpool.h"
+	<mir/filter.h>
+	<iostream>
+	<boost/filesystem.hpp>
+
+1407862473 /home/kleber/mir/git/include/testes.h
+	"streamradio.h"
+	"threadpool.h"
+	"parser.h"
+	"database.h"
+	"configuration.h"
+
+1407862177 /home/kleber/mir/git/include/streamradio.h
+	<stdio.h>
+	<time.h>
+	<string.h>
+	"exceptionmir.h"
+	<libavformat/avformat.h>
+	<libavcodec/avcodec.h>
+	<libavutil/audio_fifo.h>
+
+1407862473 /home/kleber/mir/git/include/threadpool.h
+	<stdlib.h>
+	<stdio.h>
+	<thread>
+	<chrono>
+	"threadcapture.h"
+	<boost/date_time/posix_time/posix_time.hpp>
+	<boost/thread/thread.hpp>
+
+1407862177 /home/kleber/mir/git/include/threadcapture.h
+	<stdlib.h>
+	<stdio.h>
+	<mir/filter.h>
+	<boost/date_time/posix_time/posix_time.hpp>
+	<boost/thread/thread.hpp>
+	"streamradio.h"
+	"parser.h"
+
+1407862473 /home/kleber/mir/git/include/parser.h
+	<iostream>
+	<cstdio>
+	<unistd.h>
+	<vector>
+	<fstream>
+	<dirent.h>
+	<boost/thread/thread.hpp>
+	<libavformat/avformat.h>
+	<libavcodec/avcodec.h>
+	<libavutil/avstring.h>
+	<libavutil/avutil.h>
+	<libavutil/audio_fifo.h>
+	<libavutil/frame.h>
+	<libavutil/timestamp.h>
+	<libavutil/error.h>
+	<libavutil/avassert.h>
+	<libswresample/swresample.h>
+	<mir/fingerprint.h>
+	<mir/tcpclient.h>
+	"exceptionmir.h"
+	"streamradio.h"
+	"database.h"
+
+1404431258 /usr/local/include/boost/filesystem.hpp
+	<boost/filesystem/config.hpp>
+	<boost/filesystem/path.hpp>
+	<boost/filesystem/operations.hpp>
+	<boost/filesystem/convenience.hpp>
+
+1404431272 /usr/local/include/boost/filesystem/config.hpp
+	<boost/config.hpp>
+	<boost/system/api_config.hpp>
+	<boost/detail/workaround.hpp>
+	<boost/config/auto_link.hpp>
+
+1404431272 /usr/local/include/boost/filesystem/path.hpp
+	<boost/config.hpp>
+	<boost/filesystem/config.hpp>
+	<boost/filesystem/path_traits.hpp>
+	<boost/system/error_code.hpp>
+	<boost/system/system_error.hpp>
+	<boost/iterator/iterator_facade.hpp>
+	<boost/shared_ptr.hpp>
+	<boost/io/detail/quoted_manip.hpp>
+	<boost/static_assert.hpp>
+	<boost/functional/hash_fwd.hpp>
+	<boost/type_traits/is_integral.hpp>
+	<string>
+	<iterator>
+	<cstring>
+	<iosfwd>
+	<stdexcept>
+	<cassert>
+	<locale>
+	<algorithm>
+	<boost/config/abi_prefix.hpp>
+	<boost/config/abi_suffix.hpp>
+
+1404431272 /usr/local/include/boost/filesystem/path_traits.hpp
+	<boost/config.hpp>
+	<boost/filesystem/config.hpp>
+	<boost/utility/enable_if.hpp>
+	<boost/type_traits/is_array.hpp>
+	<boost/type_traits/decay.hpp>
+	<boost/system/error_code.hpp>
+	<cwchar>
+	<string>
+	<vector>
+	<list>
+	<iterator>
+	<locale>
+	<boost/assert.hpp>
+	<boost/config/abi_prefix.hpp>
+	<boost/config/abi_suffix.hpp>
+
+1404431315 /usr/local/include/boost/io/detail/quoted_manip.hpp
+	<iosfwd>
+	<ios>
+	<string>
+	<iterator>
+	<boost/io/ios_state.hpp>
+
+1404431272 /usr/local/include/boost/filesystem/operations.hpp
+	<boost/config.hpp>
+	<boost/filesystem/config.hpp>
+	<boost/filesystem/path.hpp>
+	<boost/detail/scoped_enum_emulation.hpp>
+	<boost/detail/bitmask.hpp>
+	<boost/system/error_code.hpp>
+	<boost/system/system_error.hpp>
+	<boost/shared_ptr.hpp>
+	<boost/utility/enable_if.hpp>
+	<boost/type_traits/is_same.hpp>
+	<boost/iterator.hpp>
+	<boost/cstdint.hpp>
+	<boost/assert.hpp>
+	<string>
+	<utility>
+	<ctime>
+	<vector>
+	<stack>
+	<fstream>
+	<boost/config/abi_prefix.hpp>
+	<boost/config/abi_suffix.hpp>
+
+1404431281 /usr/local/include/boost/detail/bitmask.hpp
+	<boost/cstdint.hpp>
+
+1404431272 /usr/local/include/boost/filesystem/convenience.hpp
+	<boost/config.hpp>
+	<boost/filesystem/operations.hpp>
+	<boost/system/error_code.hpp>
+	<boost/config/abi_prefix.hpp>
+	<boost/config/abi_suffix.hpp>
+
+1407862473 source:/home/kleber/mir/git/src/parser.cpp
+	"parser.h"
+
+1407862177 source:/home/kleber/mir/git/src/rawdata.cpp
+	"rawdata.h"
+
+1407862177 /home/kleber/mir/git/include/rawdata.h
+
+1407862473 source:/home/kleber/mir/git/src/streamradio.cpp
+	"streamradio.h"
+
+1407872694 source:/home/kleber/mir/git/src/teste_ffmpeg.cpp
+	<iostream>
+	<cstdio>
+	<unistd.h>
+	<boost/thread/thread.hpp>
+	<fstream>
+	<configuration.h>
+	<libavformat/avformat.h>
+	<libavcodec/avcodec.h>
+	<libavutil/frame.h>
+	<libavutil/timestamp.h>
+	<libavutil/error.h>
+	<libswresample/swresample.h>
+	<libavutil/avassert.h>
+	<libavutil/audio_fifo.h>
+	"testes.h"
+	"threadpool.h"
+	"database.h"
+
+1407862177 source:/home/kleber/mir/git/src/testes.cpp
+	"testes.h"
+
+1407862473 source:/home/kleber/mir/git/src/threadcapture.cpp
+	"threadcapture.h"
+
+1407862473 source:/home/kleber/mir/git/src/threadpool.cpp
+	"threadpool.h"
 

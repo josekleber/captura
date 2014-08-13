@@ -15,7 +15,7 @@ INC = -Iinclude
 CFLAGS = -std=c++11 -Wall -fexceptions
 RESINC = 
 LIBDIR = 
-LIB = /usr/local/lib/libavcodec.so /usr/local/lib/libavdevice.so /usr/local/lib/libavfilter.so /usr/local/lib/libavformat.so /usr/local/lib/libavutil.so /usr/local/lib/libswresample.so /usr/local/lib/libswscale.so /usr/local/lib/libboost_system.so /usr/local/lib/libboost_thread.so /usr/local/lib/mir/libSkyLibs.so -lfftw3
+LIB = /usr/local/lib/libavcodec.so /usr/local/lib/libavdevice.so /usr/local/lib/libavfilter.so /usr/local/lib/libavformat.so /usr/local/lib/libavutil.so /usr/local/lib/libswresample.so /usr/local/lib/libswscale.so /usr/local/lib/libboost_system.so /usr/local/lib/libboost_thread.so /usr/local/lib/libboost_filesystem.so /usr/local/lib/libboost_date_time.so /usr/local/lib/libboost_timer.so /usr/local/lib/mir/libSkyLibs.so -lfftw3
 LDFLAGS = -lz -lm -lpthread -lmp3lame -lx264 -lvorbis -lfdk-aac -lfaac -lodbc
 
 INC_DEBUG = $(INC)
