@@ -7149,10 +7149,10 @@
 
 1407267809 /home/nelson/Projetos/mir/captura/include/rawdata.h
 
-1407512475 source:/home/nelson/Projetos/mir/captura/src/threadcapture.cpp
+1408367576 source:/home/nelson/Projetos/mir/captura/src/threadcapture.cpp
 	"threadcapture.h"
 
-1407501379 /home/nelson/Projetos/mir/captura/include/threadcapture.h
+1408366126 /home/nelson/Projetos/mir/captura/include/threadcapture.h
 	<stdlib.h>
 	<stdio.h>
 	<mir/filter.h>
@@ -7161,7 +7161,7 @@
 	"streamradio.h"
 	"parser.h"
 
-1408130507 source:/home/nelson/Projetos/mir/captura/src/threadpool.cpp
+1408366182 source:/home/nelson/Projetos/mir/captura/src/threadpool.cpp
 	"threadpool.h"
 
 1407560453 /home/nelson/Projetos/mir/captura/include/threadpool.h
@@ -7173,7 +7173,7 @@
 	<boost/date_time/posix_time/posix_time.hpp>
 	<boost/thread/thread.hpp>
 
-1408155993 source:/home/nelson/Projetos/mir/captura/src/main.cpp
+1408337496 source:/home/nelson/Projetos/mir/captura/src/main.cpp
 	"testes.h"
 	"configuration.h"
 	"database.h"
@@ -7221,7 +7221,7 @@
 	"streamradio.h"
 	"database.h"
 
-1408332654 source:/home/nelson/Projetos/mir/captura/src/streamradio.cpp
+1408339075 source:/home/nelson/Projetos/mir/captura/src/streamradio.cpp
 	"streamradio.h"
 
 1403150527 /usr/local/include/libavutil/avstring.h

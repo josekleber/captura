@@ -42,11 +42,18 @@ class ThreadCapture
          * \return void*
          *
          */
+         int init();
         void thrRun();
         void thrClose();
     protected:
     private:
         bool stopThread;
+
+        boost::thread* objThreadRadio;
+        boost::thread* objThreadRawParser;
+        boost::thread* objThreadM4aParser;
+        Parser* objParser;
+        StreamRadio* objRadio;
 };
 
 #endif // CAPTURE_H

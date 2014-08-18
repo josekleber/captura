@@ -202,6 +202,7 @@ int main()
                 {
                     // cria as threads
     //                objThreadPool->addThreads(urlStream[idxRadio]->url, urlStream[idxRadio]->radio);
+                    cout << "Conectando em " << urlStream[idxRadio]->url << endl;
                     string urlRadio = objThreadPool->getUrlRadio(urlStream[idxRadio]->radio);
                     if (urlRadio == "")
                         objThreadPool->addThreads(urlStream[idxRadio]->url, urlStream[idxRadio]->radio);
@@ -213,6 +214,7 @@ int main()
                 }
                 catch(...)
                 {
+                    cout << "Erro ao abrir a rádio (" << urlStream[idxRadio]->radio << ") : " << urlStream[idxRadio]->url << endl;
                 }
             }
         }
@@ -220,12 +222,20 @@ int main()
         // sempre haverá um sleep para verificar novas rádios
         boost::this_thread::sleep(boost::posix_time::minutes(config->UpdateTimer));
     }
-/**/
+/**
     // "http://wms5.fabricahost.com.br:8386/;stream.nsv";                          // mp3
     // "http://184-107-102-140.webnow.net.br:80/98fm.aac";                         // aac
     // "http://wms5.fabricahost.com.br:8386/;stream.nsv";                          // mp3
-//    objThreadPool->addThreads("http://wms5.fabricahost.com.br:8386/;stream.nsv", 1);
-//    objThreadPool->addThreads("http://184-107-102-140.webnow.net.br:80/98fm.aac", 2);
+    // "http://198.27.64.63:8566;";                          // mp3
+    try
+    {
+        objThreadPool->addThreads("http://198.27.64.63:8566;", 1);
+    //    objThreadPool->addThreads("http://184-107-102-140.webnow.net.br:80/98fm.aac", 2);
+    }
+    catch(...)
+    {
 
+    }
+/**/
     while (true);
 }
