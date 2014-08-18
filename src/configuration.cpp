@@ -14,6 +14,8 @@ Configuration::Configuration()
     ConnectionStringMySQL = pt.get<std::string>("Database.ConnectionStringMYSQL");
 
     Listener = pt.get<std::string>("Settings.Listener");
+    StreamList = pt.get<std::string>("Settings.FileStream");
+    UpdateTimer = pt.get<int>("Settings.UpdateTimer");
 
     mrIP = pt.get<std::string>("Socket.IP");
     mrPort = pt.get<std::string>("Socket.Port");

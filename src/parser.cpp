@@ -61,18 +61,25 @@ unsigned char* Parser::ReadData(AVAudioFifo *fifo)
 
 void Parser::CreateContext(string arqName, bool isRaw, AVDictionary* options)
 {
-    if (isRaw)
+    try
     {
-        rawFormatContext = CreateFormatContext(arqName, isRaw);
-        rawCodecContext = CreateCodecContext(rawFormatContext, 1, 44100, AVSampleFormat::AV_SAMPLE_FMT_S16, &options);
-        rawCodecContext->frame_size = 1024;
-        rawSwrContext = CreateSwrContext(inCodecContext, rawCodecContext);
+        if (isRaw)
+        {
+            rawFormatContext = CreateFormatContext(arqName, isRaw);
+            rawCodecContext = CreateCodecContext(rawFormatContext, 1, 44100, AVSampleFormat::AV_SAMPLE_FMT_S16, &options);
+            rawCodecContext->frame_size = 1024;
+            rawSwrContext = CreateSwrContext(inCodecContext, rawCodecContext);
+        }
+        else
+        {
+            m4aFormatContext = CreateFormatContext(arqName, isRaw);
+            m4aCodecContext = CreateCodecContext(m4aFormatContext, 1, 44100, AVSampleFormat::AV_SAMPLE_FMT_S16, &options);
+            m4aSwrContext = CreateSwrContext(inCodecContext, m4aCodecContext);
+        }
     }
-    else
+    catch(...)
     {
-        m4aFormatContext = CreateFormatContext(arqName, isRaw);
-        m4aCodecContext = CreateCodecContext(m4aFormatContext, 1, 44100, AVSampleFormat::AV_SAMPLE_FMT_S16, &options);
-        m4aSwrContext = CreateSwrContext(inCodecContext, m4aCodecContext);
+        throw;
     }
 }
 
@@ -226,6 +233,10 @@ start = clock();
                     ClientThread.join();
 
                     objClient->Send(buff, pos);
+                }
+                catch(ConvertException& e)
+                {
+                    cerr << e.what() << endl;
                 }
                 catch (exception& e)
                 {
@@ -501,49 +512,60 @@ void Parser::ProcessOutput()
 
     while (true)
     {
-        if (getFifoSize() > 0)
+        try
         {
-            m4aInFrame->nb_samples     = inCodecContext->frame_size;
-            m4aInFrame->channel_layout = inCodecContext->channel_layout;
-            m4aInFrame->format         = inCodecContext->sample_fmt;
-            m4aInFrame->sample_rate    = inCodecContext->sample_rate;
-            av_frame_get_buffer(m4aInFrame, 0);
-
-            getFifoData((void**)m4aInFrame->data, inCodecContext->frame_size);
-//            getFifoData((void**)&arqData, inCodecContext->frame_size + 26);
-//            arqName = arqData.arqName;
-
-//            if (arqAtual != arqFifo)
-            if (ctrCnt >= maxFrames)
+            if (getFifoSize() > 0)
             {
-                ctrCnt = 0;
-                // novo recorte, fecha o atual e abre o novo
-                if (arqAtual != "")
-                {
-                    av_write_trailer(m4aFormatContext);
+                m4aInFrame->nb_samples     = inCodecContext->frame_size;
+                m4aInFrame->channel_layout = inCodecContext->channel_layout;
+                m4aInFrame->format         = inCodecContext->sample_fmt;
+                m4aInFrame->sample_rate    = inCodecContext->sample_rate;
+                av_frame_get_buffer(m4aInFrame, 0);
 
-                    av_free(m4aFormatContext);
-                    av_free(m4aCodecContext);
-                    av_free(m4aSwrContext);
+                getFifoData((void**)m4aInFrame->data, inCodecContext->frame_size);
+    //            getFifoData((void**)&arqData, inCodecContext->frame_size + 26);
+    //            arqName = arqData.arqName;
+
+    //            if (arqAtual != arqFifo)
+                if (ctrCnt >= maxFrames)
+                {
+                    ctrCnt = 0;
+                    // novo recorte, fecha o atual e abre o novo
+                    if (arqAtual != "")
+                    {
+                        av_write_trailer(m4aFormatContext);
+
+                        av_free(m4aFormatContext);
+                        av_free(m4aCodecContext);
+                        av_free(m4aSwrContext);
+                    }
+
+                    cntM4aDayCut++;
+                    sprintf(chrArqName, "%05d-%05d-%s", this->idRadio, cntM4aDayCut, getDateTime().c_str());
+                    arqName = chrArqName;
+
+                    CreateContext(getSaveCutDir() + "/" + arqName + ".mp3", false, NULL);
+                    avformat_write_header(m4aFormatContext, NULL);
+
+                    arqAtual = arqName;
                 }
 
-                cntM4aDayCut++;
-                sprintf(chrArqName, "%05d-%05d-%s", this->idRadio, cntM4aDayCut, getDateTime().c_str());
-                arqName = chrArqName;
+                if (EncodeFrames(false))
+                {
+                    av_write_frame(m4aFormatContext, &m4aOutPacket);
+                }
+                ctrCnt++;
 
-                CreateContext(getSaveCutDir() + "/" + arqName + ".mp3", false, NULL);
-                avformat_write_header(m4aFormatContext, NULL);
-
-                arqAtual = arqName;
+                av_free_packet(&m4aOutPacket);
             }
-
-            if (EncodeFrames(false))
-            {
-                av_write_frame(m4aFormatContext, &m4aOutPacket);
-            }
-            ctrCnt++;
-
-            av_free_packet(&m4aOutPacket);
+        }
+        catch(ConvertException& ex)
+        {
+            cerr << ex.what() << endl;
+        }
+        catch(...)
+        {
+            cout << "ProcessOutput" << endl;
         }
     }
 }

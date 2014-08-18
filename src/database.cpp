@@ -16,7 +16,7 @@ vector<UrlStream* >  Database::getRadiosActive(string guid)
     SQLCHAR retconstring[1024];
 
     //construo a query que fará a chamad
-    string query = "SELECT u.oid, u.Radio, u.urlstreaming FROM UrlStream u LEFT JOIN Radio r ON r.OID = u.Radio WHERE r.Listener = '" + guid + "' AND r.IsActive = 1";
+    string query ="select (select top 1 oid from UrlStream u where u.Radio = ra.Oid AND u.Active = 1 order by u.Ordinal) Oid,ra.OID radio,(select top 1 UrlStreaming from UrlStream u where u.Radio = ra.Oid AND u.Active = 1 order by u.Ordinal) urlstreaming from Radio ra where ra.Listener = '" + guid + "' and ra.IsActive = 1 and (select top 1 UrlStreaming from UrlStream u where u.Radio = ra.Oid AND u.Active = 1 order by u.Ordinal) is not null order by ra.StarRating";
     vector<UrlStream*> urlstream ;
 
     if(SQL_SUCCESS!=SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &sqlEnvhandle))

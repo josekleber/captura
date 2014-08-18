@@ -14,24 +14,31 @@ ThreadPool::~ThreadPool()
 
 void ThreadPool::addThreads(string uriRadio, int id)
 {
-    ctrlThread* objThreadControl = new ctrlThread;
-    objThreadControl->isStop = true;
-    objThreadControl->idThread = id;
+    try
+    {
+        ctrlThread* objThreadControl = new ctrlThread;
+        objThreadControl->isStop = true;
+        objThreadControl->idThread = id;
 
-    objThreadControl->objCapture = new ThreadCapture;
+        objThreadControl->objCapture = new ThreadCapture;
 
-    objThreadControl->objCapture->ipRecognition = ipRecognition;
-    objThreadControl->objCapture->portRecognition = portRecognition;
-    objThreadControl->objCapture->sqlConnString = sqlConnString;
-    objThreadControl->objCapture->uriRadio = uriRadio;
-    objThreadControl->objCapture->idThread = id;
-    objThreadControl->objCapture->Filters = Filters;
-    objThreadControl->objCapture->cutFolder = cutFolder;
+        objThreadControl->objCapture->ipRecognition = ipRecognition;
+        objThreadControl->objCapture->portRecognition = portRecognition;
+        objThreadControl->objCapture->sqlConnString = sqlConnString;
+        objThreadControl->objCapture->uriRadio = uriRadio;
+        objThreadControl->objCapture->idThread = id;
+        objThreadControl->objCapture->Filters = Filters;
+        objThreadControl->objCapture->cutFolder = cutFolder;
 
-    objThreadControl->objThread = new boost::thread(boost::bind(&ThreadCapture::thrRun, objThreadControl->objCapture));
-    objThreadControl->isStop = false;
+        objThreadControl->objThread = new boost::thread(boost::bind(&ThreadCapture::thrRun, objThreadControl->objCapture));
+        objThreadControl->isStop = false;
 
-    ctrlThreads[id] = objThreadControl;
+        ctrlThreads[id] = objThreadControl;
+    }
+    catch(...)
+    {
+        throw;
+    }
 }
 
 void ThreadPool::stopThread(int id)

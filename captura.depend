@@ -7123,7 +7123,7 @@
 
 1407267809 /home/nelson/Projetos/mir/captura/include/aacdata.h
 
-1407888080 source:/home/nelson/Projetos/mir/captura/src/database.cpp
+1408333057 source:/home/nelson/Projetos/mir/captura/src/database.cpp
 	"database.h"
 
 1407888080 /home/nelson/Projetos/mir/captura/include/database.h
@@ -7161,7 +7161,7 @@
 	"streamradio.h"
 	"parser.h"
 
-1407561951 source:/home/nelson/Projetos/mir/captura/src/threadpool.cpp
+1408130507 source:/home/nelson/Projetos/mir/captura/src/threadpool.cpp
 	"threadpool.h"
 
 1407560453 /home/nelson/Projetos/mir/captura/include/threadpool.h
@@ -7173,7 +7173,7 @@
 	<boost/date_time/posix_time/posix_time.hpp>
 	<boost/thread/thread.hpp>
 
-1407888080 source:/home/nelson/Projetos/mir/captura/src/main.cpp
+1408155993 source:/home/nelson/Projetos/mir/captura/src/main.cpp
 	"testes.h"
 	"configuration.h"
 	"database.h"
@@ -7194,7 +7194,7 @@
 	<libavcodec/avcodec.h>
 	<libavutil/audio_fifo.h>
 
-1407525123 source:/home/nelson/Projetos/mir/captura/src/parser.cpp
+1408156734 source:/home/nelson/Projetos/mir/captura/src/parser.cpp
 	"parser.h"
 
 1407520677 /home/nelson/Projetos/mir/captura/include/parser.h
@@ -7221,7 +7221,7 @@
 	"streamradio.h"
 	"database.h"
 
-1407267809 source:/home/nelson/Projetos/mir/captura/src/streamradio.cpp
+1408332654 source:/home/nelson/Projetos/mir/captura/src/streamradio.cpp
 	"streamradio.h"
 
 1403150527 /usr/local/include/libavutil/avstring.h
@@ -11227,7 +11227,7 @@
 1407888080 /home/nelson/Projetos/mir/captura/include/configuration.h
 	<iostream>
 
-1407888080 source:/home/nelson/Projetos/mir/captura/src/configuration.cpp
+1408130507 source:/home/nelson/Projetos/mir/captura/src/configuration.cpp
 	"configuration.h"
 	<boost/property_tree/ptree.hpp>
 	<boost/property_tree/ini_parser.hpp>

@@ -110,7 +110,7 @@ void StreamRadio::setStreamType()
         // mesmo que haja mais de um stream de audio, neste momento, considero apenas o primeiro.
         if (!(stream))
         {
-            if ((streamType[index].streamType = AVMEDIA_TYPE_AUDIO))
+            if (streamType[index].streamType == AVMEDIA_TYPE_AUDIO)
             {
                 stream = formatContext->streams[index];
 
@@ -335,7 +335,6 @@ int StreamRadio::getFifoData(void **data, int nb_samples)
 
 int StreamRadio::getNumFrames(double sec)
 {
-    int i = (int)round(sec / duration + 0.5);
     if (duration != 0)
         return (int)round(sec / duration + 0.5);
     else

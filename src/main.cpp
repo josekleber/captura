@@ -11,8 +11,6 @@ using namespace std;
 namespace fs = boost::filesystem;
 namespace pt = boost::posix_time;
 
-//#DEFINE TESTE
-
 // objeto do banco de dados
 Database* db = NULL;
 // configurações gerais da aplicação
@@ -30,7 +28,7 @@ void writeFileStream()
     file << config->Listener << endl;
     file << pt::to_simple_string(pt::second_clock::local_time()) << endl;
 
-    for(int index = 0; index < urlStream.size(); index++)
+    for(unsigned int index = 0; index < urlStream.size(); index++)
     {
         file << urlStream[index]->id << "\t";
         file << urlStream[index]->radio << "\t";
@@ -129,44 +127,19 @@ int loadStream()
             readFileStream();
         }
     }
+    return 0;
 }
 
 /** \brief Sistema de Captura de Audios
     Captura através de streams web.
 */
-int main(int argc, char **argv)
+int main()
 {
     // retorno de métodos
     int ret = 0;
 
     // filtro utilizado pelo fingerprint
     vector<Filter> Filters;
-
-#if TESTE
-
-
-    Testes* objTestes = new Testes();
-
-    string radio1, radio2;
-
-    radio1 = "/home/nelson/Projetos/Musicas/66.mp3";
-    radio1 = "mmsh://radio.tokhost.com.br/germaniafm";  // ******* Erro
-    radio1 = "http://wms5.fabricahost.com.br:8386/;stream.nsv";                          // mp3
-    radio1 = "http://184-107-102-140.webnow.net.br:80/98fm.aac";                         // aac
-//    radio1 = "http://livestream-f.akamaihd.net/3172111_1948081_f9882103_1_1756@103114";  // h24      ***** ERRO
-//    radio1 = "rtmp://media.sgr.globo.com:80/VideoMusicais/beat98.sdp";                   // flv      ***** Erro
-//    radio1 = "mmsh://divinal.dnip.com.br:1380/divinal?MSWMExt=.asf";                     // wmav2    ***** ERRO
-//    radio1 = "mmsh://portalradios15.dnip.com.br:1380/radiocruzeiro?MSWMExt=.asf";        // wmapro   ***** ERRO
-//    radio1 = "rtsp://servidor10.dnip.com.br/87fmagudos";                                 // *****ERRO
-
-//    radio2 = "/home/nelson/Projetos/Musicas/66_out_mp3.aac";
-    radio2 = "http://wms5.fabricahost.com.br:8386/;stream.nsv";                          // mp3
-
-//    objTestes->ffmpeg_teste(radio1, radio2);
-
-    return 0;
-
-#else
 
     // registra os componentes do FFMPEG
     av_register_all();
@@ -210,6 +183,7 @@ int main(int argc, char **argv)
     //  - carrrega lista de rádios;
     //  - mantém arquivo de rádios;
     //  - instancia threads para rádio ou mata a mesma.
+/**/
     do
     {
         // carrega a lista de rádios
@@ -222,20 +196,36 @@ int main(int argc, char **argv)
         }
         else
         {
-            for (int index = 0; index < urlStream.size(); index++)
+            for (unsigned int idxRadio = 0; idxRadio < urlStream.size(); idxRadio++)
             {
-                // cria as threads
-                objThreadPool->addThreads(urlStream[index]->url,urlStream[index]->radio);
+                try
+                {
+                    // cria as threads
+    //                objThreadPool->addThreads(urlStream[idxRadio]->url, urlStream[idxRadio]->radio);
+                    string urlRadio = objThreadPool->getUrlRadio(urlStream[idxRadio]->radio);
+                    if (urlRadio == "")
+                        objThreadPool->addThreads(urlStream[idxRadio]->url, urlStream[idxRadio]->radio);
+                    else if (urlRadio != urlStream[idxRadio]->url)
+                    {
+                        objThreadPool->stopThread(urlStream[idxRadio]->radio);
+                        objThreadPool->addThreads(urlStream[idxRadio]->url, urlStream[idxRadio]->radio);
+                    }
+                }
+                catch(...)
+                {
+                }
             }
         }
 
         // sempre haverá um sleep para verificar novas rádios
         boost::this_thread::sleep(boost::posix_time::minutes(config->UpdateTimer));
-
     }
+/**/
+    // "http://wms5.fabricahost.com.br:8386/;stream.nsv";                          // mp3
+    // "http://184-107-102-140.webnow.net.br:80/98fm.aac";                         // aac
+    // "http://wms5.fabricahost.com.br:8386/;stream.nsv";                          // mp3
+//    objThreadPool->addThreads("http://wms5.fabricahost.com.br:8386/;stream.nsv", 1);
+//    objThreadPool->addThreads("http://184-107-102-140.webnow.net.br:80/98fm.aac", 2);
+
     while (true);
-
-
-
-#endif // TESTE
 }
