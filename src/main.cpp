@@ -1,11 +1,13 @@
-#include "testes.h"
+#include <iostream>
+
+#include <boost/filesystem.hpp>
+
+#include <mir/filter.h>
+
+#include "main.h"
 #include "configuration.h"
 #include "database.h"
 #include "threadpool.h"
-#include <mir/filter.h>
-
-#include <iostream>
-#include <boost/filesystem.hpp>
 
 using namespace std;
 namespace fs = boost::filesystem;
@@ -135,6 +137,9 @@ int loadStream()
 */
 int main()
 {
+    printf("\033[0m \033[2J\033[1;1H");
+    printf("Captura Version: %s\n", prgVersion);
+
     // retorno de métodos
     int ret = 0;
 
@@ -183,7 +188,6 @@ int main()
     //  - carrrega lista de rádios;
     //  - mantém arquivo de rádios;
     //  - instancia threads para rádio ou mata a mesma.
-/**/
     do
     {
         // carrega a lista de rádios
@@ -201,7 +205,6 @@ int main()
                 try
                 {
                     // cria as threads
-    //                objThreadPool->addThreads(urlStream[idxRadio]->url, urlStream[idxRadio]->radio);
                     cout << "Conectando em " << urlStream[idxRadio]->url << endl;
                     string urlRadio = objThreadPool->getUrlRadio(urlStream[idxRadio]->radio);
                     if (urlRadio == "")
@@ -222,20 +225,5 @@ int main()
         // sempre haverá um sleep para verificar novas rádios
         boost::this_thread::sleep(boost::posix_time::minutes(config->UpdateTimer));
     }
-/**
-    // "http://wms5.fabricahost.com.br:8386/;stream.nsv";                          // mp3
-    // "http://184-107-102-140.webnow.net.br:80/98fm.aac";                         // aac
-    // "http://wms5.fabricahost.com.br:8386/;stream.nsv";                          // mp3
-    // "http://198.27.64.63:8566;";                          // mp3
-    try
-    {
-        objThreadPool->addThreads("http://198.27.64.63:8566;", 1);
-    //    objThreadPool->addThreads("http://184-107-102-140.webnow.net.br:80/98fm.aac", 2);
-    }
-    catch(...)
-    {
-
-    }
-/**/
     while (true);
 }
