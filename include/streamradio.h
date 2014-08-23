@@ -14,6 +14,8 @@ extern "C"
 #include <libavutil/audio_fifo.h>
 }
 
+#include <boost/thread.hpp>
+
 using namespace std;
 
 /** \brief
@@ -194,7 +196,7 @@ private:
     double duration;
     bool isExit;
 
-bool lockFifo;
+    boost::mutex mtx_;
 
 
     /** \brief

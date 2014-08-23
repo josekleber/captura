@@ -67,7 +67,10 @@ void ThreadCapture::thrRun()
         objThreadRawParser = new boost::thread(boost::bind(&Parser::ProcessFrames, objParser));
         objThreadM4aParser = new boost::thread(boost::bind(&Parser::ProcessOutput, objParser));
 
-        while (!stopThread);
+        while (!stopThread)
+        {
+            sleep(1);
+        }
     }
     catch(...)
     {

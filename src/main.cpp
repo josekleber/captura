@@ -101,6 +101,11 @@ int readFileStream()
 */
 int loadStream()
 {
+readFileStream();
+return 0;
+
+
+
     try
     {
         // carrega do banco de dados a lista de streams
@@ -140,6 +145,18 @@ int main()
     printf("\033[0m \033[2J\033[1;1H");
     printf("Captura Version: %s\n", prgVersion);
 
+    // carrega configurações da captura
+    config = new Configuration();
+
+    printf("Filter file : %s\n", config->FilterArqName.c_str());
+    printf("Connection string : %s\n", config->ConnectionStringSQL.c_str());
+    printf("MySql Connection string : %s\n", config->ConnectionStringMySQL.c_str());
+    printf("Listener : %s\n", config->Listener.c_str());
+    printf("Stream list : %s\n", config->StreamList.c_str());
+    printf("Update time : %d\n", config->UpdateTimer);
+    printf("MRServer : %s : %s\n", config->mrIP.c_str(), config->mrPort.c_str());
+    printf("Audity folder : %s\n\n", config->cutFolder.c_str());
+
     // retorno de métodos
     int ret = 0;
 
@@ -158,9 +175,6 @@ int main()
         //TODO criar códigos de erro
         return -1;
     }
-
-    // carrega configurações da captura
-    config = new Configuration();
 
     // instancia objeto do banco de dados
     db = new Database(config->ConnectionStringSQL);
@@ -220,6 +234,8 @@ int main()
                     cout << "Erro ao abrir a rádio (" << urlStream[idxRadio]->radio << ") : " << urlStream[idxRadio]->url << endl;
                 }
             }
+
+            objThreadPool->runThreads();
         }
 
         // sempre haverá um sleep para verificar novas rádios

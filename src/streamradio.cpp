@@ -12,7 +12,8 @@ StreamRadio::StreamRadio()
     duration = 0;
     statusConnection = MIR_CONNETION_CLOSE;
     isExit = false;
-    lockFifo = true;
+
+    mtx_.unlock();
 }
 
 StreamRadio::~StreamRadio()
@@ -189,8 +190,6 @@ void StreamRadio::initFIFO(AVAudioFifo **fifo)
         printf("FIFO não pode ser alocado.\n");
         throw BadAllocException() <<errno_code(AVERROR(ENOMEM));
     }
-
-    lockFifo = false;
 }
 
 void StreamRadio::readFrame()
@@ -295,8 +294,8 @@ void StreamRadio::addSamplesFIFO(uint8_t **inputSamples, const int frameSize)
      * Make the FIFO as large as it needs to be to hold both,
      * the old and the new samples.
      */
-    while (lockFifo);
-    lockFifo = true;
+    mtx_.lock();
+
     if ((error = av_audio_fifo_realloc(fifo, av_audio_fifo_size(fifo) + frameSize)) < 0)
     {
         printf("Could not reallocate FIFO\n");
@@ -308,7 +307,8 @@ void StreamRadio::addSamplesFIFO(uint8_t **inputSamples, const int frameSize)
     {
         printf("Could not write data to FIFO\n");
     }
-    lockFifo = false;
+
+    mtx_.unlock();
 }
 
 AVAudioFifo** StreamRadio::getFIFO()
@@ -318,18 +318,22 @@ AVAudioFifo** StreamRadio::getFIFO()
 
 int StreamRadio::getFifoSize()
 {
-    while (lockFifo);
-    lockFifo = true;
+    mtx_.lock();
+
     int ret = av_audio_fifo_size(fifo);
-    lockFifo = false;
+
+    mtx_.unlock();
+
     return ret;
 }
 int StreamRadio::getFifoData(void **data, int nb_samples)
 {
-    while (lockFifo);
-    lockFifo = true;
+    mtx_.lock();
+
     int ret = av_audio_fifo_read(fifo, data, nb_samples);
-    lockFifo = false;
+
+    mtx_.unlock();
+
     return ret;
 }
 
