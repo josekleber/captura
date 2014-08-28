@@ -114,7 +114,7 @@ int Parser::EncodeFrames(bool isRAW)
     outPacket->data = NULL;
     outPacket->size = 0;
 
-    int ret = avcodec_encode_audio2(CodecContext, outPacket, outFrame, &haveData);
+    avcodec_encode_audio2(CodecContext, outPacket, outFrame, &haveData);
 
     av_frame_unref(outFrame);
 
@@ -280,7 +280,7 @@ AVFormatContext* Parser::CreateFormatContext(string arqName, bool isRaw)
 
 
         int len;
-        for (len = 0; (arqName.c_str())[len] != 0; outFormatContext->filename[len] = (arqName.c_str())[len++]);
+        for (len = 0; (arqName.c_str())[len] != 0; outFormatContext->filename[len] = (arqName.c_str())[len], len++);
         outFormatContext->filename[len] = 0;
     }
 

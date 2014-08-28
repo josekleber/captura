@@ -13,7 +13,7 @@ ThreadCapture::~ThreadCapture()
     stopThread = false;
 }
 
-int ThreadCapture::init()
+void ThreadCapture::init()
 {
     try
     {

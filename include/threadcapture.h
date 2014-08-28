@@ -42,7 +42,7 @@ class ThreadCapture
          * \return void*
          *
          */
-         int init();
+        void init();
         void thrRun();
         void thrClose();
     protected:
