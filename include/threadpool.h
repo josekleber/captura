@@ -38,7 +38,6 @@ class ThreadPool
         vector<Filter> *Filters;
 
         void addThreads(string uriRadio, int id);
-        void runThreads();
         void stopThread(int id);
         string getUrlRadio(int id);
         vector <int32_t> getActiveThread();

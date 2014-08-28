@@ -12,7 +12,6 @@ StreamRadio::StreamRadio()
     duration = 0;
     statusConnection = MIR_CONNETION_CLOSE;
     isExit = false;
-
     mtx_.unlock();
 }
 
@@ -307,7 +306,6 @@ void StreamRadio::addSamplesFIFO(uint8_t **inputSamples, const int frameSize)
     {
         printf("Could not write data to FIFO\n");
     }
-
     mtx_.unlock();
 }
 
@@ -329,11 +327,8 @@ int StreamRadio::getFifoSize()
 int StreamRadio::getFifoData(void **data, int nb_samples)
 {
     mtx_.lock();
-
     int ret = av_audio_fifo_read(fifo, data, nb_samples);
-
     mtx_.unlock();
-
     return ret;
 }
 

@@ -15,14 +15,6 @@ Parser::~Parser()
     sleep(2);
 }
 
-// somente para teste
-static char *const get_error_text(const int error)
-{
-    static char error_buffer[255];
-    av_strerror(error, error_buffer, sizeof(error_buffer));
-    return error_buffer;
-}
-
 AVFormatContext* Parser::getFormatContext(bool isRAW)
 {
     if (isRAW)
@@ -150,8 +142,6 @@ start = clock();
 
     while(!isExit)
     {
-        int data_present = 0;
-
         szFifo = objRadio->getFifoSize();
         if (szFifo >= inFrameSize)
         {
@@ -214,7 +204,7 @@ start = clock();
                 conv = (uint8_t*)&nbits;
                 for (int i = 0; i < 4; buff[pos++] = conv[i++]);
 
-                for (int j = 0; j < nbits; j++)
+                for (unsigned int j = 0; j < nbits; j++)
                 {
                     conv = (uint8_t*)&bits[j];
                     for (int i = 0; i < 4; buff[pos++] = conv[i++]);
@@ -227,12 +217,12 @@ start = clock();
                     tcp::resolver::query Query(ipRecognition, portRecognition);
                     tcp::resolver::iterator EndPointIterator = Resolver.resolve(Query);
 
-                    TCPClient* objClient = new TCPClient(IO_Service, EndPointIterator);
+                    TCPClient* objClient = new TCPClient(IO_Service, EndPointIterator, buff, pos);
 
                     boost::thread ClientThread(boost::bind(&boost::asio::io_service::run, &IO_Service));
                     ClientThread.join();
 
-                    objClient->Send(buff, pos);
+                    objClient->Close();
                 }
                 catch(ConvertException& e)
                 {
@@ -500,7 +490,6 @@ int Parser::getFifoSize()
 
 void Parser::ProcessOutput()
 {
-    arqData_ arqData;
     string arqAtual = "";
     string arqName;
     char chrArqName[28];

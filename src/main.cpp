@@ -234,9 +234,9 @@ int main()
                     cout << "Erro ao abrir a rádio (" << urlStream[idxRadio]->radio << ") : " << urlStream[idxRadio]->url << endl;
                 }
             }
-
-            objThreadPool->runThreads();
         }
+
+	cout << "loop principal. " << __TIME__ << endl;
 
         // sempre haverá um sleep para verificar novas rádios
         boost::this_thread::sleep(boost::posix_time::minutes(config->UpdateTimer));

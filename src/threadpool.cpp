@@ -33,6 +33,16 @@ void ThreadPool::addThreads(string uriRadio, int id)
         objThreadControl->objCapture->cutFolder = cutFolder;
 
         objThreadControl->objCapture->init();
+    }
+    catch(...)
+    {
+        throw;
+    }
+
+    try
+    {
+        objThreadControl->objThread = new boost::thread(boost::bind(&ThreadCapture::thrRun, objThreadControl->objCapture));
+        objThreadControl->isStop = false;
 
         if (objThreadControl->objCapture->status == 0)
             ctrlThreads[id] = objThreadControl;
@@ -40,25 +50,6 @@ void ThreadPool::addThreads(string uriRadio, int id)
     catch(...)
     {
         throw;
-    }
-}
-
-void ThreadPool::runThreads()
-{
-    for (map<unsigned int, ctrlThread*>::iterator it = ctrlThreads.begin(); it != ctrlThreads.end(); ++it)
-    {
-        try
-        {
-            if (it->second->isStop)
-            {
-                it->second->objThread = new boost::thread(boost::bind(&ThreadCapture::thrRun, it->second->objCapture));
-                it->second->isStop = false;
-            }
-        }
-        catch(...)
-        {
-            throw;
-        }
     }
 }
 
