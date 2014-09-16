@@ -5,29 +5,27 @@
 #include <cstdio>
 #include <unistd.h>
 #include <vector>
-#include <fstream>
+#include "util.h"
+
 #include <dirent.h>
 #include <boost/thread/thread.hpp>
 
 extern "C"
 {
-    #include <libavformat/avformat.h>
-    #include <libavcodec/avcodec.h>
-    #include <libavutil/avstring.h>
-    #include <libavutil/avutil.h>
-    #include <libavutil/audio_fifo.h>
-    #include <libavutil/frame.h>
-    #include <libavutil/timestamp.h>
-    #include <libavutil/error.h>
-    #include <libavutil/avassert.h>
-    #include <libswresample/swresample.h>
+#include <libavformat/avformat.h>
+#include <libavcodec/avcodec.h>
+#include <libavutil/avstring.h>
+#include <libavutil/avutil.h>
+#include <libavutil/audio_fifo.h>
+#include <libavutil/frame.h>
+#include <libavutil/timestamp.h>
+#include <libavutil/error.h>
+#include <libavutil/avassert.h>
+#include <libswresample/swresample.h>
+#include <libavutil/opt.h>
 }
 
-#include <mir/fingerprint.h>
-#include <mir/tcpclient.h>
-
 #include "exceptionmir.h"
-#include "streamradio.h"
 #include "database.h"
 
 using namespace std;
@@ -35,93 +33,93 @@ using namespace std;
 struct ContextCreatorException : virtual BaseException {};
 struct ConvertException : virtual BaseException {};
 
-struct arqData_
-{
-    char arqName[26];
-    uint8_t data[2048];
-};
-
 class Parser
 {
-    public:
-        /** Default constructor */
-        Parser();
-        /** Default destructor */
-        virtual ~Parser();
+public:
 
-        /** \brief rotina responsavel pela leitura dos dados armazenados no fifo
-         * A rotina le os packets armazenados na fifo (strutura do ffmpeg) e devolve um vetor com os dados RAW. Se o vetor for NULL, indica erro ou sem dados.
-         * Ele tambem armazena em um vetor interno, os dados para o arquivo de saida no formato M4A.
-         * A rotina, sempre no inicio, inicializa os vetores, ou seja, uma vez chamado a funcao, perde-se os dados anteriores.
-         *
-         * param *fifo AVAudioFifo
-         *
-         * \return retorna o vetor com os dados RAW
-         *
-         */
-        unsigned char* ReadData(AVAudioFifo *fifo);
-        int WriteToArq();
+    /** Default constructor */
+    Parser(string fileName, uint64_t channelLayoutIn, int sampleRateIn, int bitRateIn,
+           AVSampleFormat sampleFormatIn, int nbSamplesIn, int nbChannelIn);
 
-        AVFormatContext* getFormatContext(bool isRAW);
-        AVCodecContext* getCodecContext(bool isRAW);
-        AVCodecContext* getInCodecContext();
-        SwrContext* getSwrContext(bool isRAW);
+    /** Default destructor */
+    virtual ~Parser();
 
-        // variaveis necessarias para geracao do fingerprint
-        vector<Filter> *Filters;
-        string ipRecognition;
-        string portRecognition;
-        string sqlConnString;
-        string cutFolder;
+    /** \brief Enumerador do tipo do audio de saída */
+    enum AUDIOFORMAT
+    {
+        raw=0,
+        arq=1
+    };
 
-        unsigned int* CreateFingerPrint(vector <uint8_t> Data, unsigned int* FingerPrintSize, bool mltFFT);
+    vector<string> audioFormatList = {"wav","mp3"};
 
-        void SetStreamRadio(unsigned int idxRadio, StreamRadio* oRadio);
-        void CreateContext(string arqName, bool isRaw, AVDictionary* options);
-        void ProcessFrames();
-        void ProcessOutput();
+    void setBitRate(int value);
+    void setSampleRate(int value);
+    void setChannels(unsigned int value);
+    void setBuffer(vector <vector <uint8_t>> value);
 
-        AVFormatContext* CreateFormatContext(string arqName, bool isRaw);
-        AVCodecContext*  CreateCodecContext(AVFormatContext* frmContext, int channel, int SampleRate, AVSampleFormat SampleFormat, AVDictionary** outOptions);
-        SwrContext* CreateSwrContext(AVCodecContext *inCodecContext, AVCodecContext *outCodecContext);
-    protected:
-    private:
-        StreamRadio* objRadio;
+    /** \brief Processa os frames e gera a saída */
+    virtual void Execute();
 
-        unsigned int idRadio;
+    /** \brief configura a execução do objeto Parser */
+    void Config();
 
-        bool isExit;
+protected:
 
-        vector <unsigned char> bufRaw;
-        AVFormatContext *rawFormatContext, *m4aFormatContext;
-        AVCodecContext *rawCodecContext, *m4aCodecContext, *inCodecContext;
-        SwrContext *rawSwrContext, *m4aSwrContext;
+    string fileName;
+    int bitRate = 24000;
+    int sampleRate = 11025;
+    unsigned int nbChannel = 1;
+    unsigned int nbFrames;
+    bool isVBR;
+    AUDIOFORMAT audioFormat;
 
-        AVFrame *rawInFrame;
-        AVFrame *rawOutFrame;
-        AVPacket rawOutPacket;
+    AVFormatContext *fmt_ctx_out;
+    AVStream *stm_out = NULL;
+    AVCodecContext *cdc_ctx_out = NULL;
+    AVCodec *cdc_out = NULL;
+    SwrContext *swr_ctx = NULL;
+    AVDictionary *dic = NULL;
+    AVFrame *frame_out = NULL;
+    AVPacket pkt_out;
+    AVIOContext *io_ctx = NULL;
 
-        AVFrame *m4aInFrame;
-        AVFrame *m4aOutFrame;
-        AVPacket m4aOutPacket;
+    vector <vector <uint8_t>> bufFrames;
 
-        int maxFrames;
+    /** \brief efetua o resampling do audio, encodando, de acordo com o set do output */
+    void Resample();
 
-        bool lockFifo;
-        AVAudioFifo *arqFifo = NULL;
-        int cntRawDayCut;
-        int cntM4aDayCut;
-        void initFIFO();
-        void addSamplesFIFO(uint8_t **inputSamples, const int frameSize);
-        int getFifoData(void **data, int nb_samples);
-        int getFifoSize();
+    virtual void EndResample();
 
-        int EncodeFrames(bool isRAW);
+    virtual void initObject();
 
-        string getDateTime();
-        string getDate();
-        string getTime();
-        string getSaveCutDir();
+private:
+
+    /** \brief Nome do arquivo de saída */
+    uint64_t channelLayoutIn;
+    int sampleRateIn;
+    int bitRateIn;
+    int nbSamplesIn;
+    int nbChannelIn;
+    AVSampleFormat sampleFormatIn;
+
+    /** \brief Cria contexto de saída */
+    void CreateContext();
+
+    /** \brief Define os parâmetros para o stream de saída */
+    void setStream();
+
+    /** \brief Inicializa o resample */
+    void InitResampler();
+
+    /** \brief Retorna o id do codec de acordo com o formato de saída */
+    AVCodecID getCodecID();
+
+    /** \brief Retorna o sample format de acordo com o formato de saída */
+    AVSampleFormat getSampleFormat(AVCodecID codecID);
+
+
+
 };
 
 #endif // PARSER_H

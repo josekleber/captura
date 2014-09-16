@@ -11,13 +11,63 @@
 */
 #include <boost/exception/all.hpp>
 
+/** @brief Estrutura para informar o código do erro */
+typedef boost::error_info<struct tag_errno_code,int> errno_code;
+
+/** @brief Estrutura para informar a mensagem do erro */
+typedef boost::error_info<struct tag_errmsg, std::string> errmsg_info;
+
 /** @brief Exceção base de conexão
 * estrutura usada para indicar que houve uma exceção de conexão
 */
 struct BaseException : virtual std::exception, virtual boost::exception{};
 
-/** @brief Estrutura para informar o código do erro */
-typedef boost::error_info<struct tag_errno_code,int> errno_code;
+/** \brief
+* Exceção ocorre quando não for possível alocar memória
+*/
+struct BadAllocException : virtual BaseException {};
+
+/** \brief
+* Exceção ocorre quando não for possível conectar na URI informada
+*/
+struct OpenConnectionException : virtual BaseException {};
+
+/** \brief
+* Exceção ocorre quando se tenta acessar informações da conexão e/ou
+* codec sem ter aberto a conexão.
+*/
+struct ConnectionClosedException : virtual BaseException {};
+
+/** \brief
+* Exceção ocorre quando na conexão não for identificado nenhum
+* stream de audio, o que nesta versão não é suportado.
+*/
+struct MediaTypeNoAudioException : virtual BaseException {};
+
+/** \brief
+* Exceção ocorre quando for usado um codec não suportado.
+*/
+struct CodecNotSupportedException : virtual BaseException {};
+
+/** \brief
+* Ocorre quando um não é possível adicionar uma stream a um output
+*/
+struct StreamException : virtual BaseException {};
+
+/** \brief
+* Erro na leitura dos Frames
+*/
+struct FrameReadException : virtual BaseException {};
+
+/** \brief
+* Erro de decodificação dos Frames
+*/
+struct DecoderException : virtual BaseException {};
+
+/** \brief
+* Erro de abertura de arquivo
+*/
+struct OpenFileException : virtual BaseException{};
 
 /** @brief Enumerodor com as exceções dos processos MIR (AudioMonitor) */
 enum MIR_EXCEPTION
@@ -48,6 +98,7 @@ enum MIR_EXCEPTION
     MIR_ERR_OPEN_FORMAT_CONTEXT     = -12014,
     MIR_ERR_OPEN_OUTPUT_FORMAT      = -12015,
     MIR_ERR_OPEN_CODEC_CONTEXT      = -12016,
+    MIR_ERR_INIT_SWR_CONTEXT        = -12017,
 
 
 

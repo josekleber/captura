@@ -40,9 +40,9 @@ OBJDIR_RELEASE = obj/Release
 DEP_RELEASE = 
 OUT_RELEASE = bin/Release/captura
 
-OBJ_DEBUG = $(OBJDIR_DEBUG)/src/aacdata.o $(OBJDIR_DEBUG)/src/threadpool.o $(OBJDIR_DEBUG)/src/threadcapture.o $(OBJDIR_DEBUG)/src/testes.o $(OBJDIR_DEBUG)/src/teste_ffmpeg.o $(OBJDIR_DEBUG)/src/streamradio.o $(OBJDIR_DEBUG)/src/rawdata.o $(OBJDIR_DEBUG)/src/parser.o $(OBJDIR_DEBUG)/src/main.o $(OBJDIR_DEBUG)/src/logger.o $(OBJDIR_DEBUG)/src/database.o $(OBJDIR_DEBUG)/src/configuration.o
+OBJ_DEBUG = $(OBJDIR_DEBUG)/src/aacdata.o $(OBJDIR_DEBUG)/src/threadpool.o $(OBJDIR_DEBUG)/src/threadcapture.o $(OBJDIR_DEBUG)/src/testes.o $(OBJDIR_DEBUG)/src/teste_thread.o $(OBJDIR_DEBUG)/src/teste_ffmpeg.o $(OBJDIR_DEBUG)/src/streamradio.o $(OBJDIR_DEBUG)/src/rawdata.o $(OBJDIR_DEBUG)/src/parser.o $(OBJDIR_DEBUG)/src/main.o $(OBJDIR_DEBUG)/src/logger.o $(OBJDIR_DEBUG)/src/database.o $(OBJDIR_DEBUG)/src/configuration.o
 
-OBJ_RELEASE = $(OBJDIR_RELEASE)/src/aacdata.o $(OBJDIR_RELEASE)/src/threadpool.o $(OBJDIR_RELEASE)/src/threadcapture.o $(OBJDIR_RELEASE)/src/testes.o $(OBJDIR_RELEASE)/src/teste_ffmpeg.o $(OBJDIR_RELEASE)/src/streamradio.o $(OBJDIR_RELEASE)/src/rawdata.o $(OBJDIR_RELEASE)/src/parser.o $(OBJDIR_RELEASE)/src/main.o $(OBJDIR_RELEASE)/src/logger.o $(OBJDIR_RELEASE)/src/database.o $(OBJDIR_RELEASE)/src/configuration.o
+OBJ_RELEASE = $(OBJDIR_RELEASE)/src/aacdata.o $(OBJDIR_RELEASE)/src/threadpool.o $(OBJDIR_RELEASE)/src/threadcapture.o $(OBJDIR_RELEASE)/src/testes.o $(OBJDIR_RELEASE)/src/teste_thread.o $(OBJDIR_RELEASE)/src/teste_ffmpeg.o $(OBJDIR_RELEASE)/src/streamradio.o $(OBJDIR_RELEASE)/src/rawdata.o $(OBJDIR_RELEASE)/src/parser.o $(OBJDIR_RELEASE)/src/main.o $(OBJDIR_RELEASE)/src/logger.o $(OBJDIR_RELEASE)/src/database.o $(OBJDIR_RELEASE)/src/configuration.o
 
 all: debug release
 
@@ -70,6 +70,9 @@ $(OBJDIR_DEBUG)/src/threadcapture.o: src/threadcapture.cpp
 
 $(OBJDIR_DEBUG)/src/testes.o: src/testes.cpp
 	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c src/testes.cpp -o $(OBJDIR_DEBUG)/src/testes.o
+
+$(OBJDIR_DEBUG)/src/teste_thread.o: src/teste_thread.cpp
+	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c src/teste_thread.cpp -o $(OBJDIR_DEBUG)/src/teste_thread.o
 
 $(OBJDIR_DEBUG)/src/teste_ffmpeg.o: src/teste_ffmpeg.cpp
 	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c src/teste_ffmpeg.cpp -o $(OBJDIR_DEBUG)/src/teste_ffmpeg.o

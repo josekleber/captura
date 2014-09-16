@@ -31,8 +31,6 @@ void ThreadPool::addThreads(string uriRadio, int id)
         objThreadControl->objCapture->idThread = id;
         objThreadControl->objCapture->Filters = Filters;
         objThreadControl->objCapture->cutFolder = cutFolder;
-
-        objThreadControl->objCapture->init();
     }
     catch(...)
     {

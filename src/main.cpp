@@ -1,13 +1,7 @@
 #include <iostream>
-
-#include <boost/filesystem.hpp>
-
 #include <mir/filter.h>
 
 #include "main.h"
-#include "configuration.h"
-#include "database.h"
-#include "threadpool.h"
 
 using namespace std;
 namespace fs = boost::filesystem;
@@ -19,6 +13,7 @@ Database* db = NULL;
 Configuration* config = NULL;
 // lista de streams
 vector<UrlStream*> urlStream;
+
 
 /** \brief Armazena, em arquivo, as informações dos streams utilizados pelo listener atual.
 */
@@ -61,13 +56,13 @@ int readFileStream()
             if (config->Listener != line)
             {
                 //TODO implementar log
-                cout << "ID do listener no arquivo com lista de streams diverge da configuração atual do sistema." << endl;
+                BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "ID do listener no arquivo com lista de streams diverge da configuração atual do sistema." ANSI_COLOR_RESET;
                 return -1;
             }
 
         }
         else if (lineCount == 1)
-            cout << "ultima atualização do arquivo com a lista de streams: " << line << endl;
+            BOOST_LOG_TRIVIAL(info) << "ultima atualização do arquivo com a lista de streams: " << line.c_str();
         else
         {
             // verifica se é a linha de total
@@ -101,10 +96,6 @@ int readFileStream()
 */
 int loadStream()
 {
-readFileStream();
-return 0;
-
-
 
     try
     {
@@ -118,7 +109,7 @@ return 0;
     {
         //TODO implementar log
         //TODO implementar tratamento para diferentes exceções
-        cout << "Erro ao conectar a base de dados.\nNão foi possível pegar a lista atualizada de URLs." << endl;
+        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Erro ao conectar a base de dados." ANSI_COLOR_RESET;
 
         // tenta carregar a lista de streams do arquivo local
         fs::path p (config->StreamList);
@@ -126,7 +117,7 @@ return 0;
         if (!fs::exists(p))
         {
             //TODO implementar log
-            cout << "Arquivo com lista de streams local não foi localizado." << endl;
+            BOOST_LOG_TRIVIAL(fatal) << "Arquivo com lista de streams local não foi localizado.";
             return -1;
         }
         else
@@ -137,25 +128,25 @@ return 0;
     return 0;
 }
 
+
+void init()
+{
+    logging::core::get()->set_filter
+    (
+        logging::trivial::severity >= logging::trivial::debug
+    );
+}
+
+
 /** \brief Sistema de Captura de Audios
     Captura através de streams web.
 */
 int main()
 {
     printf("\033[0m \033[2J\033[1;1H");
-    printf("Captura Version: %s\n", prgVersion);
+    BOOST_LOG_TRIVIAL(info) <<  "Captura Version: " << prgVersion;
 
-    // carrega configurações da captura
-    config = new Configuration();
-
-    printf("Filter file : %s\n", config->FilterArqName.c_str());
-    printf("Connection string : %s\n", config->ConnectionStringSQL.c_str());
-    printf("MySql Connection string : %s\n", config->ConnectionStringMySQL.c_str());
-    printf("Listener : %s\n", config->Listener.c_str());
-    printf("Stream list : %s\n", config->StreamList.c_str());
-    printf("Update time : %d\n", config->UpdateTimer);
-    printf("MRServer : %s : %s\n", config->mrIP.c_str(), config->mrPort.c_str());
-    printf("Audity folder : %s\n\n", config->cutFolder.c_str());
+    init();
 
     // retorno de métodos
     int ret = 0;
@@ -171,10 +162,15 @@ int main()
     if (ret < 0)
     {
         //TODO implementar log
-        cout << "falha ao iniciar componente de rede do FFMPEG." << endl;
+        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "falha ao iniciar componente de rede do FFMPEG." ANSI_COLOR_RESET;
         //TODO criar códigos de erro
         return -1;
     }
+    else
+        BOOST_LOG_TRIVIAL(debug) << "carregado FFMPEG.";
+
+    // carrega configurações da captura
+    config = new Configuration();
 
     // instancia objeto do banco de dados
     db = new Database(config->ConnectionStringSQL);
@@ -185,7 +181,7 @@ int main()
     if (ret < 0)
     {
         //TODO implementar log
-        cout << "falha ao carregar filtro do fingerprint." << endl;
+        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "falha ao carregar filtro do fingerprint." ANSI_COLOR_RESET;
         //TODO criar códigos de erro
         return -1;
     }
@@ -210,7 +206,7 @@ int main()
         if (ret < 0)
         {
             //TODO implementar log
-            cout << "falha ao carregar lista de streams.\nSistema tentará novamente em " << config->UpdateTimer << " minutos." << endl;
+            BOOST_LOG_TRIVIAL(error) << "falha ao carregar lista de streams.\nSistema tentará novamente em " << config->UpdateTimer << " minutos.\n";
         }
         else
         {
@@ -219,24 +215,30 @@ int main()
                 try
                 {
                     // cria as threads
-                    cout << "Conectando em " << urlStream[idxRadio]->url << endl;
+                    BOOST_LOG_TRIVIAL(info) << "Conectando em " << urlStream[idxRadio]->radio
+                                << " - " << urlStream[idxRadio]->url.c_str();
+
                     string urlRadio = objThreadPool->getUrlRadio(urlStream[idxRadio]->radio);
                     if (urlRadio == "")
                         objThreadPool->addThreads(urlStream[idxRadio]->url, urlStream[idxRadio]->radio);
                     else if (urlRadio != urlStream[idxRadio]->url)
                     {
+                        // se a url da rádio for diferente da url atual na thread
                         objThreadPool->stopThread(urlStream[idxRadio]->radio);
                         objThreadPool->addThreads(urlStream[idxRadio]->url, urlStream[idxRadio]->radio);
                     }
+
+                     BOOST_LOG_TRIVIAL(info) << "Quantidade de Threads em funcionamento " << objThreadPool->getActiveThread().size();
                 }
                 catch(...)
                 {
-                    cout << "Erro ao abrir a rádio (" << urlStream[idxRadio]->radio << ") : " << urlStream[idxRadio]->url << endl;
+                    BOOST_LOG_TRIVIAL(error) << "Erro ao capturar a rádio"
+                    << urlStream[idxRadio]->radio << " : " << urlStream[idxRadio]->url.c_str();
                 }
             }
         }
 
-	cout << "loop principal. " << __TIME__ << endl;
+        BOOST_LOG_TRIVIAL(debug) << "Iniciando sleep do loop principal." << __DATE__  ":" << __TIME__;
 
         // sempre haverá um sleep para verificar novas rádios
         boost::this_thread::sleep(boost::posix_time::minutes(config->UpdateTimer));

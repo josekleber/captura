@@ -9,7 +9,7 @@
 #include <boost/thread/thread.hpp>
 
 #include "streamradio.h"
-#include "parser.h"
+#include "sliceprocess.h"
 
 using namespace std;
 
@@ -36,24 +36,17 @@ class ThreadCapture
 
         vector<Filter> *Filters;
 
-        /** \brief Thread de um canal. cria o objeto MRServer e acerta os parametros
-         *
-         * \param tmp void*
-         * \return void*
-         *
-         */
-        void init();
         void thrRun();
         void thrClose();
     protected:
     private:
         bool stopThread;
 
-        boost::thread* objThreadRadio;
-        boost::thread* objThreadRawParser;
-        boost::thread* objThreadM4aParser;
-        Parser* objParser;
         StreamRadio* objRadio;
+        SliceProcess* objSlice;
+
+        boost::thread* objThreadRadio;
+        boost::thread* objThreadProcessa;
 };
 
 #endif // CAPTURE_H

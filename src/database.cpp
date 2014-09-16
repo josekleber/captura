@@ -280,7 +280,7 @@ void Database::logError(unsigned int handletype, const SQLHANDLE& handle)
     SQLCHAR message[1024];
 
     if(SQL_SUCCESS == SQLGetDiagRec(handletype, handle, 1, sqlstate, NULL, message, 1024, NULL))
-        cout<<"\nMessage: "<<message<<"\t SQLSTATE: "<<sqlstate<<endl;
+        printf("\nMessage: %s \t SQLSTATE: %s\n",message,sqlstate);
 
     return ;
 }

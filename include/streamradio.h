@@ -4,11 +4,13 @@
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
+#include "util.h"
 #include "exceptionmir.h"
+#include <boost/thread.hpp>
 
 extern "C"
 {
-/** inclusão dos headers FFMPEG */
+    /** inclusão dos headers FFMPEG */
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
 #include <libavutil/audio_fifo.h>
@@ -17,44 +19,7 @@ extern "C"
 #include <boost/thread.hpp>
 
 using namespace std;
-
-/** \brief
-* Exceção ocorre quando não for possível alocar memória
-*/
-struct BadAllocException : virtual BaseException {};
-
-/** \brief
-* Exceção ocorre quando não for possível conectar na URI informada
-*/
-struct OpenConnectionException : virtual BaseException {};
-
-/** \brief
-* Exceção ocorre quando se tenta acessar informações da conexão e/ou
-* codec sem ter aberto a conexão.
-*/
-struct ConnectionClosedException : virtual BaseException {};
-
-/** \brief
-* Exceção ocorre quando na conexão não for identificado nenhum
-* stream de audio, o que nesta versão não é suportado.
-*/
-struct MediaTypeNoAudioException : virtual BaseException{};
-
-/** \brief
-* Exceção ocorre quando for usado um codec não suportado.
-*/
-struct CodecNotSupportedException : virtual BaseException{};
-
-/** \brief
-* Erro na leitura dos Frames
-*/
-struct FrameReadException : virtual BaseException{};
-
-/** \brief
-* Erro de decodificação dos Frames
-*/
-struct DecoderException : virtual BaseException{};
-
+namespace pt = boost::posix_time;
 
 /** \brief
 * Enumerador do status da conexão
@@ -164,7 +129,7 @@ public:
     * \param key    - parâmetro de configuração
     * \param value  - valor do parâmetro
     */
-    void addOptions(string *key, string *value);
+    void addOptions(string key, string value);
 
     /** \brief
     * Devolve as opções de configuração da conexão
@@ -177,9 +142,9 @@ public:
     */
     AVAudioFifo**getFIFO();
 
-int getFifoSize();
-int getFifoData(void **data, int nb_samples);
-int getNumFrames(double sec);
+    int getFifoSize();
+    int getFifoData(void **data, int nb_samples);
+    int getNumFrames(double sec);
 
 protected:
 private:
@@ -195,8 +160,9 @@ private:
     StreamType * streamType;
     double duration;
     bool isExit;
-
-    boost::mutex mtx_;
+    int bitRate; // contém o valor do bitrate de entrada
+    bool isVBR; // true se for Variable BitRate
+    boost::mutex mtx_;  // controle de lock da thread
 
 
     /** \brief
@@ -218,12 +184,11 @@ private:
     void rtspDetect(string uri);
 
     /** \brief
-    * Aloca memória para a fila de entrada.
+    * Aloca memória para as filas de entrada.
     *
-    * \param fifo - fila para a captura do áudio.
     * \see AVAudioFifo
     */
-    void initFIFO(AVAudioFifo **fifo);
+    void initFIFO();
 
     /**\brief
     * Lê os frames da conexão e armazena no FIFO.

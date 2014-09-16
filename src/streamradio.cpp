@@ -1,5 +1,6 @@
 #include "streamradio.h"
 
+
 StreamRadio::StreamRadio()
 {
     // zera o timer
@@ -12,7 +13,12 @@ StreamRadio::StreamRadio()
     duration = 0;
     statusConnection = MIR_CONNETION_CLOSE;
     isExit = false;
+    bitRate = 0;
+    isVBR = false;
     mtx_.unlock();
+
+    // define o nível de log do FFMPEG
+    av_log_set_level(AV_LOG_ERROR);
 }
 
 StreamRadio::~StreamRadio()
@@ -23,7 +29,7 @@ StreamRadio::~StreamRadio()
 
     isExit = true;
 
-    sleep(10);
+    boost::this_thread::sleep(boost::posix_time::seconds(10));
 }
 
 double StreamRadio::getConnectionTime()
@@ -61,12 +67,16 @@ AVFormatContext* StreamRadio::open(string uri)
     if (!(formatContext))
         throw BadAllocException() << errno_code(MIR_ERR_BADALLOC_CONTEXT);
 
+    // usa todos os cores do processador.
+    addOptions("threads","0");
+
     // força RTSP usar TCP
     rtspDetect(uri);
 
     // abre a conexão
     if ((ret=avformat_open_input(&formatContext,uri.c_str(),NULL,&dictionary))< 0)
     {
+        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Erro de conexão com o stream " << uri.c_str();
         statusConnection = MIR_CONNECTION_ERROR;
         throw OpenConnectionException() <<errno_code(MIR_ERR_STREAM_CONNECTION);
     }
@@ -74,9 +84,12 @@ AVFormatContext* StreamRadio::open(string uri)
     // pega informações do stream
     if ((ret=avformat_find_stream_info(formatContext,NULL)) < 0)
     {
+        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Erro ao tentar pegar informações dos streams de entrada: " << uri.c_str();
         statusConnection = MIR_CONNECTION_ERROR;
         throw OpenConnectionException() <<errno_code(MIR_ERR_STREAM_CONNECTION);
     }
+
+    BOOST_LOG_TRIVIAL(info) << ANSI_COLOR_GREEN "Conectado ao stream "  << uri.c_str() << ANSI_COLOR_RESET;
 
     statusConnection = MIR_CONNECTION_OPEN;
 
@@ -100,6 +113,7 @@ void StreamRadio::setStreamType()
     if ((statusConnection != MIR_CONNECTION_OPEN))
         throw ConnectionClosedException() <<errno_code(MIR_ERR_CONNECTION_CLOSED);
 
+    // vetor com a quantidade de streams da conexão
     streamType = new StreamType[formatContext->nb_streams];
 
     for (unsigned int index = 0; index < formatContext->nb_streams; index++)
@@ -114,35 +128,66 @@ void StreamRadio::setStreamType()
             {
                 stream = formatContext->streams[index];
 
-                codec = avcodec_find_decoder(stream->codec->codec_id);
+                if (stream->codec->codec_id == AV_CODEC_ID_WMAPRO)
+                    codec = avcodec_find_decoder(AV_CODEC_ID_AAC);
+                else
+                    codec = avcodec_find_decoder(stream->codec->codec_id);
 
-                printf("codec de entrada %s\n",codec->name);
+                BOOST_LOG_TRIVIAL(info) << "Codec de entrada " << codec->name;
 
-                /// TODO verificar a necessidade desta função. ver avcodec_open2
                 codecContext = avcodec_alloc_context3(codec);
-
                 codecContext = stream->codec;
 
                 if (avcodec_open2(codecContext,codec,NULL) < 0)
-                    throw BadAllocException() <<errno_code(MIR_ERR_BADALLOC_CONTEXT);
+                {
+                    BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Erro de alocação de contexto " << codec->name;
+                    throw BadAllocException() << errno_code(MIR_ERR_BADALLOC_CONTEXT);
+                }
+
+                if (codecContext->bit_rate == 0)
+                {
+                    BOOST_LOG_TRIVIAL(info) << "VBR detectado.";
+                    isVBR = true;
+                }
+                else
+                    bitRate = codecContext->bit_rate;
 
                 if ((codecContext->codec == NULL))
+                {
+                    BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Codec não suportado.";
                     throw CodecNotSupportedException() <<errno_code(MIR_ERR_CODEC_NOT_SUPPORTED);
+                }
             }
+            else if (formatContext->streams[index]->codec->coder_type == AVMEDIA_TYPE_ATTACHMENT)
+                BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_CYAN "Media type : AVMEDIA_TYPE_ATTACHMENT";
+            else if (formatContext->streams[index]->codec->coder_type == AVMEDIA_TYPE_DATA)
+                BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_CYAN "Media type : AVMEDIA_TYPE_DATA";
+            else if (formatContext->streams[index]->codec->coder_type == AVMEDIA_TYPE_NB)
+                BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_CYAN "Media type : AVMEDIA_TYPE_NB";
+            else if (formatContext->streams[index]->codec->coder_type == AVMEDIA_TYPE_SUBTITLE)
+                BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_CYAN "Media type : AVMEDIA_TYPE_SUBTITLE";
+            else if (formatContext->streams[index]->codec->coder_type == AVMEDIA_TYPE_VIDEO)
+                BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_CYAN "Media type : AVMEDIA_TYPE_VIDEO";
+            else
+                BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_CYAN "Media type : AVMEDIA_TYPE_UNKNOW";
         }
     }
 
     // se chegar aqui e não tiver o stream é sinal de que não existe na conexão o AVMEDIA_TYPE_AUDIO
     // neste caso lanço a exceção
     if (!(stream))
+    {
+        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Não há stream de áudio na conexão. Stream usado" ANSI_COLOR_RESET << formatContext->filename;
         throw MediaTypeNoAudioException() << errno_code(MIR_ERR_MEDIA_TYPE_NO_AUDIO);
+    }
+
 
 }
 
-void StreamRadio::addOptions(string *key, string *value)
+void StreamRadio::addOptions(string key, string value)
 {
     ///TODO: adicionar o controle de FLAGS. falta estudo de sua aplicação
-    av_dict_set(&dictionary,key->c_str(),value->c_str(),0);
+    av_dict_set(&dictionary,key.c_str(),value.c_str(),0);
 }
 
 AVDictionary * StreamRadio::getListOptions()
@@ -170,23 +215,25 @@ AVStream * StreamRadio::getStream()
 
 void StreamRadio::rtspDetect(string uri)
 {
-    int pos = (int)(uri.find("rtsp://",0));
+    int pos = uri.find("rtsp://",0);
 
-    if ((pos > 0))
+    if ((pos >= 0))
     {
+        BOOST_LOG_TRIVIAL(info) << ANSI_COLOR_YELLOW "Usando TCP com protocolo RTSP." << ANSI_COLOR_RESET;
         av_dict_set(&dictionary,"rtsp_transport","tcp",0);
     }
 }
 
-void StreamRadio::initFIFO(AVAudioFifo **fifo)
+void StreamRadio::initFIFO()
 {
     /** Create the FIFO buffer based on the specified output sample format.
        nb_samples  initial allocation size, in samples */
 
 
-    if (!(*fifo = av_audio_fifo_alloc(codecContext->sample_fmt, codecContext->channels,1)))
+    if (!(this->fifo = av_audio_fifo_alloc(codecContext->sample_fmt, codecContext->channels,1)))
     {
-        printf("FIFO não pode ser alocado.\n");
+        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "FIFO não pode ser alocado." ANSI_COLOR_RESET;
+        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Radio-> " << this->formatContext->filename << ANSI_COLOR_RESET;
         throw BadAllocException() <<errno_code(AVERROR(ENOMEM));
     }
 }
@@ -201,8 +248,8 @@ void StreamRadio::readFrame()
     // Pacote para dados temporários.
     AVPacket inputPacket;
 
-    // inicia a FIFO
-    initFIFO(&fifo);
+    // inicia as FIFOS
+    initFIFO();
 
     while (isTrue && (finished == 0) && !isExit)
     {
@@ -216,7 +263,10 @@ void StreamRadio::readFrame()
         try
         {
             if (!(frame = av_frame_alloc()))
-                throw BadAllocException() <<errno_code(MIR_ERR_BADALLOC_CONTEXT);
+            {
+                BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Erro de alocação do frame." ANSI_COLOR_RESET;
+                //throw BadAllocException() <<errno_code(MIR_ERR_BADALLOC_CONTEXT);
+            }
 
             // Lê um frame do áudio e coloca no pacote temporário.
             if ((error = av_read_frame(formatContext, &inputPacket)) < 0)
@@ -226,13 +276,18 @@ void StreamRadio::readFrame()
 //                break;
                     finished = 1;
                 else
-                    throw FrameReadException() <<errno_code(MIR_ERR_FRAME_READ);
+                {
+                    BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Erro de leitura do frame." ANSI_COLOR_RESET;
+                    //throw FrameReadException() <<errno_code(MIR_ERR_FRAME_READ);
+                }
             }
 
             if (!finished)
             {
                 try
                 {
+                    BOOST_LOG_TRIVIAL(debug) <<  "Decode do frame.";
+
                     // decodifica o frame
                     decodeAudioFrame(&data,&finished,&inputPacket);
 
@@ -245,19 +300,21 @@ void StreamRadio::readFrame()
                     // libera memória do pacote temporário
                     av_free_packet(&inputPacket);
 
+                    // Adiciona ao FIFO
+                    addSamplesFIFO(frame->extended_data, frame->nb_samples);
                 }
                 catch(DecoderException ex)
                 {
+                    BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Erro de decoding." ANSI_COLOR_RESET;
                     av_free_packet(&inputPacket);
                 }
 
-                // Adiciona ao FIFO
-                addSamplesFIFO(frame->extended_data, frame->nb_samples);
+                //boost::this_thread::sleep(boost::posix_time::milliseconds(1));
             }
         }
         catch (...)
         {
-            cout << "Ocorreu um erro no stream de entrada" << endl;
+            BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Ocorreu um erro no stream de entrada." ANSI_COLOR_RESET;
         }
     }
 }
@@ -297,7 +354,7 @@ void StreamRadio::addSamplesFIFO(uint8_t **inputSamples, const int frameSize)
 
     if ((error = av_audio_fifo_realloc(fifo, av_audio_fifo_size(fifo) + frameSize)) < 0)
     {
-        printf("Could not reallocate FIFO\n");
+        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Não foi possível alocar o FIFO." ANSI_COLOR_RESET;
     }
 
     /** Store the new samples in the FIFO buffer. */
@@ -317,11 +374,8 @@ AVAudioFifo** StreamRadio::getFIFO()
 int StreamRadio::getFifoSize()
 {
     mtx_.lock();
-
     int ret = av_audio_fifo_size(fifo);
-
     mtx_.unlock();
-
     return ret;
 }
 int StreamRadio::getFifoData(void **data, int nb_samples)

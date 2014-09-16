@@ -1,560 +1,293 @@
 #include "parser.h"
 
-Parser::Parser()
+Parser::Parser(string fileName, uint64_t channelLayoutIn, int sampleRateIn,
+               int bitRateIn, AVSampleFormat sampleFormatIn,int nbSamplesIn,int nbChannelIn)
 {
-    isExit = false;
-    lockFifo = true;
-    cntRawDayCut = 0;
-    cntM4aDayCut = 0;
+    this->fileName = fileName;
+    this->channelLayoutIn = channelLayoutIn;
+    this->sampleRateIn = sampleRateIn;
+    this->bitRateIn = bitRateIn;
+    this->sampleFormatIn = sampleFormatIn;
+    this->nbSamplesIn = nbSamplesIn;
+    this->nbChannelIn = nbChannelIn;
+
 }
 
 Parser::~Parser()
 {
-    isExit = true;
-
-    sleep(2);
+    // para dar tempo de terminar algum processo pendente
+    boost::this_thread::sleep(boost::posix_time::seconds(2));
 }
 
-AVFormatContext* Parser::getFormatContext(bool isRAW)
-{
-    if (isRAW)
-        return rawFormatContext;
-    else
-        return m4aFormatContext;
-}
-
-AVCodecContext* Parser::getCodecContext(bool isRAW)
-{
-    if (isRAW)
-        return rawCodecContext;
-    else
-        return m4aCodecContext;
-}
-
-AVCodecContext* Parser::getInCodecContext()
-{
-    return inCodecContext;
-}
-
-SwrContext* Parser::getSwrContext(bool isRAW)
-{
-    if (isRAW)
-        return rawSwrContext;
-    else
-        return m4aSwrContext;
-}
-
-unsigned char* Parser::ReadData(AVAudioFifo *fifo)
-{
-    bufRaw.push_back((unsigned char)'a');
-
-    return NULL;
-}
-
-void Parser::CreateContext(string arqName, bool isRaw, AVDictionary* options)
+void Parser::Config()
 {
     try
     {
-        if (isRaw)
-        {
-            rawFormatContext = CreateFormatContext(arqName, isRaw);
-            rawCodecContext = CreateCodecContext(rawFormatContext, 1, 44100, AVSampleFormat::AV_SAMPLE_FMT_S16, &options);
-            rawCodecContext->frame_size = 1024;
-            rawSwrContext = CreateSwrContext(inCodecContext, rawCodecContext);
-        }
-        else
-        {
-            m4aFormatContext = CreateFormatContext(arqName, isRaw);
-            m4aCodecContext = CreateCodecContext(m4aFormatContext, 1, 44100, AVSampleFormat::AV_SAMPLE_FMT_S16, &options);
-            m4aSwrContext = CreateSwrContext(inCodecContext, m4aCodecContext);
-        }
+        // cria o contexto de saída
+        CreateContext();
+
+        // seta os dados do encoder
+        setStream();
+
+        // inicia o resample
+        InitResampler();
+    }
+    catch(StreamException& err)
+    {
+        printf("erro no setStream\n");
     }
     catch(...)
     {
-        throw;
+        printf("erro geral no config\n");
     }
+
 }
 
-int Parser::EncodeFrames(bool isRAW)
+void Parser::CreateContext()
 {
-    int haveData = 0;
+    int error = 0;
 
-    AVCodecContext* CodecContext;
-    SwrContext* swrContext;
-    AVFrame* inFrame;
-    AVFrame* outFrame;
-    AVPacket* outPacket;
+    error = avformat_alloc_output_context2(&fmt_ctx_out, NULL,
+                        audioFormatList[audioFormat].c_str(), fileName.c_str());
 
-    if (isRAW)
-    {
-        CodecContext = rawCodecContext;
-        swrContext = rawSwrContext;
-        inFrame = rawInFrame;
-        outFrame = rawOutFrame;
-        outPacket = &rawOutPacket;
-    }
+    if (error < 0)
+        throw ContextCreatorException() << errno_code(MIR_ERR_BADALLOC_CONTEXT);
+
+    if(audioFormat == AUDIOFORMAT::raw)
+        fmt_ctx_out->oformat->flags |= AVFMT_NOFILE;
     else
     {
-        CodecContext = m4aCodecContext;
-        swrContext = m4aSwrContext;
-        inFrame = m4aInFrame;
-        outFrame = m4aOutFrame;
-        outPacket = &m4aOutPacket;
-    }
-
-    outFrame->nb_samples     = CodecContext->frame_size;
-    outFrame->channel_layout = CodecContext->channel_layout;
-    outFrame->format         = CodecContext->sample_fmt;
-    outFrame->sample_rate    = CodecContext->sample_rate;
-    av_frame_get_buffer(outFrame, 0);
-
-    swr_convert(swrContext, (uint8_t**)outFrame->extended_data, outFrame->nb_samples, (const uint8_t**)inFrame->data, inFrame->nb_samples);
-
-    av_init_packet(outPacket);
-    outPacket->data = NULL;
-    outPacket->size = 0;
-
-    avcodec_encode_audio2(CodecContext, outPacket, outFrame, &haveData);
-
-    av_frame_unref(outFrame);
-
-    return haveData;
-}
-
-void Parser::ProcessFrames()
-{
-    int inFrameSize = inCodecContext->frame_size;
-    int szFifo;
-    int ctrCnt = 0;
-    vector <uint8_t> binOutput;
-    arqData_ arqData;
-
-    while ((maxFrames = objRadio->getNumFrames(5)) == 0);
-
-    rawOutFrame = av_frame_alloc();
-    rawInFrame = av_frame_alloc();
-
-clock_t start;
-start = clock();
-
-    sprintf(arqData.arqName, "%05d-%05d-%s", this->idRadio, cntRawDayCut, getDateTime().c_str());
-    initFIFO();
-
-    while(!isExit)
-    {
-        szFifo = objRadio->getFifoSize();
-        if (szFifo >= inFrameSize)
-        {
-// carregando dados da FIFO
-            rawInFrame->nb_samples     = FFMIN(szFifo, inFrameSize);
-            rawInFrame->channel_layout = inCodecContext->channel_layout;
-            rawInFrame->format         = inCodecContext->sample_fmt;
-            rawInFrame->sample_rate    = inCodecContext->sample_rate;
-            av_frame_get_buffer(rawInFrame, 0);
-
-            objRadio->getFifoData((void**)rawInFrame->data, rawInFrame->nb_samples);
-
-// conversao para AAC
-            addSamplesFIFO((uint8_t**)&rawInFrame->data, rawInFrame->nb_samples);
-
-// conversao para RAW
-            if (EncodeFrames(true))
-            {
-                for (int i = 0; i < rawOutPacket.size; i++)
-                    binOutput.push_back(rawOutPacket.data[i]);
-            }
-
-            av_free_packet(&rawOutPacket);
-
-// Controle de tempo, maxFrames tem a quantidade de frames necessarios para os recortes
-            ctrCnt++;
-
-            if (ctrCnt >= maxFrames)
-            {
-                cntRawDayCut++;
-                ctrCnt = 0;
-                while ((maxFrames = objRadio->getNumFrames(5)) == 0);    // atualizando a quantidade max de frames
-
-                uint8_t* conv;
-                int pos = 0;
-                int freq = inCodecContext->sample_rate;
-
-// gerando fingerprints
-                unsigned int nbits;
-                unsigned int* bits = CreateFingerPrint(binOutput, &nbits, true);
-                binOutput.clear();
-
-                string strDateTime = getDateTime();
-
-//                Database* objDb = new Database(sqlConnString);
-//                long idSlice = objDb->insertCutHistory(this->idRadio, getSaveCutDir(), strDateTime);
-                long idSlice = cntRawDayCut;
-
-                uint8_t* buff  = new uint8_t[4 * nbits + 16];
-
-                conv = (uint8_t*)&this->idRadio;
-                for (int i = 0; i < 4; buff[pos++] = conv[i++]);
-
-                conv = (uint8_t*)&idSlice;
-                for (int i = 0; i < 4; buff[pos++] = conv[i++]);
-
-                conv = (uint8_t*)&freq;
-                for (int i = 0; i < 4; buff[pos++] = conv[i++]);
-
-                conv = (uint8_t*)&nbits;
-                for (int i = 0; i < 4; buff[pos++] = conv[i++]);
-
-                for (unsigned int j = 0; j < nbits; j++)
-                {
-                    conv = (uint8_t*)&bits[j];
-                    for (int i = 0; i < 4; buff[pos++] = conv[i++]);
-                }
-
-                try
-                {
-                    boost::asio::io_service IO_Service;
-                    tcp::resolver Resolver(IO_Service);
-                    tcp::resolver::query Query(ipRecognition, portRecognition);
-                    tcp::resolver::iterator EndPointIterator = Resolver.resolve(Query);
-
-                    TCPClient* objClient = new TCPClient(IO_Service, EndPointIterator, buff, pos);
-
-                    boost::thread ClientThread(boost::bind(&boost::asio::io_service::run, &IO_Service));
-                    ClientThread.join();
-
-                    objClient->Close();
-                }
-                catch(ConvertException& e)
-                {
-                    cerr << e.what() << endl;
-                }
-                catch (exception& e)
-                {
-                    cerr << e.what() << endl;
-                }
-
-                delete[] buff;
-
-cout << "Radio : " << this->idRadio << "    Recorte : " << cntRawDayCut << "    Size : " << szFifo - inFrameSize << "    Tempo de processamento : " << (float)(clock() - start)/CLOCKS_PER_SEC << endl;
-start = clock();
-            }
-
-            av_frame_unref(rawInFrame);
-        }
-    }
-
-    av_frame_free(&rawInFrame);
-    av_frame_free(&rawOutFrame);
-}
-
-void Parser::SetStreamRadio(unsigned int idxRadio, StreamRadio* oRadio)
-{
-    idRadio = idxRadio;
-    objRadio = oRadio;
-
-    inCodecContext = objRadio->getCodecContext();
-}
-
-AVFormatContext* Parser::CreateFormatContext(string arqName, bool isRaw)
-{
-    AVIOContext *ioContext = NULL;
-    AVFormatContext *outFormatContext = NULL;
-
-    if (!(outFormatContext = avformat_alloc_context()))
-        throw ConvertException() << errno_code(MIR_ERR_OPEN_FORMAT_CONTEXT);
-
-    if (!(outFormatContext->oformat = av_guess_format(NULL, arqName.c_str(), NULL)))
-        throw ConvertException() << errno_code(MIR_ERR_OPEN_OUTPUT_FORMAT);
-
-    if (isRaw)
-    {
-        outFormatContext->oformat->flags |= AVFMT_NOFILE;
-    }
-    else
-    {
-        outFormatContext->oformat->flags |= AVFMT_ALLOW_FLUSH;
-
-        if (avio_open(&ioContext, arqName.c_str(), AVIO_FLAG_WRITE) < 0)
+        error = avio_open(&io_ctx, fileName.c_str(), AVIO_FLAG_WRITE);
+        if (error < 0)
             throw ConvertException() << errno_code(MIR_ERR_OPEN_OUTPUT_FILE);
-        outFormatContext->pb = ioContext;
 
-
-        int len;
-        for (len = 0; (arqName.c_str())[len] != 0; outFormatContext->filename[len] = (arqName.c_str())[len], len++);
-        outFormatContext->filename[len] = 0;
     }
 
-    return outFormatContext;
+    fmt_ctx_out->pb = io_ctx;
+
 }
 
-AVCodecContext* Parser::CreateCodecContext(AVFormatContext* frmContext, int channel, int SampleRate, AVSampleFormat SampleFormat, AVDictionary** outOptions)
+void Parser::setStream()
 {
-    AVCodec *outCodec = NULL;
-    AVStream *outStream = NULL;
-    AVCodecContext* outCodecContext = NULL;
 
-    if (!(outCodec = avcodec_find_encoder(frmContext->oformat->audio_codec)))
-        throw ConvertException() << errno_code(MIR_ERR_OPEN_CODEC);
-    if (!(outStream = avformat_new_stream(frmContext, outCodec)))
-        throw ConvertException() << errno_code(MIR_ERR_OPEN_STREAM);
-    outCodecContext = outStream->codec;
+    int error = 0;
 
-    outCodecContext->channels       = channel;
-    outCodecContext->channel_layout = av_get_default_channel_layout(channel);
-    outCodecContext->sample_rate    = SampleRate;
-    outCodecContext->sample_fmt     = SampleFormat;
+    AVCodec *codec = NULL;
+    AVCodecID codecID = getCodecID();
 
-    if (frmContext->oformat->flags & AVFMT_GLOBALHEADER)
-        outCodecContext->flags |= CODEC_FLAG_GLOBAL_HEADER;
+    codec = avcodec_find_encoder(codecID);
+    fmt_ctx_out->audio_codec = codec;
+    stm_out = avformat_new_stream(fmt_ctx_out, codec);
 
-    if ((avcodec_open2(outCodecContext, outCodec, outOptions)) < 0)
-        throw ConvertException() << errno_code(MIR_ERR_OPEN_CODEC_CONTEXT);
+    if (!stm_out)
+        throw StreamException() << errno_code(MIR_ERR_OPEN_STREAM);
 
-    return outCodecContext;
+    cdc_ctx_out = avcodec_alloc_context3(codec);
+
+    cdc_ctx_out = stm_out->codec;
+    cdc_ctx_out->codec = codec;
+    cdc_ctx_out->codec_id = codecID;
+    cdc_ctx_out->codec_type = AVMEDIA_TYPE_AUDIO;
+
+    cdc_ctx_out->sample_fmt = getSampleFormat(codecID);
+
+    if (!isVBR)
+        cdc_ctx_out->bit_rate = bitRate;
+    else
+    {
+        cdc_ctx_out->rc_max_rate = 0;
+        cdc_ctx_out->rc_min_rate = 0;
+        cdc_ctx_out->bit_rate_tolerance = bitRate;
+        cdc_ctx_out->bit_rate = bitRate;
+    }
+
+    cdc_ctx_out->sample_rate = sampleRate;
+    cdc_ctx_out->channels = nbChannel;
+    cdc_ctx_out->channel_layout = av_get_default_channel_layout(nbChannel);
+
+    error = avcodec_open2(cdc_ctx_out,codec,NULL);
+
+    if (error < 0)
+        throw StreamException() << errno_code(MIR_ERR_OPEN_STREAM);
+
+    if (codecID == AV_CODEC_ID_PCM_S16LE || codecID == AV_CODEC_ID_MP3)
+        cdc_ctx_out->frame_size = av_rescale_rnd(nbSamplesIn,
+                                                 cdc_ctx_out->sample_rate, sampleRateIn,AV_ROUND_UP);
+    else if (codecID == AV_CODEC_ID_AAC)
+    {
+        cdc_ctx_out->profile = FF_PROFILE_AAC_LOW;
+        cdc_ctx_out->frame_size = 1024;
+
+        // some formats want stream headers to be separate
+        if(fmt_ctx_out->oformat->flags & AVFMT_GLOBALHEADER)
+            cdc_ctx_out->flags |= CODEC_FLAG_GLOBAL_HEADER;
+    }
+
+    cdc_out = codec;
+
+
+    av_log(NULL,AV_LOG_ERROR,"\nCodec de saida   : %s\n",cdc_out->name);
+    av_log(NULL,AV_LOG_ERROR,"CodecID          : %d\n",cdc_ctx_out->codec_id);
+    av_log(NULL,AV_LOG_ERROR,"Channels         : %d\n",cdc_ctx_out->channels);
+    av_log(NULL,AV_LOG_ERROR,"Channel Layout   : %d\n",cdc_ctx_out->channel_layout);
+    av_log(NULL,AV_LOG_ERROR,"Sample rate      : %d\n",cdc_ctx_out->sample_rate);
+    av_log(NULL,AV_LOG_ERROR,"Bit rate         : %d\n",cdc_ctx_out->bit_rate);
+    av_log(NULL,AV_LOG_ERROR,"Sample format    : %d\n",cdc_ctx_out->sample_fmt);
+    av_log(NULL,AV_LOG_ERROR,"frame size       : %d\n",cdc_ctx_out->frame_size);
+
+
+    if (audioFormat == AUDIOFORMAT::arq)
+    {
+        fmt_ctx_out->oformat->flags |= AVFMT_ALLOW_FLUSH;
+        error = avformat_write_header(fmt_ctx_out, NULL);
+
+        if (error < 0)
+            throw StreamException() << errno_code(MIR_ERR_OPEN_STREAM);
+    }
 }
 
-SwrContext* Parser::CreateSwrContext(AVCodecContext *inCodecContext, AVCodecContext *outCodecContext)
+void Parser::InitResampler()
 {
-    SwrContext* swrContext = swr_alloc_set_opts(NULL,
-       av_get_default_channel_layout(outCodecContext->channels),
-       outCodecContext->sample_fmt,
-       outCodecContext->sample_rate,
-       av_get_default_channel_layout(inCodecContext->channels),
-       inCodecContext->sample_fmt,
-       inCodecContext->sample_rate,
-       0, NULL);
+    //cout << "bits_per_coded_sample " << cdc_ctx_in->bits_per_coded_sample << endl;
 
-    if (!swrContext)
+    swr_ctx = swr_alloc_set_opts(NULL,
+                                 av_get_default_channel_layout(cdc_ctx_out->channels),
+                                 cdc_ctx_out->sample_fmt,
+                                 cdc_ctx_out->sample_rate,
+                                 av_get_default_channel_layout(nbChannelIn),
+                                 sampleFormatIn,
+                                 sampleRateIn,
+                                 0,0);
+
+    if(!swr_ctx)
         throw ContextCreatorException() << errno_code(MIR_ERR_ALLOC_SWR_CONTEXT);
 
-    /** Open the resampler with the specified parameters. */
-    if (swr_init(swrContext) < 0)
-        throw ContextCreatorException() << errno_code(MIR_ERR_ALLOC_SWR_CONTEXT);
+    // set options
+    av_opt_set_int(swr_ctx, "in_channel_layout",    channelLayoutIn, 0);
+    av_opt_set_int(swr_ctx, "in_sample_rate",       sampleRateIn, 0);
+    av_opt_set_int(swr_ctx, "in_bit_rate",       bitRateIn, 0);
+    av_opt_set_sample_fmt(swr_ctx, "in_sample_fmt", sampleFormatIn, 0);
 
-    return swrContext;
+    av_opt_set_int(swr_ctx, "out_channel_layout",    cdc_ctx_out->channel_layout, 0);
+    av_opt_set_int(swr_ctx, "out_sample_rate",       cdc_ctx_out->sample_rate, 0);
+    av_opt_set_int(swr_ctx, "out_bit_rate",       cdc_ctx_out->bit_rate, 0);
+    av_opt_set_sample_fmt(swr_ctx, "out_sample_fmt", cdc_ctx_out->sample_fmt, 0);
+
+    if (swr_init(swr_ctx) < 0)
+        throw ContextCreatorException() << errno_code(MIR_ERR_INIT_SWR_CONTEXT);
 }
 
-string Parser::getDateTime()
+void Parser::Resample()
 {
-    struct tm *DtHr;
-    time_t t;
-    char strAux[20];
+    uint8_t* dataIn;
+    int got_frame;
 
-    t = time(NULL);
-    DtHr = localtime(&t);
+    frame_out = av_frame_alloc();
 
-    sprintf(strAux, "%02d%02d%02d_%02d%02d%02d", DtHr->tm_year - 100, DtHr->tm_mon + 1, DtHr->tm_mday, DtHr->tm_hour, DtHr->tm_min, DtHr->tm_sec);
+    frame_out->nb_samples = cdc_ctx_out->frame_size;
+    frame_out->format = cdc_ctx_out->sample_fmt;
+    frame_out->sample_rate = sampleRate;
+    frame_out->channel_layout = av_get_default_channel_layout(nbChannel);
 
-    return strAux;
-}
+    av_frame_get_buffer(frame_out, 1);
 
-string Parser::getDate()
-{
-    struct tm *DtHr;
-    time_t t;
-    char strAux[20];
-
-    t = time(NULL);
-    DtHr = localtime(&t);
-
-    sprintf(strAux, "%02d%02d%02d", DtHr->tm_year - 100, DtHr->tm_mon + 1, DtHr->tm_mday);
-
-    return strAux;
-}
-
-string Parser::getTime()
-{
-    struct tm *DtHr;
-    time_t t;
-    char strAux[20];
-
-    t = time(NULL);
-    DtHr = localtime(&t);
-
-    sprintf(strAux, "%02d", DtHr->tm_hour);
-
-    return strAux;
-}
-
-string Parser::getSaveCutDir()
-{
-    DIR *dir;
-    char strAux[10];
-
-    string ret = cutFolder + "/" + getDate();
-    if ((dir = opendir(ret.c_str())) == NULL)
+    for (int idxFrame = 0; idxFrame < this->bufFrames.size(); idxFrame++)
     {
-        cntRawDayCut = 0;
-        cntM4aDayCut = 0;
-        mkdir(ret.c_str(), 0777);
+        boost::this_thread::sleep(boost::posix_time::milliseconds(1));
+        int data_present = 0;
+        int len = bufFrames[idxFrame].size();
+        dataIn = new uint8_t[len];
+
+        int i = 0;
+        for (vector<uint8_t>::iterator it = bufFrames[idxFrame].begin();
+                it != bufFrames[idxFrame].end(); ++it)
+            dataIn[i++] = (uint8_t)*it;
+
+        if (swr_convert(swr_ctx, (uint8_t**)&frame_out->data, frame_out->nb_samples,
+                         (const uint8_t**)&dataIn, nbSamplesIn) >= 0)
+        {
+            got_frame = 0;
+            av_init_packet(&pkt_out);
+            pkt_out.data = NULL;
+            pkt_out.size = 0;
+
+            if (avcodec_encode_audio2(cdc_ctx_out, &pkt_out, frame_out, &got_frame) >= 0)
+                EndResample();
+            else
+                BOOST_LOG_TRIVIAL(error) << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>   Erro no encode audio 2";
+
+            av_free_packet(&pkt_out);
+        }
+        else
+            BOOST_LOG_TRIVIAL(error) << "Erro no SWR_Convert";
+
+        delete dataIn;
     }
-    else
-        closedir(dir);
 
-    ret += "/" + getTime();
-    if ((dir = opendir(ret.c_str())) == NULL)
-        mkdir(ret.c_str(), 0777);
-    else
-        closedir(dir);
+    av_frame_free(&frame_out);
+}
 
-    sprintf(strAux, "%05d", this->idRadio);
-    ret += "/" + string(strAux);
+AVCodecID Parser::getCodecID()
+{
+    int ret = AV_CODEC_ID_NONE;
 
-    if ((dir = opendir(ret.c_str())) == NULL)
-        mkdir(ret.c_str(), 0777);
-    else
-        closedir(dir);
+    string format = audioFormatList[audioFormat];
+
+    if (format.compare("mp3") == 0)
+        ret = AV_CODEC_ID_MP3;
+    else if (format.compare("wav") == 0)
+        ret = AV_CODEC_ID_PCM_S16LE;
+    else if (format.compare("adts") == 0)
+        ret = AV_CODEC_ID_AAC;
+    else if (format.compare("flv") == 0)
+        ret = AV_CODEC_ID_AAC;
+
+    return (AVCodecID)ret;
+}
+
+AVSampleFormat Parser::getSampleFormat(AVCodecID codecID)
+{
+    AVSampleFormat ret = AV_SAMPLE_FMT_NONE;
+    switch (codecID)
+    {
+    case AV_CODEC_ID_MP3:
+        ret = AV_SAMPLE_FMT_S16P;
+        break;
+    case AV_CODEC_ID_AAC:
+        ret = AV_SAMPLE_FMT_S16;
+        break;
+    case AV_CODEC_ID_PCM_S16LE:
+        ret = AV_SAMPLE_FMT_S16;
+        break;
+    default:
+        break;
+    }
 
     return ret;
 }
 
-unsigned int* Parser::CreateFingerPrint(vector <uint8_t> Data, unsigned int* FingerPrintSize, bool mltFFT)
+void Parser::setBitRate(int value)
 {
-    FingerPrint* fingerPrint = new FingerPrint(Filters);
-    unsigned int len = Data.size();
-
-    uint8_t* convArray = (uint8_t*)calloc(1, len);
-    for (unsigned int i = 0; i < len; i += 2)
-    {
-        convArray[i] = Data[i + 1] & 0xff;
-        convArray[i + 1] = Data[i] & 0xff;
-    }
-
-    unsigned int *bits = fingerPrint->Wav2Bits((short int*)convArray, len / 2, 44100, FingerPrintSize, mltFFT);
-    free(convArray);
-
-    return bits;
+    bitRate = value;
 }
 
-void Parser::initFIFO()
+void Parser::setSampleRate(int value)
 {
-    /** Create the FIFO buffer based on the specified output sample format.
-       nb_samples  initial allocation size, in samples */
-
-
-    if (!(arqFifo = av_audio_fifo_alloc(inCodecContext->sample_fmt, inCodecContext->channels, 1)))
-    {
-        printf("FIFO não pode ser alocado.\n");
-        throw BadAllocException() << errno_code(AVERROR(ENOMEM));
-    }
-
-    lockFifo = false;
+    sampleRate = value;
 }
 
-void Parser::addSamplesFIFO(uint8_t **inputSamples, const int frameSize)
+void Parser::setChannels(unsigned int value)
 {
-    int error;
-
-    /**
-     * Make the FIFO as large as it needs to be to hold both,
-     * the old and the new samples.
-     */
-    while (lockFifo);
-    lockFifo = true;
-
-    if ((error = av_audio_fifo_realloc(arqFifo, av_audio_fifo_size(arqFifo) + frameSize)) < 0)
-    {
-        printf("Could not reallocate FIFO\n");
-    }
-
-    /** Store the new samples in the FIFO buffer. */
-    if (av_audio_fifo_write(arqFifo, (void **)inputSamples,
-                            frameSize) < frameSize)
-    {
-        printf("Could not write data to FIFO\n");
-    }
-
-    lockFifo = false;
+    nbChannel = value;
 }
 
-int Parser::getFifoData(void **data, int nb_samples)
+void Parser::setBuffer(vector <vector <uint8_t>> value)
 {
-    while (lockFifo);
-    lockFifo = true;
-
-    int ret = av_audio_fifo_read(arqFifo, data, nb_samples);
-
-    lockFifo = false;
-
-    return ret;
+    bufFrames = value;
 }
 
-int Parser::getFifoSize()
-{
-    while (lockFifo);
-    lockFifo = true;
-    int ret = av_audio_fifo_size(arqFifo);
-    lockFifo = false;
-    return ret;
-}
+void Parser::Execute(){}
 
-void Parser::ProcessOutput()
-{
-    string arqAtual = "";
-    string arqName;
-    char chrArqName[28];
+void Parser::EndResample(){}
 
-    int ctrCnt = 1000000;
-
-    m4aOutFrame = av_frame_alloc();
-    m4aInFrame = av_frame_alloc();
-
-    while (true)
-    {
-        try
-        {
-            if (getFifoSize() > 0)
-            {
-                m4aInFrame->nb_samples     = inCodecContext->frame_size;
-                m4aInFrame->channel_layout = inCodecContext->channel_layout;
-                m4aInFrame->format         = inCodecContext->sample_fmt;
-                m4aInFrame->sample_rate    = inCodecContext->sample_rate;
-                av_frame_get_buffer(m4aInFrame, 0);
-
-                getFifoData((void**)m4aInFrame->data, inCodecContext->frame_size);
-    //            getFifoData((void**)&arqData, inCodecContext->frame_size + 26);
-    //            arqName = arqData.arqName;
-
-    //            if (arqAtual != arqFifo)
-                if (ctrCnt >= maxFrames)
-                {
-                    ctrCnt = 0;
-                    // novo recorte, fecha o atual e abre o novo
-                    if (arqAtual != "")
-                    {
-                        av_write_trailer(m4aFormatContext);
-
-                        av_free(m4aFormatContext);
-                        av_free(m4aCodecContext);
-                        av_free(m4aSwrContext);
-                    }
-
-                    cntM4aDayCut++;
-                    sprintf(chrArqName, "%05d-%05d-%s", this->idRadio, cntM4aDayCut, getDateTime().c_str());
-                    arqName = chrArqName;
-
-                    CreateContext(getSaveCutDir() + "/" + arqName + ".mp3", false, NULL);
-                    avformat_write_header(m4aFormatContext, NULL);
-
-                    arqAtual = arqName;
-                }
-
-                if (EncodeFrames(false))
-                {
-                    av_write_frame(m4aFormatContext, &m4aOutPacket);
-                }
-                ctrCnt++;
-
-                av_free_packet(&m4aOutPacket);
-            }
-        }
-        catch(ConvertException& ex)
-        {
-            cerr << ex.what() << endl;
-        }
-        catch(...)
-        {
-            cout << "ProcessOutput" << endl;
-        }
-    }
-}
+void Parser::initObject(){}
