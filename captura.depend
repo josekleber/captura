@@ -7150,19 +7150,19 @@
 	<boost/log/utility/setup/file.hpp>
 	<boost/log/utility/setup/common_attributes.hpp>
 
-1410884283 source:/home/nelson/Projetos/mir/captura/src/rawdata.cpp
+1410962875 source:/home/nelson/Projetos/mir/captura/src/rawdata.cpp
 	"rawdata.h"
 
-1410884283 /home/nelson/Projetos/mir/captura/include/rawdata.h
+1410962472 /home/nelson/Projetos/mir/captura/include/rawdata.h
 	<mir/fingerprint.h>
 	<mir/tcpclient.h>
 	"exceptionmir.h"
 	"parser.h"
 
-1410911346 source:/home/nelson/Projetos/mir/captura/src/threadcapture.cpp
+1410963584 source:/home/nelson/Projetos/mir/captura/src/threadcapture.cpp
 	"threadcapture.h"
 
-1410528690 /home/nelson/Projetos/mir/captura/include/threadcapture.h
+1410963584 /home/nelson/Projetos/mir/captura/include/threadcapture.h
 	<stdlib.h>
 	<stdio.h>
 	<mir/filter.h>
@@ -7171,10 +7171,10 @@
 	"streamradio.h"
 	"sliceprocess.h"
 
-1410530599 source:/home/nelson/Projetos/mir/captura/src/threadpool.cpp
+1410964153 source:/home/nelson/Projetos/mir/captura/src/threadpool.cpp
 	"threadpool.h"
 
-1407875398 /home/nelson/Projetos/mir/captura/include/threadpool.h
+1410964153 /home/nelson/Projetos/mir/captura/include/threadpool.h
 	<stdlib.h>
 	<stdio.h>
 	<thread>
@@ -7183,7 +7183,7 @@
 	<boost/date_time/posix_time/posix_time.hpp>
 	<boost/thread/thread.hpp>
 
-1410901694 source:/home/nelson/Projetos/mir/captura/src/main.cpp
+1410960178 source:/home/nelson/Projetos/mir/captura/src/main.cpp
 	<iostream>
 	<mir/filter.h>
 	"main.h"
@@ -7228,7 +7228,7 @@
 	"exceptionmir.h"
 	"database.h"
 
-1410911346 source:/home/nelson/Projetos/mir/captura/src/streamradio.cpp
+1410956735 source:/home/nelson/Projetos/mir/captura/src/streamradio.cpp
 	"streamradio.h"
 
 1410897637 /usr/local/include/libavutil/avstring.h
@@ -11232,11 +11232,11 @@
 	<stdio.h>
 	<stddef.h>
 
-1409160929 /home/nelson/Projetos/mir/captura/include/configuration.h
+1410962262 /home/nelson/Projetos/mir/captura/include/configuration.h
 	<iostream>
 	"util.h"
 
-1409598968 source:/home/nelson/Projetos/mir/captura/src/configuration.cpp
+1410962262 source:/home/nelson/Projetos/mir/captura/src/configuration.cpp
 	"configuration.h"
 	<boost/property_tree/ptree.hpp>
 	<boost/property_tree/ini_parser.hpp>
@@ -16658,7 +16658,7 @@
 	<fstream>
 	<boost/filesystem.hpp>
 
-1410891721 /home/nelson/Projetos/mir/captura/include/sliceprocess.h
+1410962975 /home/nelson/Projetos/mir/captura/include/sliceprocess.h
 	<stdlib.h>
 	<stdio.h>
 	<string>
@@ -16666,6 +16666,6 @@
 	"rawdata.h"
 	"filedata.h"
 
-1410955865 source:/home/nelson/Projetos/mir/captura/src/sliceprocess.cpp
+1410963027 source:/home/nelson/Projetos/mir/captura/src/sliceprocess.cpp
 	"sliceprocess.h"
 

@@ -147,17 +147,13 @@ int main()
     BOOST_LOG_TRIVIAL(info) <<  "Captura Version: " << prgVersion;
 
 /**
+
 vector<int> ppp;
 vector<int> qqq;
 
-ppp.push_back(1);
-ppp.push_back(2);
-ppp.push_back(3);
-ppp.push_back(4);
-ppp.push_back(5);
-ppp.push_back(6);
+int rrr[] = {2, 3, 4, 5, 6, 7};
 
-//ppp = vector<int>rrr;
+ppp = vector<int>(std::begin(rrr), std::end(rrr));
 
 qqq = ppp;
 
@@ -216,12 +212,9 @@ return 0;
         return -1;
     }
 
-    ThreadPool* objThreadPool = new ThreadPool;
-    objThreadPool->Filters = &Filters;
-    objThreadPool->ipRecognition = config->mrIP;
-    objThreadPool->portRecognition = config->mrPort;
-    objThreadPool->sqlConnString = config->ConnectionStringSQL;
-    objThreadPool->cutFolder = config->cutFolder;
+    ThreadPool* objThreadPool = new ThreadPool(config->mrOn, config->mrIP, config->mrPort,
+                                               config->ConnectionStringMySQL, config->cutFolder,
+                                               &Filters);
 
     // laço principal da aplicação.
     // dentro deste laço :

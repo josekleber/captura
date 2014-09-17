@@ -20,26 +20,27 @@ using namespace std;
 class ThreadCapture
 {
     public:
-        ThreadCapture();
+        ThreadCapture(int mrOn, string ipRecognition, string portRecognition,
+                      string sqlConnString, int idThread, string uriRadio,
+                      vector<Filter> *Filters, string cutFolder);
         virtual ~ThreadCapture();
 
-        string uriRadio;
-
-        string ipRecognition;
-        string portRecognition;
-        string sqlConnString;
-
-        string cutFolder;
-
         int status;
-        int idThread;   // igual a idRadio
-
-        vector<Filter> *Filters;
 
         void thrRun();
         void thrClose();
     protected:
     private:
+        int mrOn;
+        string ipRecognition;
+        string portRecognition;
+        string sqlConnString;
+
+        string uriRadio;
+        int idThread;   // igual a idRadio
+        vector<Filter> *Filters;
+        string cutFolder;
+
         bool stopThread;
 
         StreamRadio* objRadio;

@@ -18,6 +18,7 @@ class Configuration
         /** \brief Tempo, em minutos, em que serão verificadas alterações nos streams */
         int UpdateTimer;
 
+        int mrOn;
         std::string mrIP;
         std::string mrPort;
 

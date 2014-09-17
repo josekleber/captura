@@ -27,11 +27,14 @@ Configuration::Configuration()
     UpdateTimer = pt.get<int>("Settings.UpdateTimer");
     BOOST_LOG_TRIVIAL(debug) << "Settings.UpdateTimer-> " << UpdateTimer;
 
-    mrIP = pt.get<std::string>("Socket.IP");
-    BOOST_LOG_TRIVIAL(debug) << "Socket.IP-> " << mrIP.c_str();
+    mrOn = pt.get<int>("MRServer.On");
+    BOOST_LOG_TRIVIAL(debug) << "MRServer.On-> " << mrOn;
 
-    mrPort = pt.get<std::string>("Socket.Port");
-    BOOST_LOG_TRIVIAL(debug) << "Socket.Port-> " << mrPort.c_str();
+    mrIP = pt.get<std::string>("MRServer.IP");
+    BOOST_LOG_TRIVIAL(debug) << "MRServer.IP-> " << mrIP.c_str();
+
+    mrPort = pt.get<std::string>("MRServer.Port");
+    BOOST_LOG_TRIVIAL(debug) << "MRServer.Port-> " << mrPort.c_str();
 
     cutFolder = pt.get<std::string>("AudityInfo.Folder");
     BOOST_LOG_TRIVIAL(debug) << "AudityInfo.Folder-> " << cutFolder.c_str();

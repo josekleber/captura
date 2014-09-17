@@ -25,10 +25,18 @@ class ThreadPool
 {
     public:
         /** Default constructor */
-        ThreadPool();
+        ThreadPool(int mrOn, string ipRecognition, string portRecognition,
+                   string sqlConnString, string cutFolder, vector<Filter> *Filters);
         /** Default destructor */
         virtual ~ThreadPool();
 
+        void addThreads(string uriRadio, int idRadio);
+        void stopThread(int idRadio);
+        string getUrlRadio(int idRadio);
+        vector <int32_t> getActiveThread();
+    protected:
+    private:
+        int mrOn;
         string ipRecognition;
         string portRecognition;
         string sqlConnString;
@@ -37,12 +45,6 @@ class ThreadPool
 
         vector<Filter> *Filters;
 
-        void addThreads(string uriRadio, int id);
-        void stopThread(int id);
-        string getUrlRadio(int id);
-        vector <int32_t> getActiveThread();
-    protected:
-    private:
         map<unsigned int, ctrlThread*> ctrlThreads;
 };
 

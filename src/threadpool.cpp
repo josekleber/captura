@@ -2,9 +2,18 @@
 
 using namespace std;
 
-ThreadPool::ThreadPool()
+ThreadPool::ThreadPool(int mrOn, string ipRecognition, string portRecognition,
+                   string sqlConnString, string cutFolder, vector<Filter> *Filters)
 {
-    //ctor
+        this->mrOn = mrOn;
+        this->ipRecognition = ipRecognition;
+        this->portRecognition = portRecognition;
+
+        this->sqlConnString = sqlConnString;
+
+        this->cutFolder = cutFolder;
+
+        this->Filters = Filters;
 }
 
 ThreadPool::~ThreadPool()
@@ -12,7 +21,7 @@ ThreadPool::~ThreadPool()
     //dtor
 }
 
-void ThreadPool::addThreads(string uriRadio, int id)
+void ThreadPool::addThreads(string uriRadio, int idRadio)
 {
     ctrlThread* objThreadControl;
 
@@ -20,17 +29,11 @@ void ThreadPool::addThreads(string uriRadio, int id)
     {
         objThreadControl = new ctrlThread;
         objThreadControl->isStop = true;
-        objThreadControl->idThread = id;
+        objThreadControl->idThread = idRadio;
 
-        objThreadControl->objCapture = new ThreadCapture;
-
-        objThreadControl->objCapture->ipRecognition = ipRecognition;
-        objThreadControl->objCapture->portRecognition = portRecognition;
-        objThreadControl->objCapture->sqlConnString = sqlConnString;
-        objThreadControl->objCapture->uriRadio = uriRadio;
-        objThreadControl->objCapture->idThread = id;
-        objThreadControl->objCapture->Filters = Filters;
-        objThreadControl->objCapture->cutFolder = cutFolder;
+        objThreadControl->objCapture = new ThreadCapture(mrOn, ipRecognition, portRecognition,
+                                                         sqlConnString, idRadio, uriRadio,
+                                                         Filters, cutFolder);
     }
     catch(...)
     {
@@ -43,7 +46,7 @@ void ThreadPool::addThreads(string uriRadio, int id)
         objThreadControl->isStop = false;
 
         if (objThreadControl->objCapture->status == 0)
-            ctrlThreads[id] = objThreadControl;
+            ctrlThreads[idRadio] = objThreadControl;
     }
     catch(...)
     {
@@ -51,13 +54,13 @@ void ThreadPool::addThreads(string uriRadio, int id)
     }
 }
 
-void ThreadPool::stopThread(int id)
+void ThreadPool::stopThread(int idRadio)
 {
 
     std::map<unsigned int, ctrlThread*>::iterator itAux;
     ctrlThread* objThreadControl;
 
-    itAux = ctrlThreads.find(id);
+    itAux = ctrlThreads.find(idRadio);
 
     if (itAux != ctrlThreads.end())
     {
@@ -66,11 +69,11 @@ void ThreadPool::stopThread(int id)
     }
 }
 
-string ThreadPool::getUrlRadio(int id)
+string ThreadPool::getUrlRadio(int idRadio)
 {
     std::map<unsigned int, ctrlThread*>::iterator itAux;
 
-    itAux = ctrlThreads.find(id);
+    itAux = ctrlThreads.find(idRadio);
 
     if (itAux != ctrlThreads.end())
         return itAux->second->uriRadio;

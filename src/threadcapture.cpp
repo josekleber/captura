@@ -2,8 +2,21 @@
 
 using namespace std;
 
-ThreadCapture::ThreadCapture()
+ThreadCapture::ThreadCapture(int mrOn, string ipRecognition, string portRecognition,
+                      string sqlConnString, int idThread, string uriRadio,
+                      vector<Filter> *Filters, string cutFolder)
 {
+    this->mrOn = mrOn;
+    this->ipRecognition = ipRecognition;
+    this->portRecognition = portRecognition;
+    this->sqlConnString = sqlConnString;
+
+    this->idThread = idThread;   // igual a idRadio
+    this->uriRadio = uriRadio;
+    this->Filters = Filters;
+    this->cutFolder = cutFolder;
+
+
     status = 0;
     stopThread = false;
 }
@@ -44,7 +57,7 @@ void ThreadCapture::thrRun()
 
         try
         {
-            objSlice = new SliceProcess(ipRecognition, portRecognition, sqlConnString,
+            objSlice = new SliceProcess(mrOn, ipRecognition, portRecognition, sqlConnString,
                                         cutFolder, idThread, Filters, objRadio);
 
             objThreadRadio = new boost::thread(boost::bind(&StreamRadio::read, objRadio));
