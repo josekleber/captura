@@ -7,6 +7,8 @@
 #include "exceptionmir.h"
 #include "parser.h"
 
+#define RAW_SAMPLE_RATE 11025
+
 class RAWData : public Parser
 {
     public:
@@ -20,7 +22,6 @@ class RAWData : public Parser
 
         void Execute();
     protected:
-        virtual void initObject();
         virtual void EndResample();
     private:
         vector<Filter> *Filters;

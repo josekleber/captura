@@ -11,152 +11,90 @@ AR = ar
 LD = g++
 WINDRES = windres
 
-INC = -Iinclude
-CFLAGS = -std=c++11 -Wall -fexceptions
-RESINC = 
-LIBDIR = 
-LIB = /usr/local/lib/libavcodec.so /usr/local/lib/libavdevice.so /usr/local/lib/libavfilter.so /usr/local/lib/libavformat.so /usr/local/lib/libavutil.so /usr/local/lib/libswresample.so /usr/local/lib/libswscale.so /usr/local/lib/libboost_system.so /usr/local/lib/libboost_thread.so /usr/local/lib/libboost_filesystem.so /usr/local/lib/libboost_date_time.so /usr/local/lib/libboost_timer.so /usr/local/lib/mir/libSkyLibs.so -lfftw3
-LDFLAGS = -lz -lm -lpthread -lmp3lame -lx264 -lvorbis -lfdk-aac -lfaac -lodbc
+INC_G = -Iinclude
+CFLAGS_G = -std=c++11 -Wall -fexceptions -DBOOST_LOG_DYN_LINK
+RESINC_G = 
+DEP_G = 
+LIBDIR_G = 
+LIB_G = /usr/local/lib/libavcodec.so /usr/local/lib/libavdevice.so /usr/local/lib/libavfilter.so /usr/local/lib/libavformat.so /usr/local/lib/libavutil.so /usr/local/lib/libswresample.so /usr/local/lib/libswscale.so /usr/local/lib/libboost_system.so /usr/local/lib/libboost_thread.so /usr/local/lib/libboost_filesystem.so /usr/local/lib/libboost_date_time.so /usr/local/lib/libboost_timer.so /usr/local/lib/libboost_log.so /usr/local/lib/libboost_log-mt.so /usr/local/lib/mir/libSkyLibs.so
+LDFLAGS_G = -lz -lm -lpthread -lmp3lame -lx264 -lvorbis -lfdk-aac -lfaac -lodbc
 
-INC_DEBUG = $(INC)
-CFLAGS_DEBUG = $(CFLAGS) -g
-RESINC_DEBUG = $(RESINC)
-RCFLAGS_DEBUG = $(RCFLAGS)
-LIBDIR_DEBUG = $(LIBDIR)
-LIB_DEBUG = $(LIB)
-LDFLAGS_DEBUG = $(LDFLAGS)
-OBJDIR_DEBUG = obj/Debug
-DEP_DEBUG = 
-OUT_DEBUG = bin/Debug/captura
+debug: INC = $(INC_G)
+debug: CFLAGS = $(CFLAGS_G)
+debug: RESINC = $(RESINC_G)
+debug: DEP = $(DEP_G)
+debug: LIBDIR = $(LIBDIR_G)
+debug: LIB = $(LIB_G)
+debug: LDFLAGS = $(LDFLAGS_G) -s
+debug: DIR = Debug
+debug: before out after
 
-INC_RELEASE = $(INC)
-CFLAGS_RELEASE = $(CFLAGS) -O2
-RESINC_RELEASE = $(RESINC)
-RCFLAGS_RELEASE = $(RCFLAGS)
-LIBDIR_RELEASE = $(LIBDIR)
-LIB_RELEASE = $(LIB)
-LDFLAGS_RELEASE = $(LDFLAGS) -s
-OBJDIR_RELEASE = obj/Release
-DEP_RELEASE = 
-OUT_RELEASE = bin/Release/captura
+release: INC = $(INC_G)
+release: CFLAGS = $(CFLAGS_G) -O2
+release: RESINC = $(RESINC_G)
+release: DEP = $(DEP_G)
+release: LIBDIR = $(LIBDIR_G)
+release: LIB = $(LIB_G)
+release: LDFLAGS = $(LDFLAGS_G) -s
+release: DIR = Release
+release: before out after
 
-OBJ_DEBUG = $(OBJDIR_DEBUG)/src/aacdata.o $(OBJDIR_DEBUG)/src/threadpool.o $(OBJDIR_DEBUG)/src/threadcapture.o $(OBJDIR_DEBUG)/src/testes.o $(OBJDIR_DEBUG)/src/teste_thread.o $(OBJDIR_DEBUG)/src/teste_ffmpeg.o $(OBJDIR_DEBUG)/src/streamradio.o $(OBJDIR_DEBUG)/src/rawdata.o $(OBJDIR_DEBUG)/src/parser.o $(OBJDIR_DEBUG)/src/main.o $(OBJDIR_DEBUG)/src/logger.o $(OBJDIR_DEBUG)/src/database.o $(OBJDIR_DEBUG)/src/configuration.o
+OBJDIR = obj/$(DIR)
+BINDIR = bin/$(DIR)
+OUT = $(BINDIR)/captura
 
-OBJ_RELEASE = $(OBJDIR_RELEASE)/src/aacdata.o $(OBJDIR_RELEASE)/src/threadpool.o $(OBJDIR_RELEASE)/src/threadcapture.o $(OBJDIR_RELEASE)/src/testes.o $(OBJDIR_RELEASE)/src/teste_thread.o $(OBJDIR_RELEASE)/src/teste_ffmpeg.o $(OBJDIR_RELEASE)/src/streamradio.o $(OBJDIR_RELEASE)/src/rawdata.o $(OBJDIR_RELEASE)/src/parser.o $(OBJDIR_RELEASE)/src/main.o $(OBJDIR_RELEASE)/src/logger.o $(OBJDIR_RELEASE)/src/database.o $(OBJDIR_RELEASE)/src/configuration.o
+OBJ = $(OBJDIR)/src/main.o $(OBJDIR)/src/configuration.o $(OBJDIR)/src/logger.o $(OBJDIR)/src/database.o $(OBJDIR)/src/threadpool.o $(OBJDIR)/src/threadcapture.o $(OBJDIR)/src/streamradio.o $(OBJDIR)/src/sliceprocess.o $(OBJDIR)/src/parser.o $(OBJDIR)/src/rawdata.o $(OBJDIR)/src/filedata.o
 
 all: debug release
 
-clean: clean_debug clean_release
+before:
+	test -d obj || mkdir -p obj
+	test -d $(OBJDIR) || mkdir -p $(OBJDIR)
+	test -d $(OBJDIR)/src || mkdir -p $(OBJDIR)/src
+	test -d bin || mkdir -p bin
+	test -d $(BINDIR) || mkdir -p $(BINDIR)
 
-before_debug: 
-	test -d bin/Debug || mkdir -p bin/Debug
-	test -d $(OBJDIR_DEBUG)/src || mkdir -p $(OBJDIR_DEBUG)/src
+after: 
 
-after_debug: 
+out: before $(OBJ) $(DEP)
+	$(LD) $(LIBDIR) -o $(OUT) $(OBJ)  $(LDFLAGS) $(LIB)
 
-debug: before_debug out_debug after_debug
+$(OBJDIR)/src/main.o: src/main.cpp
+	$(CXX) $(CFLAGS) $(INC) -c src/main.cpp -o $(OBJDIR)/src/main.o
 
-out_debug: before_debug $(OBJ_DEBUG) $(DEP_DEBUG)
-	$(LD) $(LIBDIR_DEBUG) -o $(OUT_DEBUG) $(OBJ_DEBUG)  $(LDFLAGS_DEBUG) $(LIB_DEBUG)
+$(OBJDIR)/src/configuration.o: src/configuration.cpp
+	$(CXX) $(CFLAGS) $(INC) -c src/configuration.cpp -o $(OBJDIR)/src/configuration.o
 
-$(OBJDIR_DEBUG)/src/aacdata.o: src/aacdata.cpp
-	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c src/aacdata.cpp -o $(OBJDIR_DEBUG)/src/aacdata.o
+$(OBJDIR)/src/logger.o: src/logger.cpp
+	$(CXX) $(CFLAGS) $(INC) -c src/logger.cpp -o $(OBJDIR)/src/logger.o
 
-$(OBJDIR_DEBUG)/src/threadpool.o: src/threadpool.cpp
-	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c src/threadpool.cpp -o $(OBJDIR_DEBUG)/src/threadpool.o
+$(OBJDIR)/src/database.o: src/database.cpp
+	$(CXX) $(CFLAGS) $(INC) -c src/database.cpp -o $(OBJDIR)/src/database.o
 
-$(OBJDIR_DEBUG)/src/threadcapture.o: src/threadcapture.cpp
-	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c src/threadcapture.cpp -o $(OBJDIR_DEBUG)/src/threadcapture.o
+$(OBJDIR)/src/threadpool.o: src/threadpool.cpp
+	$(CXX) $(CFLAGS) $(INC) -c src/threadpool.cpp -o $(OBJDIR)/src/threadpool.o
 
-$(OBJDIR_DEBUG)/src/testes.o: src/testes.cpp
-	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c src/testes.cpp -o $(OBJDIR_DEBUG)/src/testes.o
+$(OBJDIR)/src/threadcapture.o: src/threadcapture.cpp
+	$(CXX) $(CFLAGS) $(INC) -c src/threadcapture.cpp -o $(OBJDIR)/src/threadcapture.o
 
-$(OBJDIR_DEBUG)/src/teste_thread.o: src/teste_thread.cpp
-	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c src/teste_thread.cpp -o $(OBJDIR_DEBUG)/src/teste_thread.o
+$(OBJDIR)/src/streamradio.o: src/streamradio.cpp
+	$(CXX) $(CFLAGS) $(INC) -c src/streamradio.cpp -o $(OBJDIR)/src/streamradio.o
 
-$(OBJDIR_DEBUG)/src/teste_ffmpeg.o: src/teste_ffmpeg.cpp
-	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c src/teste_ffmpeg.cpp -o $(OBJDIR_DEBUG)/src/teste_ffmpeg.o
+$(OBJDIR)/src/sliceprocess.o: src/sliceprocess.cpp
+	$(CXX) $(CFLAGS) $(INC) -c src/sliceprocess.cpp -o $(OBJDIR)/src/sliceprocess.o
 
-$(OBJDIR_DEBUG)/src/streamradio.o: src/streamradio.cpp
-	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c src/streamradio.cpp -o $(OBJDIR_DEBUG)/src/streamradio.o
+$(OBJDIR)/src/parser.o: src/parser.cpp
+	$(CXX) $(CFLAGS) $(INC) -c src/parser.cpp -o $(OBJDIR)/src/parser.o
 
-$(OBJDIR_DEBUG)/src/rawdata.o: src/rawdata.cpp
-	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c src/rawdata.cpp -o $(OBJDIR_DEBUG)/src/rawdata.o
+$(OBJDIR)/src/rawdata.o: src/rawdata.cpp
+	$(CXX) $(CFLAGS) $(INC) -c src/rawdata.cpp -o $(OBJDIR)/src/rawdata.o
 
-$(OBJDIR_DEBUG)/src/parser.o: src/parser.cpp
-	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c src/parser.cpp -o $(OBJDIR_DEBUG)/src/parser.o
+$(OBJDIR)/src/filedata.o: src/filedata.cpp
+	$(CXX) $(CFLAGS) $(INC) -c src/filedata.cpp -o $(OBJDIR)/src/filedata.o
 
-$(OBJDIR_DEBUG)/src/main.o: src/main.cpp
-	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c src/main.cpp -o $(OBJDIR_DEBUG)/src/main.o
+clean: 
+	rm -rf bin
+	rm -rf obj
 
-$(OBJDIR_DEBUG)/src/logger.o: src/logger.cpp
-	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c src/logger.cpp -o $(OBJDIR_DEBUG)/src/logger.o
-
-$(OBJDIR_DEBUG)/src/database.o: src/database.cpp
-	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c src/database.cpp -o $(OBJDIR_DEBUG)/src/database.o
-
-$(OBJDIR_DEBUG)/src/configuration.o: src/configuration.cpp
-	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c src/configuration.cpp -o $(OBJDIR_DEBUG)/src/configuration.o
-
-clean_debug: 
-	rm -f $(OBJ_DEBUG) $(OUT_DEBUG)
-	rm -rf bin/Debug
-	rm -rf $(OBJDIR_DEBUG)/src
-
-before_release: 
-	test -d bin/Release || mkdir -p bin/Release
-	test -d $(OBJDIR_RELEASE)/src || mkdir -p $(OBJDIR_RELEASE)/src
-
-after_release: 
-
-release: before_release out_release after_release
-
-out_release: before_release $(OBJ_RELEASE) $(DEP_RELEASE)
-	$(LD) $(LIBDIR_RELEASE) -o $(OUT_RELEASE) $(OBJ_RELEASE)  $(LDFLAGS_RELEASE) $(LIB_RELEASE)
-
-$(OBJDIR_RELEASE)/src/aacdata.o: src/aacdata.cpp
-	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c src/aacdata.cpp -o $(OBJDIR_RELEASE)/src/aacdata.o
-
-$(OBJDIR_RELEASE)/src/threadpool.o: src/threadpool.cpp
-	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c src/threadpool.cpp -o $(OBJDIR_RELEASE)/src/threadpool.o
-
-$(OBJDIR_RELEASE)/src/threadcapture.o: src/threadcapture.cpp
-	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c src/threadcapture.cpp -o $(OBJDIR_RELEASE)/src/threadcapture.o
-
-$(OBJDIR_RELEASE)/src/testes.o: src/testes.cpp
-	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c src/testes.cpp -o $(OBJDIR_RELEASE)/src/testes.o
-
-$(OBJDIR_RELEASE)/src/teste_thread.o: src/teste_thread.cpp
-	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c src/teste_thread.cpp -o $(OBJDIR_RELEASE)/src/teste_thread.o
-
-$(OBJDIR_RELEASE)/src/teste_ffmpeg.o: src/teste_ffmpeg.cpp
-	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c src/teste_ffmpeg.cpp -o $(OBJDIR_RELEASE)/src/teste_ffmpeg.o
-
-$(OBJDIR_RELEASE)/src/streamradio.o: src/streamradio.cpp
-	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c src/streamradio.cpp -o $(OBJDIR_RELEASE)/src/streamradio.o
-
-$(OBJDIR_RELEASE)/src/rawdata.o: src/rawdata.cpp
-	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c src/rawdata.cpp -o $(OBJDIR_RELEASE)/src/rawdata.o
-
-$(OBJDIR_RELEASE)/src/parser.o: src/parser.cpp
-	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c src/parser.cpp -o $(OBJDIR_RELEASE)/src/parser.o
-
-$(OBJDIR_RELEASE)/src/main.o: src/main.cpp
-	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c src/main.cpp -o $(OBJDIR_RELEASE)/src/main.o
-
-$(OBJDIR_RELEASE)/src/logger.o: src/logger.cpp
-	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c src/logger.cpp -o $(OBJDIR_RELEASE)/src/logger.o
-
-$(OBJDIR_RELEASE)/src/database.o: src/database.cpp
-	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c src/database.cpp -o $(OBJDIR_RELEASE)/src/database.o
-
-$(OBJDIR_RELEASE)/src/configuration.o: src/configuration.cpp
-	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c src/configuration.cpp -o $(OBJDIR_RELEASE)/src/configuration.o
-
-clean_release: 
-	rm -f $(OBJ_RELEASE) $(OUT_RELEASE)
-	rm -rf bin/Release
-	rm -rf $(OBJDIR_RELEASE)/src
-
-.PHONY: before_debug after_debug clean_debug before_release after_release clean_release
+.PHONY: before after clean
 

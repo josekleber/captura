@@ -138,13 +138,14 @@ public:
     AVDictionary * getListOptions();
 
     /** \brief
-    * Retorna um ponteiro para a FIFO de captura
+    * Retorna o tamanho do fifo
     */
-    AVAudioFifo**getFIFO();
-
     int getFifoSize();
+
+    /** \brief
+    * Retorna dados da fifo, correspondente a um pacote
+    */
     int getFifoData(void **data, int nb_samples);
-    int getNumFrames(double sec);
 
 protected:
 private:
@@ -158,7 +159,6 @@ private:
     clock_t timer;
     EnumStatusConnect statusConnection;
     StreamType * streamType;
-    double duration;
     bool isExit;
     int bitRate; // contém o valor do bitrate de entrada
     bool isVBR; // true se for Variable BitRate

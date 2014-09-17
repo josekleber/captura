@@ -9,6 +9,15 @@ FileData::FileData(string fileName, uint64_t channelLayoutIn, int sampleRateIn,
     this->setBitRate(24000);
     this->setChannels(1);
     this->setSampleRate(11025);
+
+    try
+    {
+        this->Config();
+    }
+    catch(...)
+    {
+        throw;
+    }
 }
 
 FileData::~FileData()
@@ -18,9 +27,18 @@ FileData::~FileData()
 
 void FileData::Execute()
 {
-    this->Config();
-
-    Resample();
+    try
+    {
+        Resample();
+    }
+    catch(BadAllocException& err)
+    {
+        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Error code: " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
+    }
+    catch(FFMpegException& err)
+    {
+        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Error code: " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
+    }
 
     // grava o recorte em disco
     av_write_trailer(fmt_ctx_out);

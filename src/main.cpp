@@ -146,6 +146,36 @@ int main()
     printf("\033[0m \033[2J\033[1;1H");
     BOOST_LOG_TRIVIAL(info) <<  "Captura Version: " << prgVersion;
 
+/**
+vector<int> ppp;
+vector<int> qqq;
+
+ppp.push_back(1);
+ppp.push_back(2);
+ppp.push_back(3);
+ppp.push_back(4);
+ppp.push_back(5);
+ppp.push_back(6);
+
+//ppp = vector<int>rrr;
+
+qqq = ppp;
+
+for (vector<int>::iterator it = qqq.begin(); it != qqq.end(); ++it)
+    *it *= 2;
+
+int* sss;
+sss = &qqq[0];
+for (int i = 0; i < ppp.size(); i++)
+    printf("i: %d   ppp: %d   qqq: %2d   sss: %2d\n", i, ppp[i], qqq[i], sss[i]);
+
+
+return 0;
+/**/
+
+
+
+
     init();
 
     // retorno de métodos

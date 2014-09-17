@@ -23,6 +23,11 @@ typedef boost::error_info<struct tag_errmsg, std::string> errmsg_info;
 struct BaseException : virtual std::exception, virtual boost::exception{};
 
 /** \brief
+* Exceção geral, usado no caso de erro pego por catch(...)
+*/
+struct GeneralException : virtual BaseException {};
+
+/** \brief
 * Exceção ocorre quando não for possível alocar memória
 */
 struct BadAllocException : virtual BaseException {};
@@ -65,6 +70,11 @@ struct FrameReadException : virtual BaseException {};
 struct DecoderException : virtual BaseException {};
 
 /** \brief
+* Erro de decodificação dos Frames
+*/
+struct FFMpegException : virtual BaseException {};
+
+/** \brief
 * Erro de abertura de arquivo
 */
 struct OpenFileException : virtual BaseException{};
@@ -77,6 +87,7 @@ enum MIR_EXCEPTION
     MIR_ERR_BADALLOC_CONTEXT        = -10002,
     MIR_ERR_CONNECTION_CLOSED       = -10003,
     MIR_ERR_MEDIA_TYPE_NO_AUDIO     = -10004,
+    MIR_ERR_BADALLOC_FIFO           = -11005,
     MIR_ERR_CODEC_NOT_SUPPORTED     = -11001,
     MIR_ERR_FRAME_READ              = -11002,
     MIR_ERR_DECODE                  = -11003,
@@ -99,9 +110,13 @@ enum MIR_EXCEPTION
     MIR_ERR_OPEN_OUTPUT_FORMAT      = -12015,
     MIR_ERR_OPEN_CODEC_CONTEXT      = -12016,
     MIR_ERR_INIT_SWR_CONTEXT        = -12017,
+    MIR_ERR_BUFFER_ALLOC            = -12018,
+    MIR_ERR_RESAMPLE                = -12019,
+    MIR_ERR_ENCODE                  = -12020,
+    MIR_ERR_RAW_VECTOR_ALLOC        = -12021,
+    MIR_ERR_CREATE_PATH             = -12022,
 
-
-
+    // MIR_ERR_
 
     // IDENTIFICACAO
 
@@ -113,8 +128,10 @@ enum MIR_EXCEPTION
     MIR_DB_ALLOC_STMT      = 15003,
     MIR_DB_DRIVER_CONNECT  = 15004,
     MIR_DB_EXECUTE_QUERY   = 15005,
-    MIR_DB_UNKOWN          = 15010
+    MIR_DB_UNKOWN          = 15010,
 
+    // usado para rastrear erros (pode ser dados temporarios, somente criados em modo de desenvolvimento)
+    MIR_DES_STMRADIO_1     = -30000,
 };
 
 

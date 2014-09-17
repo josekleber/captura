@@ -13,6 +13,7 @@ SliceProcess::SliceProcess(string ipRecognition, string portRecognition, string 
     this->objRadio = objRadio;
 
     stopThread = false;
+    Status = 0;
 }
 
 SliceProcess::~SliceProcess()
@@ -22,40 +23,36 @@ SliceProcess::~SliceProcess()
 
 void SliceProcess::thrProcessa()
 {
+    AVCodecContext* cdc_ctx_in = objRadio->getCodecContext();
+
     int szFifo;
-    int inFrameSize = objRadio->getCodecContext()->frame_size;
+    int inFrameSize;
 
     RAWData* objRawData;
     FileData* objFileData;
 
-    AVFrame* inFrame = av_frame_alloc();
-
-    AVCodecContext* cdc_ctx_in = objRadio->getCodecContext();
-
     idSlice = 0;
 
-    try
-    {
-        inFrame->channel_layout = cdc_ctx_in->channel_layout;
-        inFrame->format         = cdc_ctx_in->sample_fmt;
-        inFrame->sample_rate    = cdc_ctx_in->sample_rate;
-    }
-    catch(...)
+    AVFrame* inFrame = av_frame_alloc();
+    if (inFrame == NULL)
     {
         BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "catch open connection." ANSI_COLOR_RESET;
-        status = -1;
-        return;
-        //throw;
+        Status = enumSliceProcess::ERROR;
+        throw BadAllocException() << errno_code(MIR_ERR_FRAME_ALLOC);
     }
-    //boost::this_thread::sleep(boost::posix_time::microseconds(5));
 
-    try
+    inFrameSize             = cdc_ctx_in->frame_size;
+    inFrame->channel_layout = cdc_ctx_in->channel_layout;
+    inFrame->format         = cdc_ctx_in->sample_fmt;
+    inFrame->sample_rate    = cdc_ctx_in->sample_rate;
+
+    int qtdPack = 0;
+
+    vector <vector<uint8_t>> Dados;
+
+    while (!stopThread)
     {
-        int qtdPack = 0;
-
-        vector <vector<uint8_t>> Dados;
-
-        while (!stopThread)
+        try
         {
             szFifo = objRadio->getFifoSize();
 
@@ -67,69 +64,81 @@ void SliceProcess::thrProcessa()
                 av_frame_get_buffer(inFrame, 0);
 
                 // carregando dados da FIFO
-                objRadio->getFifoData((void**)inFrame->data, szFrame);
-
-                vector <uint8_t> aux;
-                for (int i = 0; i < inFrame->nb_samples; i++)
-                    aux.push_back((uint8_t)((*inFrame->data)[i]));
-                Dados.push_back(aux);
-
-                qtdPack += szFrame;
-
-                if (qtdPack >= (inFrame->sample_rate  * 5))
+                if (objRadio->getFifoData((void**)inFrame->data, szFrame) > 0)
                 {
-                    qtdPack = 0;
+                    vector <uint8_t> aux;
+                    for (int i = 0; i < inFrame->nb_samples; i++)
+                        aux.push_back((uint8_t)((*inFrame->data)[i]));
+                    Dados.push_back(aux);
 
-                    char chrArqName[28];
-                    sprintf(chrArqName, "%05d-%05d-%s", idRadio, idSlice, getDateTime().c_str());
-                    string arqName = chrArqName;
-                    arqName = getSaveCutDir() + "/" + arqName;
-                    // processamento para fingerprint
-                    try
-                    {
-                        objRawData = new RAWData(arqName + ".wav", cdc_ctx_in->channel_layout,
-                                                 cdc_ctx_in->sample_rate, cdc_ctx_in->bit_rate,
-                                                 cdc_ctx_in->sample_fmt, szFrame, cdc_ctx_in->channels,
-                                                 Filters, ipRecognition, portRecognition, idRadio, idSlice);
-                        objRawData->setBuffer(Dados);
-                        objThreadRawParser = new boost::thread(boost::bind(&RAWData::Execute, objRawData));
-                    }
-                    catch(...)
-                    {
-                        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "catch do objParser" ANSI_COLOR_RESET;
-                        status = -1;
-                        throw;
-                    }
+                    qtdPack += szFrame;
 
-                    // processamento para arquivo
-                    try
+                    if (qtdPack >= (inFrame->sample_rate  * 5))
                     {
-                        objFileData = new FileData(arqName + ".mp3", cdc_ctx_in->channel_layout,
-                                                 cdc_ctx_in->sample_rate, cdc_ctx_in->bit_rate,
-                                                 cdc_ctx_in->sample_fmt, szFrame, cdc_ctx_in->channels);
-                        objFileData->setBuffer(Dados);
-                        objThreadArqParser = new boost::thread(boost::bind(&FileData::Execute, objFileData));
-                    }
-                    catch(...)
-                    {
-                        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "catch do objParser" ANSI_COLOR_RESET;
-                        status = -1;
-                        throw;
-                    }
+                        qtdPack = 0;
 
-                    // reseta dados
-                    for (int i = 0; i < Dados.size(); i++)
-                        (Dados[i]).clear();
-                    Dados.clear();
+                        char chrArqName[28];
+                        sprintf(chrArqName, "%05d-%05d-%s", idRadio, idSlice, getDateTime().c_str());
+                        string arqName = chrArqName;
+                        try
+                        {
+                            arqName = getSaveCutDir() + "/" + arqName;
+                        }
+                        catch(exception& err)
+                        {
+                            throw;
+                        }
+                        // processamento para fingerprint
+                        try
+                        {
+                            objRawData = new RAWData(arqName + ".wav", cdc_ctx_in->channel_layout,
+                                                     cdc_ctx_in->sample_rate, cdc_ctx_in->bit_rate,
+                                                     cdc_ctx_in->sample_fmt, szFrame, cdc_ctx_in->channels,
+                                                     Filters, ipRecognition, portRecognition, idRadio, idSlice);
+                            objRawData->setBuffer(Dados);
+                            objThreadRawParser = new boost::thread(boost::bind(&RAWData::Execute, objRawData));
+                        }
+                        catch(...)
+                        {
+                            BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "catch do rawdata" ANSI_COLOR_RESET;
+                            throw;
+                        }
+
+                        // processamento para arquivo
+                        try
+                        {
+                            objFileData = new FileData(arqName + ".mp3", cdc_ctx_in->channel_layout,
+                                                     cdc_ctx_in->sample_rate, cdc_ctx_in->bit_rate,
+                                                     cdc_ctx_in->sample_fmt, szFrame, cdc_ctx_in->channels);
+                            objFileData->setBuffer(Dados);
+                            objThreadArqParser = new boost::thread(boost::bind(&FileData::Execute, objFileData));
+                        }
+                        catch(...)
+                        {
+                            BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "catch do filedata" ANSI_COLOR_RESET;
+                            throw;
+                        }
+
+                        // reseta dados
+                        for (int i = 0; i < Dados.size(); i++)
+                            (Dados[i]).clear();
+                        Dados.clear();
+
+                        idSlice++;
+                    }
                 }
             }
+
             boost::this_thread::sleep(boost::posix_time::microseconds(1));
         }
-    }
-    catch(...)
-    {
-        status = -1;
-        throw;
+        catch(exception& err)
+        {
+            BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED << "Error: " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
+        }
+        catch(...)
+        {
+            BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED << "Error" << ANSI_COLOR_RESET;
+        }
     }
 }
 
@@ -180,34 +189,46 @@ string SliceProcess::getSaveCutDir()
     char strAux[10];
     string path;
 
-    path = this->cutFolder + "/" + getDate();
-    fs::path dirPath(path);
-
-    if (!fs::exists(dirPath))
+    try
     {
-        idSlice = 0;
-        fs::create_directories(dirPath);
+        path = this->cutFolder + "/" + getDate();
+        fs::path dirPath(path);
+
+        if (!fs::exists(dirPath))
+        {
+            idSlice = 0;
+            fs::create_directories(dirPath);
+        }
+
+        path += "/" + getHour();
+
+        fs::path dirPathTime(path);
+
+        if (!fs::exists(dirPathTime))
+        {
+            fs::create_directories(dirPathTime);
+        }
+
+        sprintf(strAux, "%05d", idRadio);
+
+        path += "/" + string(strAux);
+
+        fs::path dirPathRadio(path);
+
+        if (!fs::exists(dirPathRadio))
+        {
+            fs::create_directories(dirPathRadio);
+        }
     }
-
-    path += "/" + getHour();
-
-    fs::path dirPathTime(path);
-
-    if (!fs::exists(dirPathTime))
+    catch(exception& err)
     {
-        fs::create_directories(dirPathTime);
-    }
-
-    sprintf(strAux, "%05d", idRadio);
-
-    path += "/" + string(strAux);
-
-    fs::path dirPathRadio(path);
-
-    if (!fs::exists(dirPathRadio))
-    {
-        fs::create_directories(dirPathRadio);
+        throw OpenFileException() << errno_code(MIR_ERR_CREATE_PATH);
     }
 
     return path;
+}
+
+int SliceProcess::getStatus()
+{
+    return Status;
 }

@@ -10,12 +10,10 @@ StreamRadio::StreamRadio()
     stream = NULL;
     dictionary = NULL;
     fifo = NULL;
-    duration = 0;
     statusConnection = MIR_CONNETION_CLOSE;
     isExit = false;
     bitRate = 0;
     isVBR = false;
-    mtx_.unlock();
 
     // define o nível de log do FFMPEG
     av_log_set_level(AV_LOG_ERROR);
@@ -80,7 +78,6 @@ AVFormatContext* StreamRadio::open(string uri)
         statusConnection = MIR_CONNECTION_ERROR;
         throw OpenConnectionException() <<errno_code(MIR_ERR_STREAM_CONNECTION);
     }
-
     // pega informações do stream
     if ((ret=avformat_find_stream_info(formatContext,NULL)) < 0)
     {
@@ -170,6 +167,15 @@ void StreamRadio::setStreamType()
                 BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_CYAN "Media type : AVMEDIA_TYPE_VIDEO";
             else
                 BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_CYAN "Media type : AVMEDIA_TYPE_UNKNOW";
+
+av_log(NULL,AV_LOG_ERROR,"\nCodec de entrada : %s\n",codec->name);
+av_log(NULL,AV_LOG_ERROR,"CodecID            : %d\n", codecContext->codec_id);
+av_log(NULL,AV_LOG_ERROR,"Channels           : %d\n", codecContext->channels);
+av_log(NULL,AV_LOG_ERROR,"Channel Layout     : %d\n", codecContext->channel_layout);
+av_log(NULL,AV_LOG_ERROR,"Sample rate        : %d\n", codecContext->sample_rate);
+av_log(NULL,AV_LOG_ERROR,"Bit rate           : %d\n", codecContext->bit_rate);
+av_log(NULL,AV_LOG_ERROR,"Sample format      : %d\n", codecContext->sample_fmt);
+av_log(NULL,AV_LOG_ERROR,"frame size         : %d\n", codecContext->frame_size);
         }
     }
 
@@ -230,11 +236,11 @@ void StreamRadio::initFIFO()
        nb_samples  initial allocation size, in samples */
 
 
-    if (!(this->fifo = av_audio_fifo_alloc(codecContext->sample_fmt, codecContext->channels,1)))
+    if ((this->fifo = av_audio_fifo_alloc(codecContext->sample_fmt, codecContext->channels,1)) == NULL)
     {
         BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "FIFO não pode ser alocado." ANSI_COLOR_RESET;
         BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Radio-> " << this->formatContext->filename << ANSI_COLOR_RESET;
-        throw BadAllocException() <<errno_code(AVERROR(ENOMEM));
+        throw BadAllocException() << errno_code(MIR_ERR_BADALLOC_FIFO);
     }
 }
 
@@ -248,8 +254,19 @@ void StreamRadio::readFrame()
     // Pacote para dados temporários.
     AVPacket inputPacket;
 
-    // inicia as FIFOS
-    initFIFO();
+    try
+    {
+        // inicia as FIFOS
+        initFIFO();
+    }
+    catch(BadAllocException)
+    {
+        throw;
+    }
+    catch(...)
+    {
+        throw GeneralException() << errno_code(MIR_DES_STMRADIO_1);
+    }
 
     while (isTrue && (finished == 0) && !isExit)
     {
@@ -286,7 +303,7 @@ void StreamRadio::readFrame()
             {
                 try
                 {
-                    BOOST_LOG_TRIVIAL(debug) <<  "Decode do frame.";
+//                    BOOST_LOG_TRIVIAL(debug) <<  "Decode do frame.";
 
                     // decodifica o frame
                     decodeAudioFrame(&data,&finished,&inputPacket);
@@ -334,12 +351,6 @@ void StreamRadio::decodeAudioFrame(int *data, int *finished, AVPacket *inputPack
         printf("Could not decode frame (error '%d')\n", error);
         throw DecoderException() << errno_code(MIR_ERR_DECODE);
     }
-
-    if (duration == 0)
-    {
-        double time_base = av_q2d(formatContext->streams[0]->time_base);
-        duration = time_base * av_frame_get_pkt_duration(frame);
-    }
 }
 
 void StreamRadio::addSamplesFIFO(uint8_t **inputSamples, const int frameSize)
@@ -352,44 +363,43 @@ void StreamRadio::addSamplesFIFO(uint8_t **inputSamples, const int frameSize)
      */
     mtx_.lock();
 
-    if ((error = av_audio_fifo_realloc(fifo, av_audio_fifo_size(fifo) + frameSize)) < 0)
+    if (fifo != NULL)
     {
-        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Não foi possível alocar o FIFO." ANSI_COLOR_RESET;
-    }
+        if ((error = av_audio_fifo_realloc(fifo, av_audio_fifo_size(fifo) + frameSize)) < 0)
+        {
+            BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Não foi possível alocar o FIFO." ANSI_COLOR_RESET;
+        }
 
-    /** Store the new samples in the FIFO buffer. */
-    if (av_audio_fifo_write(fifo, (void **)inputSamples,
-                            frameSize) < frameSize)
-    {
-        printf("Could not write data to FIFO\n");
+        /** Store the new samples in the FIFO buffer. */
+        if (av_audio_fifo_write(fifo, (void **)inputSamples,
+                                frameSize) < frameSize)
+        {
+            error = -1;
+            BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Could not write data to FIFO." ANSI_COLOR_RESET;
+        }
     }
     mtx_.unlock();
 }
 
-AVAudioFifo** StreamRadio::getFIFO()
-{
-    return &fifo;
-}
-
 int StreamRadio::getFifoSize()
 {
+    int ret;
     mtx_.lock();
-    int ret = av_audio_fifo_size(fifo);
+    if (fifo != NULL)
+        ret = av_audio_fifo_size(fifo);
+    else
+        ret = 0;
     mtx_.unlock();
     return ret;
 }
 int StreamRadio::getFifoData(void **data, int nb_samples)
 {
+    int ret;
     mtx_.lock();
-    int ret = av_audio_fifo_read(fifo, data, nb_samples);
+    if (fifo != NULL)
+        ret = av_audio_fifo_read(fifo, data, nb_samples);
+    else
+        ret = -1;
     mtx_.unlock();
     return ret;
-}
-
-int StreamRadio::getNumFrames(double sec)
-{
-    if (duration != 0)
-        return (int)round(sec / duration + 0.5);
-    else
-        return 0;
 }

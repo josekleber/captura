@@ -10,7 +10,6 @@ Parser::Parser(string fileName, uint64_t channelLayoutIn, int sampleRateIn,
     this->sampleFormatIn = sampleFormatIn;
     this->nbSamplesIn = nbSamplesIn;
     this->nbChannelIn = nbChannelIn;
-
 }
 
 Parser::~Parser()
@@ -32,15 +31,10 @@ void Parser::Config()
         // inicia o resample
         InitResampler();
     }
-    catch(StreamException& err)
-    {
-        printf("erro no setStream\n");
-    }
     catch(...)
     {
-        printf("erro geral no config\n");
+        throw;
     }
-
 }
 
 void Parser::CreateContext()
@@ -60,16 +54,13 @@ void Parser::CreateContext()
         error = avio_open(&io_ctx, fileName.c_str(), AVIO_FLAG_WRITE);
         if (error < 0)
             throw ConvertException() << errno_code(MIR_ERR_OPEN_OUTPUT_FILE);
-
     }
 
     fmt_ctx_out->pb = io_ctx;
-
 }
 
 void Parser::setStream()
 {
-
     int error = 0;
 
     AVCodec *codec = NULL;
@@ -125,7 +116,6 @@ void Parser::setStream()
 
     cdc_out = codec;
 
-
     av_log(NULL,AV_LOG_ERROR,"\nCodec de saida   : %s\n",cdc_out->name);
     av_log(NULL,AV_LOG_ERROR,"CodecID          : %d\n",cdc_ctx_out->codec_id);
     av_log(NULL,AV_LOG_ERROR,"Channels         : %d\n",cdc_ctx_out->channels);
@@ -134,7 +124,6 @@ void Parser::setStream()
     av_log(NULL,AV_LOG_ERROR,"Bit rate         : %d\n",cdc_ctx_out->bit_rate);
     av_log(NULL,AV_LOG_ERROR,"Sample format    : %d\n",cdc_ctx_out->sample_fmt);
     av_log(NULL,AV_LOG_ERROR,"frame size       : %d\n",cdc_ctx_out->frame_size);
-
 
     if (audioFormat == AUDIOFORMAT::arq)
     {
@@ -148,8 +137,6 @@ void Parser::setStream()
 
 void Parser::InitResampler()
 {
-    //cout << "bits_per_coded_sample " << cdc_ctx_in->bits_per_coded_sample << endl;
-
     swr_ctx = swr_alloc_set_opts(NULL,
                                  av_get_default_channel_layout(cdc_ctx_out->channels),
                                  cdc_ctx_out->sample_fmt,
@@ -183,13 +170,28 @@ void Parser::Resample()
     int got_frame;
 
     frame_out = av_frame_alloc();
+    if (frame_out == NULL)
+        throw BadAllocException() << errno_code(MIR_ERR_FRAME_ALLOC);
 
     frame_out->nb_samples = cdc_ctx_out->frame_size;
     frame_out->format = cdc_ctx_out->sample_fmt;
     frame_out->sample_rate = sampleRate;
     frame_out->channel_layout = av_get_default_channel_layout(nbChannel);
 
-    av_frame_get_buffer(frame_out, 1);
+    if (av_frame_get_buffer(frame_out, 1) < 0)
+        throw BadAllocException() << errno_code(MIR_ERR_BUFFER_ALLOC);
+
+    frame_in = av_frame_alloc();
+    if (frame_in == NULL)
+        throw BadAllocException() << errno_code(MIR_ERR_FRAME_ALLOC);
+
+    frame_in->nb_samples = nbSamplesIn;
+    frame_in->format = sampleFormatIn;
+    frame_in->sample_rate = sampleRateIn;
+    frame_in->channel_layout = channelLayoutIn;
+
+    if (av_frame_get_buffer(frame_in, 1) < 0)
+        throw BadAllocException() << errno_code(MIR_ERR_BUFFER_ALLOC);
 
     for (int idxFrame = 0; idxFrame < this->bufFrames.size(); idxFrame++)
     {
@@ -198,13 +200,11 @@ void Parser::Resample()
         int len = bufFrames[idxFrame].size();
         dataIn = new uint8_t[len];
 
-        int i = 0;
-        for (vector<uint8_t>::iterator it = bufFrames[idxFrame].begin();
-                it != bufFrames[idxFrame].end(); ++it)
-            dataIn[i++] = (uint8_t)*it;
+        for (int j = 0; j < len; j++)
+            frame_in->data[0][j] = bufFrames[idxFrame][j];
 
         if (swr_convert(swr_ctx, (uint8_t**)&frame_out->data, frame_out->nb_samples,
-                         (const uint8_t**)&dataIn, nbSamplesIn) >= 0)
+                         (const uint8_t**)&frame_in->data, frame_in->nb_samples) >= 0)
         {
             got_frame = 0;
             av_init_packet(&pkt_out);
@@ -214,12 +214,12 @@ void Parser::Resample()
             if (avcodec_encode_audio2(cdc_ctx_out, &pkt_out, frame_out, &got_frame) >= 0)
                 EndResample();
             else
-                BOOST_LOG_TRIVIAL(error) << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>   Erro no encode audio 2";
+                throw FFMpegException() << errno_code(MIR_ERR_ENCODE);
 
             av_free_packet(&pkt_out);
         }
         else
-            BOOST_LOG_TRIVIAL(error) << "Erro no SWR_Convert";
+            throw FFMpegException() << errno_code(MIR_ERR_RESAMPLE);
 
         delete dataIn;
     }

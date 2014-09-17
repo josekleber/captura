@@ -80,6 +80,7 @@ protected:
     AVCodec *cdc_out = NULL;
     SwrContext *swr_ctx = NULL;
     AVDictionary *dic = NULL;
+    AVFrame *frame_in = NULL;
     AVFrame *frame_out = NULL;
     AVPacket pkt_out;
     AVIOContext *io_ctx = NULL;

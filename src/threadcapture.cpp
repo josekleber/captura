@@ -15,32 +15,68 @@ ThreadCapture::~ThreadCapture()
 
 void ThreadCapture::thrRun()
 {
-    try
+    while (!stopThread)
     {
-        objRadio = new StreamRadio;
-        objRadio->open(uriRadio);
-
-        objSlice = new SliceProcess(ipRecognition, portRecognition, sqlConnString,
-                                    cutFolder, idThread, Filters, objRadio);
-
-        objThreadRadio = new boost::thread(boost::bind(&StreamRadio::read, objRadio));
-        boost::this_thread::sleep(boost::posix_time::microseconds(500));
-        while (objRadio->getFifoSize() == 0)
+        do
         {
+            try
+            {
+                objRadio = new StreamRadio;
+                objRadio->open(uriRadio);
+            }
+            catch(BadAllocException& err)
+            {
+                BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED << "Error: " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
+            }
+            catch(OpenConnectionException& err)
+            {
+                BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED << "Error: " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
+            }
+
+            if (objRadio->getStatus() != EnumStatusConnect::MIR_CONNECTION_OPEN)
+            {
+                objRadio->close();
+                delete objRadio;
+                objRadio = NULL;
+                boost::this_thread::sleep(boost::posix_time::seconds(30));
+            }
+        } while (objRadio == NULL);
+
+        try
+        {
+            objSlice = new SliceProcess(ipRecognition, portRecognition, sqlConnString,
+                                        cutFolder, idThread, Filters, objRadio);
+
+            objThreadRadio = new boost::thread(boost::bind(&StreamRadio::read, objRadio));
             boost::this_thread::sleep(boost::posix_time::microseconds(500));
+            while (objRadio->getFifoSize() == 0)
+            {
+                boost::this_thread::sleep(boost::posix_time::microseconds(500));
+            }
+
+            objThreadProcessa = new boost::thread(boost::bind(&SliceProcess::thrProcessa, objSlice));
+
+            while (!stopThread)
+            {
+                if (objRadio->getStatus() != EnumStatusConnect::MIR_CONNECTION_OPEN)
+                {
+                    delete objSlice;
+                    objSlice = NULL;
+
+                    objRadio->close();
+                    delete objRadio;
+                    objRadio = NULL;
+
+                    break;
+                }
+                boost::this_thread::sleep(boost::posix_time::microseconds(1));
+            }
         }
-
-        objThreadProcessa = new boost::thread(boost::bind(&SliceProcess::thrProcessa, objSlice));
-
-        while (!stopThread)
+        catch(...)
         {
-            boost::this_thread::sleep(boost::posix_time::microseconds(1));
+            status = -1;
+            throw;
         }
-    }
-    catch(...)
-    {
-        status = -1;
-        throw;
     }
 }
 

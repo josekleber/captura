@@ -14,11 +14,18 @@ using namespace std;
 class SliceProcess
 {
     public:
+        enum enumSliceProcess
+        {
+            STOP = 0,
+            RUN,
+            ERROR
+        };
         SliceProcess(string ipRecognition, string portRecognition, string sqlConnString,
                      string cutFolder, int idRadio, vector<Filter> *Filters, StreamRadio* objRadio);
         virtual ~SliceProcess();
 
         void thrProcessa();
+        int getStatus();
     protected:
     private:
         bool stopThread;
@@ -29,9 +36,9 @@ class SliceProcess
 
         string cutFolder;
 
-        int status;
         int idRadio;
         int idSlice;
+        int Status;
 
         StreamRadio* objRadio;
 
