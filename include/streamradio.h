@@ -4,19 +4,19 @@
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
-#include "util.h"
-#include "exceptionmir.h"
-#include <boost/thread.hpp>
 
 extern "C"
 {
     /** inclusão dos headers FFMPEG */
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
-#include <libavutil/audio_fifo.h>
 }
 
 #include <boost/thread.hpp>
+
+#include "util.h"
+#include "exceptionmir.h"
+#include "queue.h"
 
 using namespace std;
 namespace pt = boost::posix_time;
@@ -28,6 +28,7 @@ enum EnumStatusConnect
 {
     MIR_CONNECTION_OPEN,
     MIR_CONNETION_CLOSE,
+    MIR_CONNETION_CLOSING,
     MIR_CONNECTION_ERROR
 };
 
@@ -137,15 +138,9 @@ public:
     */
     AVDictionary * getListOptions();
 
-    /** \brief
-    * Retorna o tamanho do fifo
-    */
-    int getFifoSize();
-
-    /** \brief
-    * Retorna dados da fifo, correspondente a um pacote
-    */
-    int getFifoData(void **data, int nb_samples);
+    int getQueueSize();
+    int getChannelSize();
+    vector<vector<uint8_t>> getQueueData();
 
 protected:
 private:
@@ -155,15 +150,14 @@ private:
     AVCodec *codec;
     AVFrame *frame = NULL;
     AVDictionary *dictionary;
-    AVAudioFifo *fifo = NULL;
+
     clock_t timer;
     EnumStatusConnect statusConnection;
     StreamType * streamType;
     bool isExit;
     int bitRate; // contém o valor do bitrate de entrada
     bool isVBR; // true se for Variable BitRate
-    boost::mutex mtx_;  // controle de lock da thread
-
+    Queue* objQueue;
 
     /** \brief
     * Define os streams existentes numa conexão
@@ -183,13 +177,6 @@ private:
     */
     void rtspDetect(string uri);
 
-    /** \brief
-    * Aloca memória para as filas de entrada.
-    *
-    * \see AVAudioFifo
-    */
-    void initFIFO();
-
     /**\brief
     * Lê os frames da conexão e armazena no FIFO.
     * A captura será constante
@@ -207,14 +194,6 @@ private:
     *
     */
     void decodeAudioFrame(int *data, int *finished, AVPacket *inputPacket);
-
-    /** \brief
-    * Adiciona frame decodificado para o FIFO de entrada.
-    *
-    * \param inputSamples   - dados decodificados que serão inseridos no FIFO ( do Kininho )
-    * \param frameSize      - tamanho dos dados.
-    */
-    void addSamplesFIFO(uint8_t **inputSamples, const int frameSize);
 };
 
 #endif // CONNECT_H

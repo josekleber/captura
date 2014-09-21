@@ -6,6 +6,14 @@
 
 #include <iostream>
 #include <fstream>
+
+extern "C"
+{
+    /** inclusão dos headers FFMPEG */
+#include <libavformat/avformat.h>
+#include <libavcodec/avcodec.h>
+}
+
 #include <mir/filter.h>
 
 #include "configuration.h"

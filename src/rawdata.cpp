@@ -43,7 +43,7 @@ unsigned int* RAWData::CreateFingerPrint(vector <uint8_t> Data, unsigned int* Fi
 {
     unsigned int len = Data.size();
 
-    uint8_t* convArray = (uint8_t*)calloc(1, len);
+    uint8_t* convArray = new uint8_t[len];
     for (unsigned int i = 0; i < len; i += 2)
     {
         convArray[i] = Data[i + 1] & 0xff;
@@ -58,7 +58,8 @@ unsigned int* RAWData::CreateFingerPrint(vector <uint8_t> Data, unsigned int* Fi
                 &bits, FingerPrintSize);
         objFingerPrint->Generate();
 
-        free(convArray);
+        delete[] convArray;
+        delete objFingerPrint;
 
         return bits;
     }
@@ -91,7 +92,8 @@ start = clock();
 
     // gerando fingerprints
     unsigned int nbits;
-    unsigned int* bits = CreateFingerPrint(binOutput, &nbits, true);
+    unsigned int* bits = NULL;
+    bits = CreateFingerPrint(binOutput, &nbits, true);
 
     binOutput.clear();
 
@@ -107,15 +109,12 @@ start = clock();
             int pos = 0;
 
             int16_t arqNameSize = fileName.size();
-            uint8_t* buff  = new uint8_t[4 * nbits + arqNameSize + 18];
+            uint8_t* buff  = new uint8_t[4 * nbits + arqNameSize + 14];
 
             conv = (uint8_t*)&this->idRadio;
             for (int i = 0; i < 4; buff[pos++] = conv[i++]);
 
             conv = (uint8_t*)&idSlice;
-            for (int i = 0; i < 4; buff[pos++] = conv[i++]);
-
-            conv = (uint8_t*)&freq;
             for (int i = 0; i < 4; buff[pos++] = conv[i++]);
 
             conv = (uint8_t*)&nbits;
@@ -126,11 +125,13 @@ start = clock();
 
             for (int i = 0; i < arqNameSize; buff[pos++] = (fileName.c_str())[i++]);
 
-            for (int j = 0; j < nbits; j++)
+            for (unsigned int j = 0; j < nbits; j++)
             {
                 conv = (uint8_t*)&bits[j];
                 for (int i = 0; i < 4; buff[pos++] = conv[i++]);
             }
+
+            delete[] bits;
 
             try
             {
@@ -165,6 +166,8 @@ start = clock();
 cout << "Radio : " << this->idRadio << "    Recorte : " << idSlice << "    Tempo de processamento : " << (float)(clock() - start)/CLOCKS_PER_SEC << endl;
 start = clock();
     }
+
+delete this;
 }
 
 void RAWData::EndResample()

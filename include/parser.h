@@ -56,16 +56,14 @@ public:
     void setBitRate(int value);
     void setSampleRate(int value);
     void setChannels(unsigned int value);
-    void setBuffer(vector <vector <uint8_t>> value);
+    void setBuffer(vector<vector<vector<uint8_t>>> value, int szChannel);
 
     /** \brief Processa os frames e gera a saída */
     virtual void Execute();
 
     /** \brief configura a execução do objeto Parser */
     void Config();
-
 protected:
-
     string fileName;
     int bitRate = 24000;
     int sampleRate = 11025;
@@ -85,7 +83,8 @@ protected:
     AVPacket pkt_out;
     AVIOContext *io_ctx = NULL;
 
-    vector <vector <uint8_t>> bufFrames;
+    vector<vector<vector<uint8_t>>> bufFrames;
+    int szChannel;
 
     /** \brief efetua o resampling do audio, encodando, de acordo com o set do output */
     void Resample();
@@ -93,7 +92,6 @@ protected:
     virtual void EndResample();
 
     virtual void initObject();
-
 private:
 
     /** \brief Nome do arquivo de saída */
@@ -119,8 +117,7 @@ private:
     /** \brief Retorna o sample format de acordo com o formato de saída */
     AVSampleFormat getSampleFormat(AVCodecID codecID);
 
-
-
+    void EndProcess();
 };
 
 #endif // PARSER_H

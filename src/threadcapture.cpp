@@ -24,13 +24,22 @@ ThreadCapture::ThreadCapture(int mrOn, string ipRecognition, string portRecognit
 ThreadCapture::~ThreadCapture()
 {
     stopThread = true;
+
+    while (status == 0)
+        boost::this_thread::sleep(boost::posix_time::milliseconds(10));
+
+    if (objRadio != NULL)
+    {
+        delete objRadio;
+    }
+
 }
 
 void ThreadCapture::thrRun()
 {
     while (!stopThread)
     {
-        do
+        while (objRadio == NULL)
         {
             try
             {
@@ -48,21 +57,25 @@ void ThreadCapture::thrRun()
 
             if (objRadio->getStatus() != EnumStatusConnect::MIR_CONNECTION_OPEN)
             {
-                objRadio->close();
                 delete objRadio;
                 objRadio = NULL;
                 boost::this_thread::sleep(boost::posix_time::seconds(30));
             }
-        } while (objRadio == NULL);
-
+        }
+/**/
         try
         {
             objSlice = new SliceProcess(mrOn, ipRecognition, portRecognition, sqlConnString,
                                         cutFolder, idThread, Filters, objRadio);
-
+/**
+printf("preparando para iniciar\n");
+boost::this_thread::sleep(boost::posix_time::seconds(10));
+printf("mais 10 segundos\n");
+boost::this_thread::sleep(boost::posix_time::seconds(10));
+/**/
             objThreadRadio = new boost::thread(boost::bind(&StreamRadio::read, objRadio));
             boost::this_thread::sleep(boost::posix_time::microseconds(500));
-            while (objRadio->getFifoSize() == 0)
+            while (objRadio->getQueueSize() == 0)
             {
                 boost::this_thread::sleep(boost::posix_time::microseconds(500));
             }
@@ -90,10 +103,8 @@ void ThreadCapture::thrRun()
             status = -1;
             throw;
         }
+/**/
     }
-}
 
-void ThreadCapture::thrClose()
-{
-    stopThread = true;
+    status = 1;
 }

@@ -61,6 +61,7 @@
 			<Add library="/usr/local/lib/libboost_log.so" />
 			<Add library="/usr/local/lib/libboost_log-mt.so" />
 			<Add library="/usr/local/lib/mir/libSkyLibs.so" />
+			<Add library="/usr/local/lib/libboost*.so" />
 		</Linker>
 		<Unit filename="config.ini" />
 		<Unit filename="include/configuration.h" />
@@ -70,6 +71,7 @@
 		<Unit filename="include/logger.h" />
 		<Unit filename="include/main.h" />
 		<Unit filename="include/parser.h" />
+		<Unit filename="include/queue.h" />
 		<Unit filename="include/queuehandler.h" />
 		<Unit filename="include/rawdata.h" />
 		<Unit filename="include/sliceprocess.h" />
@@ -85,6 +87,7 @@
 		<Unit filename="src/logger.cpp" />
 		<Unit filename="src/main.cpp" />
 		<Unit filename="src/parser.cpp" />
+		<Unit filename="src/queue.cpp" />
 		<Unit filename="src/rawdata.cpp" />
 		<Unit filename="src/sliceprocess.cpp" />
 		<Unit filename="src/streamradio.cpp" />

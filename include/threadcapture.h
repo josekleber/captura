@@ -28,7 +28,6 @@ class ThreadCapture
         int status;
 
         void thrRun();
-        void thrClose();
     protected:
     private:
         int mrOn;

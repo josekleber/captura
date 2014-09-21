@@ -16,6 +16,22 @@ Parser::~Parser()
 {
     // para dar tempo de terminar algum processo pendente
     boost::this_thread::sleep(boost::posix_time::seconds(2));
+
+    EndProcess();
+}
+
+void Parser::EndProcess()
+{
+    if (fmt_ctx_out)
+        avformat_free_context(fmt_ctx_out);
+    if (dic)
+        av_free(dic);
+    if (io_ctx)
+        avio_close(io_ctx);
+    if (swr_ctx)
+        swr_free(&swr_ctx);
+    if (cdc_ctx_out)
+        avcodec_close(cdc_ctx_out);
 }
 
 void Parser::Config()
@@ -116,6 +132,7 @@ void Parser::setStream()
 
     cdc_out = codec;
 
+/**
     av_log(NULL,AV_LOG_ERROR,"\nCodec de saida   : %s\n",cdc_out->name);
     av_log(NULL,AV_LOG_ERROR,"CodecID          : %d\n",cdc_ctx_out->codec_id);
     av_log(NULL,AV_LOG_ERROR,"Channels         : %d\n",cdc_ctx_out->channels);
@@ -124,6 +141,7 @@ void Parser::setStream()
     av_log(NULL,AV_LOG_ERROR,"Bit rate         : %d\n",cdc_ctx_out->bit_rate);
     av_log(NULL,AV_LOG_ERROR,"Sample format    : %d\n",cdc_ctx_out->sample_fmt);
     av_log(NULL,AV_LOG_ERROR,"frame size       : %d\n",cdc_ctx_out->frame_size);
+/**/
 
     if (audioFormat == AUDIOFORMAT::arq)
     {
@@ -197,11 +215,13 @@ void Parser::Resample()
     {
         boost::this_thread::sleep(boost::posix_time::milliseconds(1));
         int data_present = 0;
-        int len = bufFrames[idxFrame].size();
-        dataIn = new uint8_t[len];
 
-        for (int j = 0; j < len; j++)
-            frame_in->data[0][j] = bufFrames[idxFrame][j];
+        vector<vector<uint8_t>> aux = bufFrames[idxFrame];
+        for (int i = 0; i < aux.size(); i++)
+            memcpy(frame_in->data[i], aux[i].data(), szChannel);
+        for (int i = 0; i < aux.size(); i++)
+            aux[i].clear();
+        aux.clear();
 
         if (swr_convert(swr_ctx, (uint8_t**)&frame_out->data, frame_out->nb_samples,
                          (const uint8_t**)&frame_in->data, frame_in->nb_samples) >= 0)
@@ -221,9 +241,19 @@ void Parser::Resample()
         else
             throw FFMpegException() << errno_code(MIR_ERR_RESAMPLE);
 
-        delete dataIn;
+        delete[] dataIn;
     }
 
+    for (int idxFrame = 0; idxFrame < this->bufFrames.size(); idxFrame++)
+    {
+        for (int i = 0; i < bufFrames[idxFrame].size(); i++)
+            bufFrames[idxFrame][i].clear();
+        bufFrames[idxFrame].clear();
+    }
+    bufFrames.clear();
+/**/
+
+    av_frame_free(&frame_in);
     av_frame_free(&frame_out);
 }
 
@@ -281,9 +311,10 @@ void Parser::setChannels(unsigned int value)
     nbChannel = value;
 }
 
-void Parser::setBuffer(vector <vector <uint8_t>> value)
+void Parser::setBuffer(vector<vector<vector<uint8_t>>> value, int szChannel)
 {
     bufFrames = value;
+    this->szChannel = szChannel;
 }
 
 void Parser::Execute(){}

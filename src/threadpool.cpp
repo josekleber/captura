@@ -18,7 +18,7 @@ ThreadPool::ThreadPool(int mrOn, string ipRecognition, string portRecognition,
 
 ThreadPool::~ThreadPool()
 {
-    //dtor
+    ctrlThreads.clear();
 }
 
 void ThreadPool::addThreads(string uriRadio, int idRadio)
@@ -30,6 +30,7 @@ void ThreadPool::addThreads(string uriRadio, int idRadio)
         objThreadControl = new ctrlThread;
         objThreadControl->isStop = true;
         objThreadControl->idThread = idRadio;
+        objThreadControl->uriRadio = uriRadio;
 
         objThreadControl->objCapture = new ThreadCapture(mrOn, ipRecognition, portRecognition,
                                                          sqlConnString, idRadio, uriRadio,
@@ -47,6 +48,11 @@ void ThreadPool::addThreads(string uriRadio, int idRadio)
 
         if (objThreadControl->objCapture->status == 0)
             ctrlThreads[idRadio] = objThreadControl;
+        else
+        {
+            delete objThreadControl->objCapture;
+            delete objThreadControl;
+        }
     }
     catch(...)
     {
@@ -56,7 +62,6 @@ void ThreadPool::addThreads(string uriRadio, int idRadio)
 
 void ThreadPool::stopThread(int idRadio)
 {
-
     std::map<unsigned int, ctrlThread*>::iterator itAux;
     ctrlThread* objThreadControl;
 
@@ -65,7 +70,7 @@ void ThreadPool::stopThread(int idRadio)
     if (itAux != ctrlThreads.end())
     {
         objThreadControl = itAux->second;
-        objThreadControl->objCapture->thrClose();
+        ctrlThreads.erase(itAux);
     }
 }
 
