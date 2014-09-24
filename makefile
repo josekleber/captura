@@ -43,7 +43,7 @@ OBJDIR = obj/$(DIR)
 BINDIR = bin/$(DIR)
 OUT = $(BINDIR)/captura
 
-OBJ = $(OBJDIR)/src/main.o $(OBJDIR)/src/configuration.o $(OBJDIR)/src/logger.o $(OBJDIR)/src/database.o $(OBJDIR)/src/threadpool.o $(OBJDIR)/src/threadcapture.o $(OBJDIR)/src/streamradio.o $(OBJDIR)/src/sliceprocess.o $(OBJDIR)/src/parser.o $(OBJDIR)/src/rawdata.o $(OBJDIR)/src/filedata.o
+OBJ = $(OBJDIR)/src/main.o $(OBJDIR)/src/configuration.o $(OBJDIR)/src/logger.o $(OBJDIR)/src/database.o $(OBJDIR)/src/threadpool.o $(OBJDIR)/src/threadcapture.o $(OBJDIR)/src/queue.o $(OBJDIR)/src/streamradio.o $(OBJDIR)/src/sliceprocess.o $(OBJDIR)/src/parser.o $(OBJDIR)/src/rawdata.o $(OBJDIR)/src/filedata.o
 
 all: debug release
 
@@ -76,6 +76,9 @@ $(OBJDIR)/src/threadpool.o: src/threadpool.cpp
 
 $(OBJDIR)/src/threadcapture.o: src/threadcapture.cpp
 	$(CXX) $(CFLAGS) $(INC) -c src/threadcapture.cpp -o $(OBJDIR)/src/threadcapture.o
+
+$(OBJDIR)/src/queue.o: src/queue.cpp
+	$(CXX) $(CFLAGS) $(INC) -c src/queue.cpp -o $(OBJDIR)/src/queue.o
 
 $(OBJDIR)/src/streamradio.o: src/streamradio.cpp
 	$(CXX) $(CFLAGS) $(INC) -c src/streamradio.cpp -o $(OBJDIR)/src/streamradio.o

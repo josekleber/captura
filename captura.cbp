@@ -12,7 +12,6 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
-					<Add option="-DBOOST_LOG_DYN_LINK" />
 					<Add directory="include" />
 				</Compiler>
 			</Target>
@@ -34,6 +33,7 @@
 			<Add option="-std=c++11" />
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
+			<Add option="-DBOOST_LOG_DYN_LINK" />
 			<Add directory="include" />
 		</Compiler>
 		<Linker>
@@ -59,9 +59,9 @@
 			<Add library="/usr/local/lib/libboost_date_time.so" />
 			<Add library="/usr/local/lib/libboost_timer.so" />
 			<Add library="/usr/local/lib/libboost_log.so" />
-			<Add library="/usr/local/lib/libboost_log-mt.so" />
 			<Add library="/usr/local/lib/mir/libSkyLibs.so" />
 			<Add library="/usr/local/lib/libboost*.so" />
+			<Add directory="/usr/local/lib" />
 		</Linker>
 		<Unit filename="config.ini" />
 		<Unit filename="include/configuration.h" />
@@ -120,7 +120,6 @@
 				<lib name="libavcodec" />
 				<lib name="libavdevice" />
 				<lib name="x264" />
-				<lib name="aacplus" />
 				<lib name="fdk-aac" />
 			</lib_finder>
 		</Extensions>

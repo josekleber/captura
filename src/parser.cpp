@@ -22,14 +22,14 @@ Parser::~Parser()
 
 void Parser::EndProcess()
 {
-    if (fmt_ctx_out)
-        avformat_free_context(fmt_ctx_out);
     if (dic)
         av_free(dic);
     if (io_ctx)
         avio_close(io_ctx);
     if (swr_ctx)
         swr_free(&swr_ctx);
+    if (fmt_ctx_out)
+        avformat_free_context(fmt_ctx_out);
     if (cdc_ctx_out)
         avcodec_close(cdc_ctx_out);
 }
@@ -69,7 +69,12 @@ void Parser::CreateContext()
     {
         error = avio_open(&io_ctx, fileName.c_str(), AVIO_FLAG_WRITE);
         if (error < 0)
+        {
+            char error_buffer[255];
+            av_strerror(error, error_buffer, sizeof(error_buffer));
+            BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Error: " << error_buffer << ANSI_COLOR_RESET;
             throw ConvertException() << errno_code(MIR_ERR_OPEN_OUTPUT_FILE);
+        }
     }
 
     fmt_ctx_out->pb = io_ctx;
@@ -132,17 +137,6 @@ void Parser::setStream()
 
     cdc_out = codec;
 
-/**
-    av_log(NULL,AV_LOG_ERROR,"\nCodec de saida   : %s\n",cdc_out->name);
-    av_log(NULL,AV_LOG_ERROR,"CodecID          : %d\n",cdc_ctx_out->codec_id);
-    av_log(NULL,AV_LOG_ERROR,"Channels         : %d\n",cdc_ctx_out->channels);
-    av_log(NULL,AV_LOG_ERROR,"Channel Layout   : %d\n",cdc_ctx_out->channel_layout);
-    av_log(NULL,AV_LOG_ERROR,"Sample rate      : %d\n",cdc_ctx_out->sample_rate);
-    av_log(NULL,AV_LOG_ERROR,"Bit rate         : %d\n",cdc_ctx_out->bit_rate);
-    av_log(NULL,AV_LOG_ERROR,"Sample format    : %d\n",cdc_ctx_out->sample_fmt);
-    av_log(NULL,AV_LOG_ERROR,"frame size       : %d\n",cdc_ctx_out->frame_size);
-/**/
-
     if (audioFormat == AUDIOFORMAT::arq)
     {
         fmt_ctx_out->oformat->flags |= AVFMT_ALLOW_FLUSH;
@@ -184,7 +178,6 @@ void Parser::InitResampler()
 
 void Parser::Resample()
 {
-    uint8_t* dataIn;
     int got_frame;
 
     frame_out = av_frame_alloc();
@@ -211,15 +204,14 @@ void Parser::Resample()
     if (av_frame_get_buffer(frame_in, 1) < 0)
         throw BadAllocException() << errno_code(MIR_ERR_BUFFER_ALLOC);
 
-    for (int idxFrame = 0; idxFrame < this->bufFrames.size(); idxFrame++)
+    for (int idxFrame = 0; idxFrame < (int)this->bufFrames.size(); idxFrame++)
     {
         boost::this_thread::sleep(boost::posix_time::milliseconds(1));
-        int data_present = 0;
 
         vector<vector<uint8_t>> aux = bufFrames[idxFrame];
-        for (int i = 0; i < aux.size(); i++)
+        for (int i = 0; i < (int)aux.size(); i++)
             memcpy(frame_in->data[i], aux[i].data(), szChannel);
-        for (int i = 0; i < aux.size(); i++)
+        for (int i = 0; i < (int)aux.size(); i++)
             aux[i].clear();
         aux.clear();
 
@@ -237,16 +229,15 @@ void Parser::Resample()
                 throw FFMpegException() << errno_code(MIR_ERR_ENCODE);
 
             av_free_packet(&pkt_out);
+//            av_frame_unref(frame_out);
         }
         else
             throw FFMpegException() << errno_code(MIR_ERR_RESAMPLE);
-
-        delete[] dataIn;
     }
 
-    for (int idxFrame = 0; idxFrame < this->bufFrames.size(); idxFrame++)
+    for (int idxFrame = 0; idxFrame < (int)this->bufFrames.size(); idxFrame++)
     {
-        for (int i = 0; i < bufFrames[idxFrame].size(); i++)
+        for (int i = 0; i < (int)bufFrames[idxFrame].size(); i++)
             bufFrames[idxFrame][i].clear();
         bufFrames[idxFrame].clear();
     }
