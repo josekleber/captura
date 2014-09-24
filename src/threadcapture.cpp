@@ -2,11 +2,12 @@
 
 using namespace std;
 
-ThreadCapture::ThreadCapture(int mrOn, string ipRecognition, string portRecognition,
+ThreadCapture::ThreadCapture(int mrOn, bool svFP, string ipRecognition, string portRecognition,
                       string sqlConnString, int idThread, string uriRadio,
                       vector<Filter> *Filters, string cutFolder)
 {
     this->mrOn = mrOn;
+    this->svFP = svFP;
     this->ipRecognition = ipRecognition;
     this->portRecognition = portRecognition;
     this->sqlConnString = sqlConnString;
@@ -39,7 +40,7 @@ void ThreadCapture::thrRun()
 {
     while (!stopThread)
     {
-        while (objRadio == NULL)
+        do
         {
             try
             {
@@ -61,24 +62,19 @@ void ThreadCapture::thrRun()
                 objRadio = NULL;
                 boost::this_thread::sleep(boost::posix_time::seconds(30));
             }
-        }
+        } while (objRadio == NULL);
 /**/
         try
         {
-            objSlice = new SliceProcess(mrOn, ipRecognition, portRecognition, sqlConnString,
+            objSlice = new SliceProcess(mrOn, svFP, ipRecognition, portRecognition, sqlConnString,
                                         cutFolder, idThread, Filters, objRadio);
-/**
-printf("preparando para iniciar\n");
-boost::this_thread::sleep(boost::posix_time::seconds(10));
-printf("mais 10 segundos\n");
-boost::this_thread::sleep(boost::posix_time::seconds(10));
-/**/
+
             objThreadRadio = new boost::thread(boost::bind(&StreamRadio::read, objRadio));
-            boost::this_thread::sleep(boost::posix_time::microseconds(500));
-            while (objRadio->getQueueSize() == 0)
+
+            do
             {
                 boost::this_thread::sleep(boost::posix_time::microseconds(500));
-            }
+            } while (objRadio->getQueueSize() == 0);
 
             objThreadProcessa = new boost::thread(boost::bind(&SliceProcess::thrProcessa, objSlice));
 

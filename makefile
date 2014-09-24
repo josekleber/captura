@@ -16,7 +16,7 @@ CFLAGS_G = -std=c++11 -Wall -fexceptions -DBOOST_LOG_DYN_LINK
 RESINC_G = 
 DEP_G = 
 LIBDIR_G = 
-LIB_G = /usr/local/lib/libavcodec.so /usr/local/lib/libavdevice.so /usr/local/lib/libavfilter.so /usr/local/lib/libavformat.so /usr/local/lib/libavutil.so /usr/local/lib/libswresample.so /usr/local/lib/libswscale.so /usr/local/lib/libboost_system.so /usr/local/lib/libboost_thread.so /usr/local/lib/libboost_filesystem.so /usr/local/lib/libboost_date_time.so /usr/local/lib/libboost_timer.so /usr/local/lib/libboost_log.so /usr/local/lib/libboost_log-mt.so /usr/local/lib/mir/libSkyLibs.so
+LIB_G = /usr/local/lib/libavcodec.so /usr/local/lib/libavdevice.so /usr/local/lib/libavfilter.so /usr/local/lib/libavformat.so /usr/local/lib/libavutil.so /usr/local/lib/libswresample.so /usr/local/lib/libswscale.so /usr/local/lib/libboost_system.so /usr/local/lib/libboost_thread.so /usr/local/lib/libboost_filesystem.so /usr/local/lib/libboost_date_time.so /usr/local/lib/libboost_timer.so /usr/local/lib/libboost_log.so /usr/local/lib/mir/libSkyLibs.so
 LDFLAGS_G = -lz -lm -lpthread -lmp3lame -lx264 -lvorbis -lfdk-aac -lfaac -lodbc
 
 debug: INC = $(INC_G)

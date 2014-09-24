@@ -241,11 +241,11 @@ void StreamRadio::readFrame()
     }
     catch(BadAllocException)
     {
-        throw;
+        throw FifoException() << errno_code(MIR_ERR_NOT_HAVE_FIFO_OBJECT);
     }
     catch(...)
     {
-        throw GeneralException() << errno_code(MIR_DES_STMRADIO_1);
+        throw FifoException() << errno_code(MIR_ERR_NOT_HAVE_FIFO_OBJECT);
     }
 
 int njn = 0;
@@ -339,15 +339,24 @@ void StreamRadio::decodeAudioFrame(int *haveData, int *finished, AVPacket *input
 
 vector<vector<uint8_t>> StreamRadio::getQueueData()
 {
-    return objQueue->getQueueData();
+    if (objQueue)
+        return objQueue->getQueueData();
+    else
+        throw FifoException() << errno_code(MIR_ERR_NOT_HAVE_FIFO_OBJECT);
 }
 
 int StreamRadio::getQueueSize()
 {
-    return objQueue->getQueueSize();
+    if (objQueue)
+        return objQueue->getQueueSize();
+    else
+        return 0;
 }
 
 int StreamRadio::getChannelSize()
 {
-    return objQueue->getChannelSize();
+    if (objQueue)
+        return objQueue->getChannelSize();
+    else
+        throw FifoException() << errno_code(MIR_ERR_NOT_HAVE_FIFO_OBJECT);
 }

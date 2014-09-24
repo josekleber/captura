@@ -20,7 +20,7 @@ class SliceProcess
             RUN,
             ERROR
         };
-        SliceProcess(int mrOn, string ipRecognition, string portRecognition, string sqlConnString,
+        SliceProcess(int mrOn, bool svFP, string ipRecognition, string portRecognition, string sqlConnString,
                      string cutFolder, int idRadio, vector<Filter> *Filters, StreamRadio* objRadio);
         virtual ~SliceProcess();
 
@@ -31,6 +31,7 @@ class SliceProcess
         bool stopThread;
 
         int mrOn;
+        bool svFP;
         string ipRecognition;
         string portRecognition;
         string sqlConnString;

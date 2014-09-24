@@ -12,6 +12,7 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
+					<Add option="-g" />
 					<Add directory="include" />
 				</Compiler>
 			</Target>
@@ -31,7 +32,7 @@
 		</Build>
 		<Compiler>
 			<Add option="-std=c++11" />
-			<Add option="-Wall" />
+			<Add option="-w" />
 			<Add option="-fexceptions" />
 			<Add option="-DBOOST_LOG_DYN_LINK" />
 			<Add directory="include" />
@@ -60,10 +61,11 @@
 			<Add library="/usr/local/lib/libboost_timer.so" />
 			<Add library="/usr/local/lib/libboost_log.so" />
 			<Add library="/usr/local/lib/mir/libSkyLibs.so" />
-			<Add library="/usr/local/lib/libboost*.so" />
 			<Add directory="/usr/local/lib" />
 		</Linker>
-		<Unit filename="config.ini" />
+		<Unit filename="config.ini">
+			<Option target="Release" />
+		</Unit>
 		<Unit filename="include/configuration.h" />
 		<Unit filename="include/database.h" />
 		<Unit filename="include/exceptionmir.h" />
@@ -80,7 +82,9 @@
 		<Unit filename="include/threadpool.h" />
 		<Unit filename="include/util.h" />
 		<Unit filename="include/version.h" />
-		<Unit filename="makefile" />
+		<Unit filename="makefile">
+			<Option target="Release" />
+		</Unit>
 		<Unit filename="src/configuration.cpp" />
 		<Unit filename="src/database.cpp" />
 		<Unit filename="src/filedata.cpp" />

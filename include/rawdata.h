@@ -15,7 +15,7 @@ class RAWData : public Parser
         /** Default constructor */
         RAWData(string fileName, uint64_t channelLayoutIn, int sampleRateIn, int bitRateIn,
                 AVSampleFormat sampleFormatIn, int nbSamplesIn, int nbChannelIn,
-                vector<Filter> *Filters, int mrOn, string ipRecognition, string portRecognition,
+                vector<Filter> *Filters, int mrOn, bool svFP, string ipRecognition, string portRecognition,
                 int32_t idRadio, int32_t idSlice);
         /** Default destructor */
         virtual ~RAWData();
@@ -31,6 +31,8 @@ class RAWData : public Parser
         int32_t freq;
         int32_t idRadio;
         int32_t idSlice;
+
+        bool svFP;
 
         // vetor para armazenar os dados para obter o fingerprint
         vector <uint8_t> binOutput;

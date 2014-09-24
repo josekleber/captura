@@ -79,6 +79,11 @@ struct FFMpegException : virtual BaseException {};
 */
 struct OpenFileException : virtual BaseException{};
 
+/** \brief
+* Erro de abertura de arquivo
+*/
+struct FifoException : virtual BaseException{};
+
 /** @brief Enumerodor com as exceções dos processos MIR (AudioMonitor) */
 enum MIR_EXCEPTION
 {
@@ -115,6 +120,9 @@ enum MIR_EXCEPTION
     MIR_ERR_ENCODE                  = -12020,
     MIR_ERR_RAW_VECTOR_ALLOC        = -12021,
     MIR_ERR_CREATE_PATH             = -12022,
+
+    // FIFO
+    MIR_ERR_NOT_HAVE_FIFO_OBJECT    = -13001,
 
     // MIR_ERR_
 

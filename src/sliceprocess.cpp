@@ -1,9 +1,10 @@
 #include "sliceprocess.h"
 
-SliceProcess::SliceProcess(int mrOn, string ipRecognition, string portRecognition, string sqlConnString,
+SliceProcess::SliceProcess(int mrOn, bool svFP, string ipRecognition, string portRecognition, string sqlConnString,
                            string cutFolder, int idRadio, vector<Filter> *Filters, StreamRadio* objRadio)
 {
     this->mrOn = mrOn;
+    this->svFP = svFP;
     this->ipRecognition = ipRecognition;
     this->portRecognition = portRecognition;
     this->sqlConnString = sqlConnString;
@@ -98,7 +99,7 @@ void SliceProcess::thrProcessa()
                         objRawData = new RAWData(arqName + ".wav", cdc_ctx_in->channel_layout,
                                                  cdc_ctx_in->sample_rate, cdc_ctx_in->bit_rate,
                                                  cdc_ctx_in->sample_fmt, szFrame, cdc_ctx_in->channels,
-                                                 Filters, mrOn, ipRecognition, portRecognition, idRadio, idSlice);
+                                                 Filters, mrOn, svFP, ipRecognition, portRecognition, idRadio, idSlice);
                         objRawData->setBuffer(Packets, objRadio->getChannelSize());
                         objThreadRawParser = new boost::thread(boost::bind(&RAWData::Execute, objRawData));
                     }

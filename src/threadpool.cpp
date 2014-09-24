@@ -2,10 +2,11 @@
 
 using namespace std;
 
-ThreadPool::ThreadPool(int mrOn, string ipRecognition, string portRecognition,
+ThreadPool::ThreadPool(int mrOn, bool svFP, string ipRecognition, string portRecognition,
                    string sqlConnString, string cutFolder, vector<Filter> *Filters)
 {
         this->mrOn = mrOn;
+        this->svFP = svFP;
         this->ipRecognition = ipRecognition;
         this->portRecognition = portRecognition;
 
@@ -32,7 +33,7 @@ void ThreadPool::addThreads(string uriRadio, int idRadio)
         objThreadControl->idThread = idRadio;
         objThreadControl->uriRadio = uriRadio;
 
-        objThreadControl->objCapture = new ThreadCapture(mrOn, ipRecognition, portRecognition,
+        objThreadControl->objCapture = new ThreadCapture(mrOn, svFP, ipRecognition, portRecognition,
                                                          sqlConnString, idRadio, uriRadio,
                                                          Filters, cutFolder);
     }
