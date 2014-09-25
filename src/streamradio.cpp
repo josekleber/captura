@@ -141,66 +141,6 @@ void StreamRadio::setStreamType()
 
     this->channelLayout = codecContext->channel_layout;
 
-    // vetor com a quantidade de streams da conexão
-    streamType = new StreamType[formatContext->nb_streams];
-
-    for (unsigned int index = 0; index < formatContext->nb_streams; index++)
-    {
-        streamType[index].id = index;
-        streamType[index].streamType = formatContext->streams[index]->codec->codec_type;
-
-        // mesmo que haja mais de um stream de audio, neste momento, considero apenas o primeiro.
-        if (!(stream))
-        {
-            if (streamType[index].streamType == AVMEDIA_TYPE_AUDIO)
-            {
-                stream = formatContext->streams[index];
-
-                if (stream->codec->codec_id == AV_CODEC_ID_WMAPRO)
-                    codec = avcodec_find_decoder(AV_CODEC_ID_AAC);
-                else
-                    codec = avcodec_find_decoder(stream->codec->codec_id);
-
-                BOOST_LOG_TRIVIAL(info) << "Codec de entrada " << codec->name;
-
-                codecContext = avcodec_alloc_context3(codec);
-                codecContext = stream->codec;
-
-                if (avcodec_open2(codecContext,codec,NULL) < 0)
-                {
-                    BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Erro de alocação de contexto " << codec->name;
-                    throw BadAllocException() << errno_code(MIR_ERR_BADALLOC_CONTEXT);
-                }
-
-                if (codecContext->bit_rate == 0)
-                {
-                    BOOST_LOG_TRIVIAL(info) << "VBR detectado.";
-                    isVBR = true;
-                }
-                else
-                    bitRate = codecContext->bit_rate;
-
-                if ((codecContext->codec == NULL))
-                {
-                    BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Codec não suportado.";
-                    throw CodecNotSupportedException() <<errno_code(MIR_ERR_CODEC_NOT_SUPPORTED);
-                }
-            }
-            else if (formatContext->streams[index]->codec->coder_type == AVMEDIA_TYPE_ATTACHMENT)
-                BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_CYAN "Media type : AVMEDIA_TYPE_ATTACHMENT";
-            else if (formatContext->streams[index]->codec->coder_type == AVMEDIA_TYPE_DATA)
-                BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_CYAN "Media type : AVMEDIA_TYPE_DATA";
-            else if (formatContext->streams[index]->codec->coder_type == AVMEDIA_TYPE_NB)
-                BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_CYAN "Media type : AVMEDIA_TYPE_NB";
-            else if (formatContext->streams[index]->codec->coder_type == AVMEDIA_TYPE_SUBTITLE)
-                BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_CYAN "Media type : AVMEDIA_TYPE_SUBTITLE";
-            else if (formatContext->streams[index]->codec->coder_type == AVMEDIA_TYPE_VIDEO)
-                BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_CYAN "Media type : AVMEDIA_TYPE_VIDEO";
-            else
-                BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_CYAN "Media type : AVMEDIA_TYPE_UNKNOW";
-        }
-    }
-
     // se chegar aqui e não tiver o stream é sinal de que não existe na conexão o AVMEDIA_TYPE_AUDIO
     // neste caso lanço a exceção
     if (!(stream))
@@ -274,11 +214,11 @@ void StreamRadio::readFrame()
     }
     catch(BadAllocException)
     {
-        throw FifoException() << errno_code(MIR_ERR_NOT_HAVE_FIFO_OBJECT);
+        throw;
     }
     catch(...)
     {
-        throw FifoException() << errno_code(MIR_ERR_NOT_HAVE_FIFO_OBJECT);
+        throw GeneralException() << errno_code(MIR_DES_STMRADIO_1);
     }
 
 int njn = 0;
@@ -372,24 +312,15 @@ void StreamRadio::decodeAudioFrame(int *haveData, int *finished, AVPacket *input
 
 vector<vector<uint8_t>> StreamRadio::getQueueData()
 {
-    if (objQueue)
-        return objQueue->getQueueData();
-    else
-        throw FifoException() << errno_code(MIR_ERR_NOT_HAVE_FIFO_OBJECT);
+    return objQueue->getQueueData();
 }
 
 int StreamRadio::getQueueSize()
 {
-    if (objQueue)
-        return objQueue->getQueueSize();
-    else
-        return 0;
+    return objQueue->getQueueSize();
 }
 
 int StreamRadio::getChannelSize()
 {
-    if (objQueue)
-        return objQueue->getChannelSize();
-    else
-        throw FifoException() << errno_code(MIR_ERR_NOT_HAVE_FIFO_OBJECT);
+    return objQueue->getChannelSize();
 }
