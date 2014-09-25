@@ -3,6 +3,7 @@
 *.lo
 *.o
 *.obj
+*~
 
 # Compiled Dynamic libraries
 *.so
@@ -24,3 +25,9 @@
 /.gitignore
 /captura.depend
 /captura.layout
+bin/Debug/captura
+bin/Release/captura
+
+# Others files
+valgrind/valgrind.cfg
+

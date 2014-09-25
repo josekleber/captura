@@ -2,7 +2,7 @@
 
 RAWData::RAWData(string fileName, uint64_t channelLayoutIn, int sampleRateIn, int bitRateIn,
                  AVSampleFormat sampleFormatIn, int nbSamplesIn, int nbChannelIn,
-                 vector<Filter> *Filters, int mrOn, string ipRecognition, string portRecognition,
+                 vector<Filter> *Filters, int mrOn, bool svFP, string ipRecognition, string portRecognition,
                  int32_t idRadio, int32_t idSlice) :
                      Parser (fileName, channelLayoutIn, sampleRateIn, bitRateIn,
                              sampleFormatIn, nbSamplesIn, nbChannelIn)
@@ -16,6 +16,7 @@ RAWData::RAWData(string fileName, uint64_t channelLayoutIn, int sampleRateIn, in
     this->Filters = Filters;
 
     this->mrOn = mrOn;
+    this->svFP = svFP;
     this->ipRecognition = ipRecognition;
     this->portRecognition = portRecognition;
 
@@ -132,6 +133,30 @@ start = clock();
             }
 
             delete[] bits;
+
+            try
+            {
+                if (svFP)
+                {
+                    int p = fileName.find_last_of("/") + 1;
+                    string aux = fileName.substr(0, p) + "FingerPrint";
+                    boost::filesystem::path dirPath(aux);
+
+                    if (!boost::filesystem::exists(dirPath))
+                    {
+                        boost::filesystem::create_directories(dirPath);
+                    }
+                    aux += "/" + fileName.substr(p , fileName.find_last_of(".") - p) + ".bin";
+
+                    FILE* fp = fopen(aux.c_str(), "wb");
+                    fwrite(buff, 1, pos, fp);
+                    fclose(fp);
+                }
+            }
+            catch(...)
+            {
+                    cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>> ERRO" << endl;
+            }
 
             try
             {

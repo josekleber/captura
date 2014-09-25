@@ -329,7 +329,7 @@ return 0;
         return -1;
     }
 
-    ThreadPool* objThreadPool = new ThreadPool(config->mrOn, config->mrIP, config->mrPort,
+    ThreadPool* objThreadPool = new ThreadPool(config->mrOn, config->svFP, config->mrIP, config->mrPort,
                                                config->ConnectionStringMySQL, config->cutFolder,
                                                &Filters);
 

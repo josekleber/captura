@@ -20,7 +20,7 @@ using namespace std;
 class ThreadCapture
 {
     public:
-        ThreadCapture(int mrOn, string ipRecognition, string portRecognition,
+        ThreadCapture(int mrOn, bool svFP, string ipRecognition, string portRecognition,
                       string sqlConnString, int idThread, string uriRadio,
                       vector<Filter> *Filters, string cutFolder);
         virtual ~ThreadCapture();
@@ -31,6 +31,7 @@ class ThreadCapture
     protected:
     private:
         int mrOn;
+        bool svFP;
         string ipRecognition;
         string portRecognition;
         string sqlConnString;

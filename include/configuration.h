@@ -23,6 +23,7 @@ class Configuration
         int UpdateTimer;
 
         int mrOn;
+        bool svFP;
         std::string mrIP;
         std::string mrPort;
 

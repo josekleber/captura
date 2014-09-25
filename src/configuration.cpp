@@ -25,8 +25,11 @@ Configuration::Configuration()
     UpdateTimer = pt.get<int>("Settings.UpdateTimer");
     BOOST_LOG_TRIVIAL(debug) << "Settings.UpdateTimer-> " << UpdateTimer;
 
+    svFP = pt.get<bool>("FingerPrint.Save");
+    BOOST_LOG_TRIVIAL(debug) << "FingerPrint.Save-> " << (svFP ? "On" : "Off");
+
     mrOn = pt.get<int>("MRServer.On");
-    BOOST_LOG_TRIVIAL(debug) << "MRServer.On-> " << mrOn;
+    BOOST_LOG_TRIVIAL(debug) << "MRServer-> " << ((mrOn == 1) ? "On" : "Off");
 
     mrIP = pt.get<std::string>("MRServer.IP");
     BOOST_LOG_TRIVIAL(debug) << "MRServer.IP-> " << mrIP.c_str();
