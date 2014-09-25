@@ -91,11 +91,11 @@ void SliceProcess::thrProcessa()
                     {
                         throw;
                     }
-
+/**/
                     // processamento para fingerprint
                     try
                     {
-                        objRawData = new RAWData(arqName + ".wav", cdc_ctx_in->channel_layout,
+                        objRawData = new RAWData(arqName + ".wav", objRadio->getChannelLayout(),
                                                  cdc_ctx_in->sample_rate, cdc_ctx_in->bit_rate,
                                                  cdc_ctx_in->sample_fmt, szFrame, cdc_ctx_in->channels,
                                                  Filters, mrOn, ipRecognition, portRecognition, idRadio, idSlice);
@@ -107,12 +107,13 @@ void SliceProcess::thrProcessa()
                         BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "catch do rawdata" ANSI_COLOR_RESET;
                         throw;
                     }
+/**/
 
 /**/
                     // processamento para arquivo
                     try
                     {
-                        objFileData = new FileData(arqName + ".mp3", cdc_ctx_in->channel_layout,
+                        objFileData = new FileData(arqName + ".mp3", objRadio->getChannelLayout(),
                                                  cdc_ctx_in->sample_rate, cdc_ctx_in->bit_rate,
                                                  cdc_ctx_in->sample_fmt, szFrame, cdc_ctx_in->channels);
                         objFileData->setBuffer(Packets, objRadio->getChannelSize());

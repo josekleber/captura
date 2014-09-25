@@ -39,7 +39,7 @@ void ThreadCapture::thrRun()
 {
     while (!stopThread)
     {
-        while (objRadio == NULL)
+        do
         {
             try
             {
@@ -61,7 +61,7 @@ void ThreadCapture::thrRun()
                 objRadio = NULL;
                 boost::this_thread::sleep(boost::posix_time::seconds(30));
             }
-        }
+        } while (objRadio == NULL);
 /**/
         try
         {
@@ -75,11 +75,14 @@ boost::this_thread::sleep(boost::posix_time::seconds(10));
 /**/
             objThreadRadio = new boost::thread(boost::bind(&StreamRadio::read, objRadio));
             boost::this_thread::sleep(boost::posix_time::microseconds(500));
+
+            cout << "aqui JK 1" << endl;
             while (objRadio->getQueueSize() == 0)
             {
                 boost::this_thread::sleep(boost::posix_time::microseconds(500));
             }
 
+            cout << "aqui JK 2" << endl;
             objThreadProcessa = new boost::thread(boost::bind(&SliceProcess::thrProcessa, objSlice));
 
             while (!stopThread)

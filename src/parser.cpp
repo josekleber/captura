@@ -153,7 +153,7 @@ void Parser::InitResampler()
                                  av_get_default_channel_layout(cdc_ctx_out->channels),
                                  cdc_ctx_out->sample_fmt,
                                  cdc_ctx_out->sample_rate,
-                                 av_get_default_channel_layout(nbChannelIn),
+                                 channelLayoutIn,
                                  sampleFormatIn,
                                  sampleRateIn,
                                  0,0);

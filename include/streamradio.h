@@ -110,7 +110,7 @@ public:
     *
     * \exception ConnectionClosedException
     */
-    StreamType * getStreamType();
+    __attribute__((deprecated)) StreamType * getStreamType();
 
     /** \brief
     * Retorna o AVCodecContext do stream de audio
@@ -138,6 +138,11 @@ public:
     */
     AVDictionary * getListOptions();
 
+    /** \brief
+    * Devido a um BUG no decode da entrada AAC temos de manter o ChannelLayout da entrada antes de chamar o decode.
+    */
+    int getChannelLayout();
+
     int getQueueSize();
     int getChannelSize();
     vector<vector<uint8_t>> getQueueData();
@@ -153,11 +158,14 @@ private:
 
     clock_t timer;
     EnumStatusConnect statusConnection;
-    StreamType * streamType;
+    __attribute__((deprecated)) StreamType * streamType;
     bool isExit;
     int bitRate; // contém o valor do bitrate de entrada
     bool isVBR; // true se for Variable BitRate
     Queue* objQueue;
+    int streamIndex; // contém o indice do stream de aúdio localizado av_find_best_stream.
+    string uri; // URL ou arquivo de entrada de dados.
+    int channelLayout; // fix bug de entrada AAC, onde ao chamar o decode ele modifica o layout do channel de entrada.
 
     /** \brief
     * Define os streams existentes numa conexão
@@ -172,10 +180,8 @@ private:
     * será utilizado o TCP como protocolo
     * de comunicação.
     *
-    *
-    * \param uri - url do stream.
     */
-    void rtspDetect(string uri);
+    void rtspDetect();
 
     /**\brief
     * Lê os frames da conexão e armazena no FIFO.

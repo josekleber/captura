@@ -18,7 +18,7 @@ void Logger::debug(std::string msg)
 
 void Logger::Teste()
 {
-/**/
+/**
     logging::add_file_log
     (
         keywords::file_name = "a2_%N.log",

@@ -1,7 +1,5 @@
 #include "streamradio.h"
 
-// pequeno teste do versionamento
-
 StreamRadio::StreamRadio()
 {
     // zera o timer
@@ -73,19 +71,12 @@ AVFormatContext* StreamRadio::open(string uri)
     addOptions("threads","0");
 
     // força RTSP usar TCP
-    rtspDetect(uri);
+    rtspDetect();
 
     // abre a conexão
     if ((ret=avformat_open_input(&formatContext,uri.c_str(),NULL,&dictionary))< 0)
     {
         BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Erro de conexão com o stream " << uri.c_str();
-        statusConnection = MIR_CONNECTION_ERROR;
-        throw OpenConnectionException() <<errno_code(MIR_ERR_STREAM_CONNECTION);
-    }
-    // pega informações do stream
-    if ((ret=avformat_find_stream_info(formatContext,NULL)) < 0)
-    {
-        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Erro ao tentar pegar informações dos streams de entrada: " << uri.c_str();
         statusConnection = MIR_CONNECTION_ERROR;
         throw OpenConnectionException() <<errno_code(MIR_ERR_STREAM_CONNECTION);
     }
@@ -113,6 +104,42 @@ void StreamRadio::setStreamType()
 {
     if ((statusConnection != MIR_CONNECTION_OPEN))
         throw ConnectionClosedException() <<errno_code(MIR_ERR_CONNECTION_CLOSED);
+
+    // pega informações do stream
+    if (avformat_find_stream_info(formatContext,NULL) < 0)
+    {
+        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Erro ao tentar pegar informações dos streams de entrada: " << uri.c_str();
+        statusConnection = MIR_CONNECTION_ERROR;
+        throw OpenConnectionException() <<errno_code(MIR_ERR_STREAM_CONNECTION);
+    }
+
+    av_dump_format(formatContext,0,this->uri.c_str(),0);
+
+    // recupera o melhor stream para os valores passados
+    streamIndex = av_find_best_stream(formatContext, AVMEDIA_TYPE_AUDIO, -1, -1, &codec, 0);
+
+    if (streamIndex == AVERROR_STREAM_NOT_FOUND)
+    {
+        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Não há stream de áudio na conexão. Stream usado" ANSI_COLOR_RESET << this->uri.c_str();
+        throw MediaTypeNoAudioException() << errno_code(MIR_ERR_MEDIA_TYPE_NO_AUDIO);
+    }
+    else if (streamIndex == AVERROR_DECODER_NOT_FOUND)
+    {
+        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Codec não suportado.";
+        throw CodecNotSupportedException() <<errno_code(MIR_ERR_CODEC_NOT_SUPPORTED);
+    }
+
+    stream = formatContext->streams[streamIndex];
+    codecContext = avcodec_alloc_context3(codec);
+    codecContext = stream->codec;
+
+    if (avcodec_open2(codecContext,codec,NULL) < 0)
+    {
+        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Erro de alocação de contexto " << codec->name;
+        throw BadAllocException() << errno_code(MIR_ERR_BADALLOC_CONTEXT);
+    }
+
+    this->channelLayout = codecContext->channel_layout;
 
     // vetor com a quantidade de streams da conexão
     streamType = new StreamType[formatContext->nb_streams];
@@ -185,6 +212,11 @@ void StreamRadio::setStreamType()
 
 }
 
+int StreamRadio::getChannelLayout()
+{
+    return channelLayout;
+}
+
 void StreamRadio::addOptions(string key, string value)
 {
     ///TODO: adicionar o controle de FLAGS. falta estudo de sua aplicação
@@ -214,9 +246,9 @@ AVStream * StreamRadio::getStream()
     return stream;
 }
 
-void StreamRadio::rtspDetect(string uri)
+void StreamRadio::rtspDetect()
 {
-    int pos = uri.find("rtsp://",0);
+    int pos = this->uri.find("rtsp://",0);
 
     if ((pos >= 0))
     {
