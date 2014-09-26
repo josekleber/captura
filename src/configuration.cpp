@@ -10,8 +10,8 @@ Configuration::Configuration()
     FilterArqName = pt.get<std::string>("Filters.FileName");
     BOOST_LOG_TRIVIAL(debug) << "Filters.FileName->" << FilterArqName.c_str();
 
-    ConnectionStringSQL = pt.get<std::string>("Database.ConnectionStringSQL");
-    BOOST_LOG_TRIVIAL(debug) << "Database.ConnectionStringSQL-> " << ConnectionStringSQL.c_str();
+    ConnectionStringSQLProducao = pt.get<std::string>("Database.ConnectionStringSQLProducao");
+    BOOST_LOG_TRIVIAL(debug) << "Database.ConnectionStringSQL-> " << ConnectionStringSQLProducao.c_str();
 
     ConnectionStringMySQL = pt.get<std::string>("Database.ConnectionStringMYSQL");
     BOOST_LOG_TRIVIAL(debug) << "Database.ConnectionStringMYSQL-> " << ConnectionStringMySQL.c_str();

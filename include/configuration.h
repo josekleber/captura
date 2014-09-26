@@ -15,7 +15,7 @@ class Configuration
         Configuration();
 
         std::string FilterArqName;
-        std::string ConnectionStringSQL;
+        std::string ConnectionStringSQLProducao;
         std::string ConnectionStringMySQL;
         std::string Listener;
         std::string StreamList;
