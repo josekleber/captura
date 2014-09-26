@@ -16,11 +16,22 @@ Queue::~Queue()
 
 int Queue::getQueueSize()
 {
-    int ret;
-    mtx_.lock();
-    ret = queueData.size() * FrameSize;
-    mtx_.unlock();
-    return ret;
+    //boost::lock_guard<boost::mutex> guard(mtx_);
+    while (mtx)
+        boost::this_thread::sleep(boost::posix_time::milliseconds(10));
+    mtx = true;
+    try
+    {
+        int ret;
+        ret = queueData.size() * FrameSize;
+        mtx = false;
+        return ret;
+    }
+    catch(...)
+    {
+        mtx = false;
+        throw FifoException() << errno_code(MIR_ERR_FIFO_SIZE);
+    }
 }
 
 void Queue::addQueueData(uint8_t **inputSamples, const int frameSize)
@@ -29,47 +40,60 @@ void Queue::addQueueData(uint8_t **inputSamples, const int frameSize)
      * Make the FIFO as large as it needs to be to hold both,
      * the old and the new samples.
      */
-    mtx_.lock();
-
-    vector<vector <uint8_t>> buf1;
-    for (int numBuf = 0; numBuf < nbBuffers; numBuf++)
+//    boost::lock_guard<boost::mutex> guard(mtx_);
+    while (mtx)
+        boost::this_thread::sleep(boost::posix_time::milliseconds(10));
+    mtx = true;
+    try
     {
-        vector <uint8_t> buf2;
-        for (int data = 0; data < frameSize; data++)
-            for (int qntByte = 0; qntByte < bufSize; qntByte++)
-                buf2.push_back(inputSamples[numBuf][data * bufSize + qntByte]);
-        buf1.push_back(buf2);
+        vector<vector <uint8_t>> buf1;
+        for (int numBuf = 0; numBuf < nbBuffers; numBuf++)
+        {
+            vector <uint8_t> buf2;
+            for (int data = 0; data < frameSize; data++)
+                for (int qntByte = 0; qntByte < bufSize; qntByte++)
+                    buf2.push_back(inputSamples[numBuf][data * bufSize + qntByte]);
+            buf1.push_back(buf2);
+        }
+
+        queueData.push(buf1);
+
+        for (int numBuf = 0; numBuf < nbBuffers; numBuf++)
+            buf1[numBuf].clear();
+        buf1.clear();
+        mtx = false;
     }
-
-    queueData.push(buf1);
-
-    for (int numBuf = 0; numBuf < nbBuffers; numBuf++)
-        buf1[numBuf].clear();
-    buf1.clear();
-
-    mtx_.unlock();
+    catch(...)
+    {
+        mtx = false;
+        throw FifoException() << errno_code(MIR_ERR_FIFO_ADD);
+    }
 }
 
-//int Queue::getQueueData(uint8_t **dest, int nbSamples)
 vector<vector<uint8_t>> Queue::getQueueData()
 {
     vector<vector<uint8_t>> ret;
-    mtx_.lock();
-    if (queueData.size() > 0)
+//    boost::lock_guard<boost::mutex> guard(mtx_);
+    while (mtx)
+        boost::this_thread::sleep(boost::posix_time::milliseconds(10));
+    mtx = true;
+    try
     {
-        ret = queueData.front();
-//        vector <vector <uint8_t>> buf1 = queueData.front();
-        queueData.pop();
-//        ret = buf1.size();
-//        for (int numBuf = 0; numBuf < nbBuffers; numBuf++)
-//            memcpy(dest[numBuf], buf1[numBuf].data(), nbSamples * bufSize);
-//        for (int numBuf = 0; numBuf < nbBuffers; numBuf++)
-//            buf1[numBuf].clear();
-//        buf1.clear();
-    }
-    mtx_.unlock();
+        if (queueData.size() > 0)
+        {
+            ret = queueData.front();
 
-    return ret;
+            queueData.pop();
+        }
+
+        mtx = false;
+        return ret;
+    }
+    catch(...)
+    {
+        mtx = false;
+        throw FifoException() << errno_code(MIR_ERR_FIFO_GET);
+    }
 }
 
 int Queue::getChannelSize()

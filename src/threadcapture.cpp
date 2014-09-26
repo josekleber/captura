@@ -2,6 +2,12 @@
 
 using namespace std;
 
+ThreadCapture::ThreadCapture()
+{
+    status = 0;
+    stopThread = false;
+}
+
 ThreadCapture::ThreadCapture(int mrOn, bool svFP, string ipRecognition, string portRecognition,
                       string sqlConnString, int idThread, string uriRadio,
                       vector<Filter> *Filters, string cutFolder)
@@ -16,7 +22,6 @@ ThreadCapture::ThreadCapture(int mrOn, bool svFP, string ipRecognition, string p
     this->uriRadio = uriRadio;
     this->Filters = Filters;
     this->cutFolder = cutFolder;
-
 
     status = 0;
     stopThread = false;
@@ -63,12 +68,26 @@ void ThreadCapture::thrRun()
                 boost::this_thread::sleep(boost::posix_time::seconds(30));
             }
         } while (objRadio == NULL);
-/**/
+
         try
         {
+/**
             objSlice = new SliceProcess(mrOn, svFP, ipRecognition, portRecognition, sqlConnString,
                                         cutFolder, idThread, Filters, objRadio);
+/**/
+            objSlice = new SliceProcess();
 
+            objSlice->mrOn = mrOn;
+            objSlice->svFP = svFP;
+            objSlice->ipRecognition = ipRecognition;
+            objSlice->portRecognition = portRecognition;
+            objSlice->sqlConnString = sqlConnString;
+            objSlice->cutFolder = cutFolder;
+            objSlice->idRadio = idThread;
+            objSlice->Filters = Filters;
+
+            objSlice->objRadio = objRadio;
+/**/
             objThreadRadio = new boost::thread(boost::bind(&StreamRadio::read, objRadio));
 
             do
@@ -99,7 +118,6 @@ void ThreadCapture::thrRun()
             status = -1;
             throw;
         }
-/**/
     }
 
     status = 1;

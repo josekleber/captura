@@ -89,6 +89,19 @@ AVFormatContext* StreamRadio::open(string uri)
 
     timer = clock(); // inicia a contagem do tempo de conexão
 
+    try
+    {
+        objQueue = new Queue(codecContext, formatContext);
+    }
+    catch(BadAllocException)
+    {
+        throw;
+    }
+    catch(...)
+    {
+        throw GeneralException() << errno_code(MIR_DES_STMRADIO_1);
+    }
+
     return formatContext;
 }
 
@@ -206,20 +219,6 @@ void StreamRadio::readFrame()
 
     // Pacote para dados temporários.
     AVPacket inputPacket;
-
-    try
-    {
-        // inicia a FIFO
-        objQueue = new Queue(codecContext, formatContext);
-    }
-    catch(BadAllocException)
-    {
-        throw;
-    }
-    catch(...)
-    {
-        throw GeneralException() << errno_code(MIR_DES_STMRADIO_1);
-    }
 
 int njn = 0;
     while (isTrue && (finished == 0) && !isExit)

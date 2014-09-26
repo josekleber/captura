@@ -1,5 +1,14 @@
 #include "filedata.h"
 
+FileData::FileData() : Parser()
+{
+    this->audioFormat = AUDIOFORMAT::arq;
+
+    this->setBitRate(24000);
+    this->setChannels(1);
+    this->setSampleRate(11025);
+}
+
 FileData::FileData(string fileName, uint64_t channelLayoutIn, int sampleRateIn,
                    int bitRateIn, AVSampleFormat sampleFormatIn, int nbSamplesIn, int nbChannelIn)
     : Parser(fileName, channelLayoutIn, sampleRateIn, bitRateIn, sampleFormatIn, nbSamplesIn, nbChannelIn)

@@ -1,11 +1,6 @@
 #include "rawdata.h"
 
-RAWData::RAWData(string fileName, uint64_t channelLayoutIn, int sampleRateIn, int bitRateIn,
-                 AVSampleFormat sampleFormatIn, int nbSamplesIn, int nbChannelIn,
-                 vector<Filter> *Filters, int mrOn, bool svFP, string ipRecognition, string portRecognition,
-                 int32_t idRadio, int32_t idSlice) :
-                     Parser (fileName, channelLayoutIn, sampleRateIn, bitRateIn,
-                             sampleFormatIn, nbSamplesIn, nbChannelIn)
+RAWData::RAWData() : Parser ()
 {
     this->audioFormat = RAWData::raw;
 
@@ -13,6 +8,16 @@ RAWData::RAWData(string fileName, uint64_t channelLayoutIn, int sampleRateIn, in
     this->setChannels(1);
     this->setSampleRate(11025);
 
+    this->freq = RAW_SAMPLE_RATE;
+}
+
+RAWData::RAWData(string fileName, uint64_t channelLayoutIn, int sampleRateIn, int bitRateIn,
+                 AVSampleFormat sampleFormatIn, int nbSamplesIn, int nbChannelIn,
+                 vector<Filter> *Filters, int mrOn, bool svFP, string ipRecognition, string portRecognition,
+                 int32_t idRadio, int32_t idSlice) :
+                     Parser (fileName, channelLayoutIn, sampleRateIn, bitRateIn,
+                             sampleFormatIn, nbSamplesIn, nbChannelIn)
+{
     this->Filters = Filters;
 
     this->mrOn = mrOn;
@@ -22,6 +27,12 @@ RAWData::RAWData(string fileName, uint64_t channelLayoutIn, int sampleRateIn, in
 
     this->idRadio = idRadio;
     this->idSlice = idSlice;
+
+    this->audioFormat = RAWData::raw;
+
+    this->setBitRate(64000);
+    this->setChannels(1);
+    this->setSampleRate(11025);
 
     this->freq = RAW_SAMPLE_RATE;
 
@@ -124,7 +135,10 @@ start = clock();
             conv = (uint8_t*)&arqNameSize;
             for (int i = 0; i < 2; buff[pos++] = conv[i++]);
 
-            for (int i = 0; i < arqNameSize; buff[pos++] = (fileName.c_str())[i++]);
+            for (int i = 0; i < arqNameSize - 3; buff[pos++] = (fileName.c_str())[i++]);
+            buff[pos++] = 'm';
+            buff[pos++] = 'p';
+            buff[pos++] = '3';
 
             for (unsigned int j = 0; j < nbits; j++)
             {

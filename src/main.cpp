@@ -5,7 +5,7 @@ namespace fs = boost::filesystem;
 namespace pt = boost::posix_time;
 
 // objeto do banco de dados
-Database* db = NULL;
+Database_SQL* db = NULL;
 // configurações gerais da aplicação
 Configuration* config = NULL;
 // lista de streams
@@ -316,7 +316,7 @@ return 0;
     config = new Configuration();
 
     // instancia objeto do banco de dados
-    db = new Database(config->ConnectionStringSQL);
+    db = new Database_SQL(config->ConnectionStringSQLProducao);
 
     // carrega filtro utilizado pelo fingerprint
     ret = Filter::FilterLoad(&Filters, config->FilterArqName);

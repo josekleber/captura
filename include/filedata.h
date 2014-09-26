@@ -13,12 +13,15 @@ class FileData : public Parser
 {
     public:
         /** Default constructor */
+        FileData();
         FileData(string fileName, uint64_t channelLayoutIn, int sampleRateIn,
                  int bitRateIn, AVSampleFormat sampleFormatIn, int nbSamplesIn, int nbChannelIn);
         /** Default destructor */
         virtual ~FileData();
 
         virtual void Execute();
+
+        string fileName;
     protected:
 
         int setStreamOut();
@@ -27,7 +30,6 @@ class FileData : public Parser
 
     private:
 
-        string fileName;
         string cutFolder;
 
         int cntFileDayCut;

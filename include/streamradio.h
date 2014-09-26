@@ -146,7 +146,6 @@ public:
     int getQueueSize();
     int getChannelSize();
     vector<vector<uint8_t>> getQueueData();
-
 protected:
 private:
     AVFormatContext *formatContext;

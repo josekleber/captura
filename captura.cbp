@@ -67,7 +67,8 @@
 			<Option target="Release" />
 		</Unit>
 		<Unit filename="include/configuration.h" />
-		<Unit filename="include/database.h" />
+		<Unit filename="include/database_mysql.h" />
+		<Unit filename="include/database_sql.h" />
 		<Unit filename="include/exceptionmir.h" />
 		<Unit filename="include/filedata.h" />
 		<Unit filename="include/logger.h" />
@@ -86,7 +87,11 @@
 			<Option target="Release" />
 		</Unit>
 		<Unit filename="src/configuration.cpp" />
-		<Unit filename="src/database.cpp" />
+		<Unit filename="src/database_mysql.cpp">
+			<Option compile="0" />
+			<Option link="0" />
+		</Unit>
+		<Unit filename="src/database_sql.cpp" />
 		<Unit filename="src/filedata.cpp" />
 		<Unit filename="src/logger.cpp" />
 		<Unit filename="src/main.cpp" />

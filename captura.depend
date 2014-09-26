@@ -17808,23 +17808,23 @@
 1411329103 source:/home/nelson/Projetos/mir/captura/src/queue.cpp
 	"queue.h"
 
-1411577752 source:/home/mir/Projetos/mir/captura/src/configuration.cpp
+1411698282 source:/home/mir/Projetos/mir/captura/src/configuration.cpp
 	"configuration.h"
 
-1411570788 /home/mir/Projetos/mir/captura/include/configuration.h
+1411698241 /home/mir/Projetos/mir/captura/include/configuration.h
 	<iostream>
 	<boost/property_tree/ptree.hpp>
 	<boost/property_tree/ini_parser.hpp>
 	"util.h"
 
-1411411424 /home/mir/Projetos/mir/captura/include/util.h
+1411677290 /home/mir/Projetos/mir/captura/include/util.h
 	<boost/filesystem.hpp>
 	<boost/log/trivial.hpp>
 
-1411411424 source:/home/mir/Projetos/mir/captura/src/database.cpp
+1411677290 source:/home/mir/Projetos/mir/captura/src/database.cpp
 	"database.h"
 
-1411411424 /home/mir/Projetos/mir/captura/include/database.h
+1411677290 /home/mir/Projetos/mir/captura/include/database.h
 	"exceptionmir.h"
 	<time.h>
 	<iostream>
@@ -17834,18 +17834,18 @@
 	<sqlext.h>
 	<vector>
 
-1411578531 /home/mir/Projetos/mir/captura/include/exceptionmir.h
+1411679964 /home/mir/Projetos/mir/captura/include/exceptionmir.h
 	<boost/exception/all.hpp>
 
-1411411424 source:/home/mir/Projetos/mir/captura/src/filedata.cpp
+1411699847 source:/home/mir/Projetos/mir/captura/src/filedata.cpp
 	"filedata.h"
 
-1411411424 /home/mir/Projetos/mir/captura/include/filedata.h
+1411693362 /home/mir/Projetos/mir/captura/include/filedata.h
 	"parser.h"
 	<fstream>
 	<boost/filesystem.hpp>
 
-1411411424 /home/mir/Projetos/mir/captura/include/parser.h
+1411692250 /home/mir/Projetos/mir/captura/include/parser.h
 	<iostream>
 	<cstdio>
 	<unistd.h>
@@ -17867,10 +17867,10 @@
 	"exceptionmir.h"
 	"database.h"
 
-1411577476 source:/home/mir/Projetos/mir/captura/src/logger.cpp
+1411677290 source:/home/mir/Projetos/mir/captura/src/logger.cpp
 	"logger.h"
 
-1411411424 /home/mir/Projetos/mir/captura/include/logger.h
+1411677290 /home/mir/Projetos/mir/captura/include/logger.h
 	<boost/move/utility.hpp>
 	<boost/log/core.hpp>
 	<boost/log/trivial.hpp>
@@ -17884,21 +17884,21 @@
 	<boost/log/sources/global_logger_storage.hpp>
 	<boost/log/support/date_time.hpp>
 
-1411570665 source:/home/mir/Projetos/mir/captura/src/main.cpp
+1411698363 source:/home/mir/Projetos/mir/captura/src/main.cpp
 	"main.h"
 
-1411411424 /home/mir/Projetos/mir/captura/include/main.h
+1411698330 /home/mir/Projetos/mir/captura/include/main.h
 	<iostream>
 	<fstream>
 	<libavformat/avformat.h>
 	<libavcodec/avcodec.h>
 	<mir/filter.h>
 	"configuration.h"
-	"database.h"
+	"database_sql.h"
 	"threadpool.h"
 	"logger.h"
 
-1411570638 /home/mir/Projetos/mir/captura/include/threadpool.h
+1411701690 /home/mir/Projetos/mir/captura/include/threadpool.h
 	<stdlib.h>
 	<stdio.h>
 	<thread>
@@ -17907,7 +17907,7 @@
 	<boost/date_time/posix_time/posix_time.hpp>
 	<boost/thread/thread.hpp>
 
-1411570568 /home/mir/Projetos/mir/captura/include/threadcapture.h
+1411701690 /home/mir/Projetos/mir/captura/include/threadcapture.h
 	<stdlib.h>
 	<stdio.h>
 	<mir/filter.h>
@@ -17916,7 +17916,7 @@
 	"streamradio.h"
 	"sliceprocess.h"
 
-1411411424 /home/mir/Projetos/mir/captura/include/streamradio.h
+1411701690 /home/mir/Projetos/mir/captura/include/streamradio.h
 	<stdio.h>
 	<time.h>
 	<string.h>
@@ -17927,7 +17927,7 @@
 	"exceptionmir.h"
 	"queue.h"
 
-1411411424 /home/mir/Projetos/mir/captura/include/queue.h
+1411702373 /home/mir/Projetos/mir/captura/include/queue.h
 	<string>
 	<vector>
 	<queue>
@@ -17938,7 +17938,7 @@
 	"util.h"
 	"exceptionmir.h"
 
-1411570480 /home/mir/Projetos/mir/captura/include/sliceprocess.h
+1411701690 /home/mir/Projetos/mir/captura/include/sliceprocess.h
 	<stdlib.h>
 	<stdio.h>
 	<string>
@@ -17946,31 +17946,31 @@
 	"rawdata.h"
 	"filedata.h"
 
-1411570341 /home/mir/Projetos/mir/captura/include/rawdata.h
+1411692250 /home/mir/Projetos/mir/captura/include/rawdata.h
 	<mir/fingerprint.h>
 	<mir/tcpclient.h>
 	"exceptionmir.h"
 	"parser.h"
 
-1411411424 source:/home/mir/Projetos/mir/captura/src/parser.cpp
+1411692250 source:/home/mir/Projetos/mir/captura/src/parser.cpp
 	"parser.h"
 
-1411411424 source:/home/mir/Projetos/mir/captura/src/queue.cpp
+1411702374 source:/home/mir/Projetos/mir/captura/src/queue.cpp
 	"queue.h"
 
-1411598517 source:/home/mir/Projetos/mir/captura/src/rawdata.cpp
+1411703280 source:/home/mir/Projetos/mir/captura/src/rawdata.cpp
 	"rawdata.h"
 
-1411570480 source:/home/mir/Projetos/mir/captura/src/sliceprocess.cpp
+1411703103 source:/home/mir/Projetos/mir/captura/src/sliceprocess.cpp
 	"sliceprocess.h"
 
-1411597560 source:/home/mir/Projetos/mir/captura/src/streamradio.cpp
+1411702887 source:/home/mir/Projetos/mir/captura/src/streamradio.cpp
 	"streamradio.h"
 
-1411597415 source:/home/mir/Projetos/mir/captura/src/threadcapture.cpp
+1411701836 source:/home/mir/Projetos/mir/captura/src/threadcapture.cpp
 	"threadcapture.h"
 
-1411570638 source:/home/mir/Projetos/mir/captura/src/threadpool.cpp
+1411701865 source:/home/mir/Projetos/mir/captura/src/threadpool.cpp
 	"threadpool.h"
 
 1411664139 /usr/local/include/boost/config/user.hpp
@@ -18128,7 +18128,7 @@
 	<signal.h>
 	<boost/config/posix_features.hpp>
 
-1411411424 /home/mir/Projetos/mir/captura/include/version.h
+1411677290 /home/mir/Projetos/mir/captura/include/version.h
 
 1411664145 /usr/local/include/boost/config/platform/symbian.hpp
 	<cstdlib>
@@ -20805,4 +20805,18 @@
 	<boost/asio/error.hpp>
 	<boost/asio/detail/push_options.hpp>
 	<boost/asio/detail/pop_options.hpp>
+
+1411694748 source:/home/mir/Projetos/mir/captura/src/database_sql.cpp
+	"database_sql.h"
+
+1411694748 /home/mir/Projetos/mir/captura/include/database_sql.h
+	"exceptionmir.h"
+	<time.h>
+	<iostream>
+	<list>
+	<vector>
+	<string>
+	<sql.h>
+	<sqltypes.h>
+	<sqlext.h>
 

@@ -38,6 +38,7 @@ class Parser
 public:
 
     /** Default constructor */
+    Parser();
     Parser(string fileName, uint64_t channelLayoutIn, int sampleRateIn, int bitRateIn,
            AVSampleFormat sampleFormatIn, int nbSamplesIn, int nbChannelIn);
 
@@ -63,8 +64,18 @@ public:
 
     /** \brief configura a execução do objeto Parser */
     void Config();
-protected:
+
+
     string fileName;
+    uint64_t channelLayoutIn;
+    int sampleRateIn;
+    int bitRateIn;
+    AVSampleFormat sampleFormatIn;
+    int nbSamplesIn;
+    int nbChannelIn;
+
+
+protected:
     int bitRate = 24000;
     int sampleRate = 11025;
     unsigned int nbChannel = 1;
@@ -93,15 +104,6 @@ protected:
 
     virtual void initObject();
 private:
-
-    /** \brief Nome do arquivo de saída */
-    uint64_t channelLayoutIn;
-    int sampleRateIn;
-    int bitRateIn;
-    int nbSamplesIn;
-    int nbChannelIn;
-    AVSampleFormat sampleFormatIn;
-
     /** \brief Cria contexto de saída */
     void CreateContext();
 

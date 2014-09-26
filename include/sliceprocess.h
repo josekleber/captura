@@ -20,15 +20,15 @@ class SliceProcess
             RUN,
             ERROR
         };
+
+        SliceProcess();
         SliceProcess(int mrOn, bool svFP, string ipRecognition, string portRecognition, string sqlConnString,
                      string cutFolder, int idRadio, vector<Filter> *Filters, StreamRadio* objRadio);
         virtual ~SliceProcess();
 
         void thrProcessa();
         int getStatus();
-    protected:
-    private:
-        bool stopThread;
+
 
         int mrOn;
         bool svFP;
@@ -39,12 +39,16 @@ class SliceProcess
         string cutFolder;
 
         int idRadio;
-        int idSlice;
-        int Status;
-
-        StreamRadio* objRadio;
 
         vector<Filter> *Filters;
+
+        StreamRadio* objRadio;
+    protected:
+    private:
+        bool stopThread;
+
+        int idSlice;
+        int Status;
 
         boost::thread* objThreadRawParser;
         boost::thread* objThreadArqParser;

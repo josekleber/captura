@@ -1,5 +1,11 @@
 #include "sliceprocess.h"
 
+SliceProcess::SliceProcess()
+{
+    stopThread = false;
+    Status = 0;
+}
+
 SliceProcess::SliceProcess(int mrOn, bool svFP, string ipRecognition, string portRecognition, string sqlConnString,
                            string cutFolder, int idRadio, vector<Filter> *Filters, StreamRadio* objRadio)
 {
@@ -96,10 +102,31 @@ void SliceProcess::thrProcessa()
                     // processamento para fingerprint
                     try
                     {
-                        objRawData = new RAWData(arqName + ".wav", objRadio->getChannelLayout(),
-                                                 cdc_ctx_in->sample_rate, cdc_ctx_in->bit_rate,
-                                                 cdc_ctx_in->sample_fmt, szFrame, cdc_ctx_in->channels,
-                                                 Filters, mrOn, svFP, ipRecognition, portRecognition, idRadio, idSlice);
+/**/
+                        objRawData = new RAWData();
+                        objRawData->fileName = arqName + ".wav";
+                        objRawData->channelLayoutIn = objRadio->getChannelLayout();
+                        objRawData->sampleRateIn = cdc_ctx_in->sample_rate;
+                        objRawData->bitRateIn = cdc_ctx_in->bit_rate;
+                        objRawData->sampleFormatIn = cdc_ctx_in->sample_fmt;
+                        objRawData->nbSamplesIn = szFrame;
+                        objRawData->nbChannelIn = cdc_ctx_in->channels;
+
+                        objRawData->Filters = Filters;
+                        objRawData->mrOn = mrOn;
+                        objRawData->svFP = svFP;
+                        objRawData->ipRecognition = ipRecognition;
+                        objRawData->portRecognition = portRecognition;
+                        objRawData->idRadio = idRadio;
+                        objRawData->idSlice = idSlice;
+
+                        objRawData->Config();
+
+//                        objRawData = new RAWData(arqName + ".wav", objRadio->getChannelLayout(),
+//                                                 cdc_ctx_in->sample_rate, cdc_ctx_in->bit_rate,
+//                                                 cdc_ctx_in->sample_fmt, szFrame, cdc_ctx_in->channels,
+//                                                 Filters, mrOn, svFP, ipRecognition, portRecognition, idRadio, idSlice);
+
                         objRawData->setBuffer(Packets, objRadio->getChannelSize());
                         objThreadRawParser = new boost::thread(boost::bind(&RAWData::Execute, objRawData));
                     }
@@ -110,13 +137,25 @@ void SliceProcess::thrProcessa()
                     }
 /**/
 
-/**/
+/**
                     // processamento para arquivo
                     try
                     {
-                        objFileData = new FileData(arqName + ".mp3", objRadio->getChannelLayout(),
-                                                 cdc_ctx_in->sample_rate, cdc_ctx_in->bit_rate,
-                                                 cdc_ctx_in->sample_fmt, szFrame, cdc_ctx_in->channels);
+                        objFileData = new FileData();
+                        objFileData->fileName = arqName + ".mp3";
+                        objFileData->channelLayoutIn = objRadio->getChannelLayout();
+                        objFileData->sampleRateIn = cdc_ctx_in->sample_rate;
+                        objFileData->bitRateIn = cdc_ctx_in->bit_rate;
+                        objFileData->sampleFormatIn = cdc_ctx_in->sample_fmt;
+                        objFileData->nbSamplesIn = szFrame;
+                        objFileData->nbChannelIn = cdc_ctx_in->channels;
+
+                        objFileData->Config();
+
+//                        objFileData = new FileData(arqName + ".mp3", objRadio->getChannelLayout(),
+//                                                 cdc_ctx_in->sample_rate, cdc_ctx_in->bit_rate,
+//                                                 cdc_ctx_in->sample_fmt, szFrame, cdc_ctx_in->channels);
+
                         objFileData->setBuffer(Packets, objRadio->getChannelSize());
                         objThreadArqParser = new boost::thread(boost::bind(&FileData::Execute, objFileData));
                     }
@@ -126,7 +165,7 @@ void SliceProcess::thrProcessa()
                         throw;
                     }
 /**/
-cout << "idSlice: " << idSlice << "    FIFO: " << szFifo << endl;
+cout << "idRadio: " << idRadio << "    idSlice: " << idSlice << "    FIFO: " << szFifo << endl;
 
                     // reseta dados
                     for (int i = 0; i < Packets.size(); i++)

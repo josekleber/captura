@@ -33,9 +33,23 @@ void ThreadPool::addThreads(string uriRadio, int idRadio)
         objThreadControl->idThread = idRadio;
         objThreadControl->uriRadio = uriRadio;
 
+/**
         objThreadControl->objCapture = new ThreadCapture(mrOn, svFP, ipRecognition, portRecognition,
                                                          sqlConnString, idRadio, uriRadio,
                                                          Filters, cutFolder);
+/**/
+        objThreadControl->objCapture = new ThreadCapture();
+        objThreadControl->objCapture->mrOn = mrOn;
+        objThreadControl->objCapture->svFP = svFP;
+        objThreadControl->objCapture->ipRecognition = ipRecognition;
+        objThreadControl->objCapture->portRecognition = portRecognition;
+        objThreadControl->objCapture->sqlConnString = sqlConnString;
+
+        objThreadControl->objCapture->idThread = idRadio;
+        objThreadControl->objCapture->uriRadio = uriRadio;
+        objThreadControl->objCapture->Filters = Filters;
+        objThreadControl->objCapture->cutFolder = cutFolder;
+/**/
     }
     catch(...)
     {

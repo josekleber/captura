@@ -1,4 +1,7 @@
 #include "parser.h"
+Parser::Parser()
+{
+}
 
 Parser::Parser(string fileName, uint64_t channelLayoutIn, int sampleRateIn,
                int bitRateIn, AVSampleFormat sampleFormatIn,int nbSamplesIn,int nbChannelIn)

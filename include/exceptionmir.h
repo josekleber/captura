@@ -123,6 +123,10 @@ enum MIR_EXCEPTION
 
     // FIFO
     MIR_ERR_NOT_HAVE_FIFO_OBJECT    = -13001,
+    MIR_ERR_FIFO_SIZE               = -13002,
+    MIR_ERR_FIFO_ADD                = -13003,
+    MIR_ERR_FIFO_GET                = -13004,
+
 
     // MIR_ERR_
 

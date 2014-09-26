@@ -50,6 +50,7 @@ class Queue
     protected:
     private:
         boost::mutex mtx_;  // controle de lock da thread
+        bool mtx = false;
         queue <vector<vector<uint8_t>>> queueData;
         int SampleSize;
         int FrameSize;

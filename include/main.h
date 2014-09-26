@@ -17,7 +17,7 @@ extern "C"
 #include <mir/filter.h>
 
 #include "configuration.h"
-#include "database.h"
+#include "database_sql.h"
 #include "threadpool.h"
 #include "logger.h"
 
