@@ -13,9 +13,9 @@ WINDRES = windres
 
 INC_G = -Iinclude
 CFLAGS_G = -std=c++11 -Wall -fexceptions -DBOOST_LOG_DYN_LINK
-RESINC_G = 
-DEP_G = 
-LIBDIR_G = 
+RESINC_G =
+DEP_G =
+LIBDIR_G =
 LIB_G = /usr/local/lib/libavcodec.so /usr/local/lib/libavdevice.so /usr/local/lib/libavfilter.so /usr/local/lib/libavformat.so /usr/local/lib/libavutil.so /usr/local/lib/libswresample.so /usr/local/lib/libswscale.so /usr/local/lib/libboost_system.so /usr/local/lib/libboost_thread.so /usr/local/lib/libboost_filesystem.so /usr/local/lib/libboost_date_time.so /usr/local/lib/libboost_timer.so /usr/local/lib/libboost_log.so /usr/local/lib/mir/libSkyLibs.so
 LDFLAGS_G = -lz -lm -lpthread -lmp3lame -lx264 -lvorbis -lfdk-aac -lfaac -lodbc
 
@@ -43,7 +43,7 @@ OBJDIR = obj/$(DIR)
 BINDIR = bin/$(DIR)
 OUT = $(BINDIR)/captura
 
-OBJ = $(OBJDIR)/src/main.o $(OBJDIR)/src/configuration.o $(OBJDIR)/src/logger.o $(OBJDIR)/src/database.o $(OBJDIR)/src/threadpool.o $(OBJDIR)/src/threadcapture.o $(OBJDIR)/src/queue.o $(OBJDIR)/src/streamradio.o $(OBJDIR)/src/sliceprocess.o $(OBJDIR)/src/parser.o $(OBJDIR)/src/rawdata.o $(OBJDIR)/src/filedata.o
+OBJ = $(OBJDIR)/src/main.o $(OBJDIR)/src/configuration.o $(OBJDIR)/src/logger.o $(OBJDIR)/src/database_sql.o $(OBJDIR)/src/threadpool.o $(OBJDIR)/src/threadcapture.o $(OBJDIR)/src/queue.o $(OBJDIR)/src/streamradio.o $(OBJDIR)/src/sliceprocess.o $(OBJDIR)/src/parser.o $(OBJDIR)/src/rawdata.o $(OBJDIR)/src/filedata.o
 
 all: debug release
 
@@ -54,7 +54,7 @@ before:
 	test -d bin || mkdir -p bin
 	test -d $(BINDIR) || mkdir -p $(BINDIR)
 
-after: 
+after:
 
 out: before $(OBJ) $(DEP)
 	$(LD) $(LIBDIR) -o $(OUT) $(OBJ)  $(LDFLAGS) $(LIB)
@@ -68,8 +68,8 @@ $(OBJDIR)/src/configuration.o: src/configuration.cpp
 $(OBJDIR)/src/logger.o: src/logger.cpp
 	$(CXX) $(CFLAGS) $(INC) -c src/logger.cpp -o $(OBJDIR)/src/logger.o
 
-$(OBJDIR)/src/database.o: src/database.cpp
-	$(CXX) $(CFLAGS) $(INC) -c src/database.cpp -o $(OBJDIR)/src/database.o
+$(OBJDIR)/src/database_sql.o: src/database_sql.cpp
+	$(CXX) $(CFLAGS) $(INC) -c src/database_sql.cpp -o $(OBJDIR)/src/database_sql.o
 
 $(OBJDIR)/src/threadpool.o: src/threadpool.cpp
 	$(CXX) $(CFLAGS) $(INC) -c src/threadpool.cpp -o $(OBJDIR)/src/threadpool.o
@@ -95,7 +95,7 @@ $(OBJDIR)/src/rawdata.o: src/rawdata.cpp
 $(OBJDIR)/src/filedata.o: src/filedata.cpp
 	$(CXX) $(CFLAGS) $(INC) -c src/filedata.cpp -o $(OBJDIR)/src/filedata.o
 
-clean: 
+clean:
 	rm -rf bin
 	rm -rf obj
 

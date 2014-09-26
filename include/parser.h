@@ -26,7 +26,6 @@ extern "C"
 }
 
 #include "exceptionmir.h"
-#include "database.h"
 
 using namespace std;
 
