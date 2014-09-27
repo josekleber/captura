@@ -60,12 +60,13 @@ void StreamRadio::close()
 
 AVFormatContext* StreamRadio::open(string uri)
 {
-    formatContext = avformat_alloc_context();
-    int ret = 0; // retorno das funções FFMPEG
+    // retorno das funções FFMPEG
+    int ret = 0;
 
     // verifica se conseguiu alocar o contexto
+    formatContext = avformat_alloc_context();
     if (!(formatContext))
-        throw BadAllocException() << errno_code(MIR_ERR_BADALLOC_CONTEXT);
+        throw StreamRadioException() << errno_code(MIR_ERR_BADALLOC_CONTEXT);
 
     // usa todos os cores do processador.
     addOptions("threads","0");
@@ -78,22 +79,31 @@ AVFormatContext* StreamRadio::open(string uri)
     {
         BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Erro de conexão com o stream " << uri.c_str();
         statusConnection = MIR_CONNECTION_ERROR;
-        throw OpenConnectionException() <<errno_code(MIR_ERR_STREAM_CONNECTION);
+        throw StreamRadioException() <<errno_code(MIR_ERR_STREAM_CONNECTION);
     }
 
     BOOST_LOG_TRIVIAL(info) << ANSI_COLOR_GREEN "Conectado ao stream "  << uri.c_str() << ANSI_COLOR_RESET;
 
     statusConnection = MIR_CONNECTION_OPEN;
 
-    setStreamType(); // pega os streams que a conexão contém
+    try
+    {
+        setStreamType(); // pega os streams que a conexão contém
+    }
+    catch(...)
+    {
+        throw;
+    }
 
     timer = clock(); // inicia a contagem do tempo de conexão
+
+    av_dump_format(formatContext, streamIndex, uri.c_str(), 0);
 
     try
     {
         objQueue = new Queue(codecContext, formatContext);
     }
-    catch(BadAllocException)
+    catch(FifoException& err)
     {
         throw;
     }
@@ -108,7 +118,7 @@ AVFormatContext* StreamRadio::open(string uri)
 void StreamRadio::read()
 {
     if (statusConnection != MIR_CONNECTION_OPEN)
-        throw ConnectionClosedException() <<errno_code(MIR_ERR_CONNECTION_CLOSED);
+        throw StreamRadioException() <<errno_code(MIR_ERR_CONNECTION_CLOSED);
 
     readFrame();
 }
@@ -116,30 +126,27 @@ void StreamRadio::read()
 void StreamRadio::setStreamType()
 {
     if ((statusConnection != MIR_CONNECTION_OPEN))
-        throw ConnectionClosedException() <<errno_code(MIR_ERR_CONNECTION_CLOSED);
+        throw StreamRadioException() <<errno_code(MIR_ERR_CONNECTION_CLOSED);
 
     // pega informações do stream
     if (avformat_find_stream_info(formatContext,NULL) < 0)
     {
         BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Erro ao tentar pegar informações dos streams de entrada: " << uri.c_str();
         statusConnection = MIR_CONNECTION_ERROR;
-        throw OpenConnectionException() <<errno_code(MIR_ERR_STREAM_CONNECTION);
+        throw StreamRadioException() <<errno_code(MIR_ERR_STREAM_CONNECTION);
     }
 
-    av_dump_format(formatContext,0,this->uri.c_str(),0);
-
-    // recupera o melhor stream para os valores passados
     streamIndex = av_find_best_stream(formatContext, AVMEDIA_TYPE_AUDIO, -1, -1, &codec, 0);
 
     if (streamIndex == AVERROR_STREAM_NOT_FOUND)
     {
         BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Não há stream de áudio na conexão. Stream usado" ANSI_COLOR_RESET << this->uri.c_str();
-        throw MediaTypeNoAudioException() << errno_code(MIR_ERR_MEDIA_TYPE_NO_AUDIO);
+        throw StreamRadioException() << errno_code(MIR_ERR_MEDIA_TYPE_NO_AUDIO);
     }
     else if (streamIndex == AVERROR_DECODER_NOT_FOUND)
     {
         BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Codec não suportado.";
-        throw CodecNotSupportedException() <<errno_code(MIR_ERR_CODEC_NOT_SUPPORTED);
+        throw StreamRadioException() <<errno_code(MIR_ERR_CODEC_NOT_SUPPORTED);
     }
 
     stream = formatContext->streams[streamIndex];
@@ -149,7 +156,7 @@ void StreamRadio::setStreamType()
     if (avcodec_open2(codecContext,codec,NULL) < 0)
     {
         BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Erro de alocação de contexto " << codec->name;
-        throw BadAllocException() << errno_code(MIR_ERR_BADALLOC_CONTEXT);
+        throw StreamRadioException() << errno_code(MIR_ERR_BADALLOC_CONTEXT);
     }
 
     this->channelLayout = codecContext->channel_layout;
@@ -159,10 +166,8 @@ void StreamRadio::setStreamType()
     if (!(stream))
     {
         BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Não há stream de áudio na conexão. Stream usado" ANSI_COLOR_RESET << formatContext->filename;
-        throw MediaTypeNoAudioException() << errno_code(MIR_ERR_MEDIA_TYPE_NO_AUDIO);
+        throw StreamRadioException() << errno_code(MIR_ERR_MEDIA_TYPE_NO_AUDIO);
     }
-
-
 }
 
 int StreamRadio::getChannelLayout()
@@ -184,7 +189,7 @@ AVDictionary * StreamRadio::getListOptions()
 StreamType * StreamRadio::getStreamType()
 {
     if ((statusConnection != MIR_CONNECTION_OPEN))
-        throw ConnectionClosedException() <<errno_code(MIR_ERR_CONNECTION_CLOSED);
+        throw StreamRadioException() <<errno_code(MIR_ERR_CONNECTION_CLOSED);
 
     return streamType;
 }
@@ -269,15 +274,19 @@ int njn = 0;
                     av_free_packet(&inputPacket);
 
                     // Adiciona ao FIFO
-                    objQueue->addQueueData(frame->data, frame->nb_samples);
+                    objQueue->addQueueData(frame);
 
                     av_frame_free(&frame);
 //cout << "pacote " << njn++ << endl;
                 }
-                catch(DecoderException ex)
+                catch(DecoderException& err)
                 {
-                    BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Erro de decoding." ANSI_COLOR_RESET;
+                    BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Erro de decoding: " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
                     av_free_packet(&inputPacket);
+                }
+                catch(FifoException& err)
+                {
+                    BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Erro no FIFO: " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
                 }
 
                 //boost::this_thread::sleep(boost::posix_time::milliseconds(1));
@@ -305,21 +314,35 @@ void StreamRadio::decodeAudioFrame(int *haveData, int *finished, AVPacket *input
                                        haveData, inputPacket)) < 0)
     {
         printf("Could not decode frame (error '%d')\n", error);
-        throw DecoderException() << errno_code(MIR_ERR_DECODE);
+        throw StreamRadioException() << errno_code(MIR_ERR_DECODE);
     }
 }
 
 vector<vector<uint8_t>> StreamRadio::getQueueData()
 {
-    return objQueue->getQueueData();
+    try
+    {
+        return objQueue->getQueueData();
+    }
+    catch(FifoException& err)
+    {
+        throw err;
+    }
 }
 
 int StreamRadio::getQueueSize()
 {
-    return objQueue->getQueueSize();
+    try
+    {
+        return objQueue->getQueueSize();
+    }
+    catch(FifoException& err)
+    {
+        throw err;
+    }
 }
 
-int StreamRadio::getChannelSize()
+int StreamRadio::getSzBuffer()
 {
-    return objQueue->getChannelSize();
+    return objQueue->getSzBuffer();
 }

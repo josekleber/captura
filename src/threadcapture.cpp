@@ -60,6 +60,22 @@ void ThreadCapture::thrRun()
             {
                 BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED << "Error: " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
             }
+            catch(FifoException& err)
+            {
+                BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED << "Fifo Error: " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
+            }
+            catch(StreamRadioException& err)
+            {
+                BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED << "StreamRadio Error: " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
+            }
+            catch(GeneralException& err)
+            {
+                BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED << "Error: " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
+            }
+            catch(...)
+            {
+                BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED << "Error: General erros" << ANSI_COLOR_RESET;
+            }
 
             if (objRadio->getStatus() != EnumStatusConnect::MIR_CONNECTION_OPEN)
             {

@@ -40,13 +40,25 @@ void FileData::Execute()
     {
         Resample();
     }
+    catch(ResampleException& err)
+    {
+        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Error code (File): " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
+        return;
+    }
+    catch(FifoException& err)
+    {
+        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Error code (File): " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
+        return;
+    }
     catch(BadAllocException& err)
     {
-        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Error code: " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
+        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Error code (File): " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
+        return;
     }
     catch(FFMpegException& err)
     {
-        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Error code: " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
+        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Error code (File): " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
+        return;
     }
 
     // grava o recorte em disco

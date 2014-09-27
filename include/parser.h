@@ -56,7 +56,7 @@ public:
     void setBitRate(int value);
     void setSampleRate(int value);
     void setChannels(unsigned int value);
-    void setBuffer(vector<vector<vector<uint8_t>>> value, int szChannel);
+    void setBuffer(vector<vector<vector<uint8_t>>> value);
 
     /** \brief Processa os frames e gera a saída */
     virtual void Execute();
@@ -72,15 +72,17 @@ public:
     AVSampleFormat sampleFormatIn;
     int nbSamplesIn;
     int nbChannelIn;
-
+    int szBuffer;
 
 protected:
+    AUDIOFORMAT audioFormat;
+
     int bitRate = 24000;
     int sampleRate = 11025;
     unsigned int nbChannel = 1;
     unsigned int nbFrames;
     bool isVBR;
-    AUDIOFORMAT audioFormat;
+    int nbBuffers;
 
     AVFormatContext *fmt_ctx_out;
     AVStream *stm_out = NULL;
@@ -94,7 +96,6 @@ protected:
     AVIOContext *io_ctx = NULL;
 
     vector<vector<vector<uint8_t>>> bufFrames;
-    int szChannel;
 
     /** \brief efetua o resampling do audio, encodando, de acordo com o set do output */
     void Resample();

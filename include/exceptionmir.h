@@ -79,6 +79,20 @@ struct FFMpegException : virtual BaseException {};
 */
 struct OpenFileException : virtual BaseException{};
 
+
+
+
+
+/** \brief
+* Erro de abertura de arquivo
+*/
+struct ResampleException : virtual BaseException{};
+
+/** \brief
+* Erro de abertura de arquivo
+*/
+struct StreamRadioException : virtual BaseException{};
+
 /** \brief
 * Erro de abertura de arquivo
 */
@@ -125,7 +139,12 @@ enum MIR_EXCEPTION
     MIR_ERR_NOT_HAVE_FIFO_OBJECT    = -13001,
     MIR_ERR_FIFO_SIZE               = -13002,
     MIR_ERR_FIFO_ADD                = -13003,
-    MIR_ERR_FIFO_GET                = -13004,
+    MIR_ERR_FIFO_BUFFER_SIZE        = -13004,
+    MIR_ERR_FIFO_ADD_FORMAT         = -13005,
+    MIR_ERR_FIFO_ADD_CHANNELS       = -13006,
+    MIR_ERR_FIFO_GET                = -13007,
+    MIR_ERR_FIFO_DATA1              = -13008,
+    MIR_ERR_FIFO_DATA2              = -13009,
 
 
     // MIR_ERR_

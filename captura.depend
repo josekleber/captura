@@ -4203,7 +4203,7 @@
 	<boost/date_time/posix_time/posix_time.hpp>
 	<boost/thread/thread.hpp>
 
-1411665145 /usr/local/include/mir/filter.h
+1411768404 /usr/local/include/mir/filter.h
 	<stdio.h>
 	<stdlib.h>
 	<complex>
@@ -7403,7 +7403,7 @@
 	"streamradio.h"
 	"database.h"
 
-1411665145 /usr/local/include/mir/fingerprint.h
+1411768404 /usr/local/include/mir/fingerprint.h
 	<complex>
 	<fftw3.h>
 	<stdio.h>
@@ -7466,7 +7466,7 @@
 	<string>
 	<exception>
 
-1411665145 /usr/local/include/mir/tcpclient.h
+1411768404 /usr/local/include/mir/tcpclient.h
 	<cstdlib>
 	<deque>
 	<iostream>
@@ -17834,18 +17834,18 @@
 	<sqlext.h>
 	<vector>
 
-1411679964 /home/mir/Projetos/mir/captura/include/exceptionmir.h
+1411828251 /home/mir/Projetos/mir/captura/include/exceptionmir.h
 	<boost/exception/all.hpp>
 
-1411699847 source:/home/mir/Projetos/mir/captura/src/filedata.cpp
+1411779446 source:/home/mir/Projetos/mir/captura/src/filedata.cpp
 	"filedata.h"
 
-1411693362 /home/mir/Projetos/mir/captura/include/filedata.h
+1411775088 /home/mir/Projetos/mir/captura/include/filedata.h
 	"parser.h"
 	<fstream>
 	<boost/filesystem.hpp>
 
-1411692250 /home/mir/Projetos/mir/captura/include/parser.h
+1411829532 /home/mir/Projetos/mir/captura/include/parser.h
 	<iostream>
 	<cstdio>
 	<unistd.h>
@@ -17865,7 +17865,6 @@
 	<libswresample/swresample.h>
 	<libavutil/opt.h>
 	"exceptionmir.h"
-	"database.h"
 
 1411677290 source:/home/mir/Projetos/mir/captura/src/logger.cpp
 	"logger.h"
@@ -17884,8 +17883,9 @@
 	<boost/log/sources/global_logger_storage.hpp>
 	<boost/log/support/date_time.hpp>
 
-1411698363 source:/home/mir/Projetos/mir/captura/src/main.cpp
+1411835650 source:/home/mir/Projetos/mir/captura/src/main.cpp
 	"main.h"
+	<sys/resource.h>
 
 1411698330 /home/mir/Projetos/mir/captura/include/main.h
 	<iostream>
@@ -17916,7 +17916,7 @@
 	"streamradio.h"
 	"sliceprocess.h"
 
-1411701690 /home/mir/Projetos/mir/captura/include/streamradio.h
+1411829188 /home/mir/Projetos/mir/captura/include/streamradio.h
 	<stdio.h>
 	<time.h>
 	<string.h>
@@ -17927,7 +17927,7 @@
 	"exceptionmir.h"
 	"queue.h"
 
-1411702373 /home/mir/Projetos/mir/captura/include/queue.h
+1411836255 /home/mir/Projetos/mir/captura/include/queue.h
 	<string>
 	<vector>
 	<queue>
@@ -17952,25 +17952,25 @@
 	"exceptionmir.h"
 	"parser.h"
 
-1411692250 source:/home/mir/Projetos/mir/captura/src/parser.cpp
+1411835867 source:/home/mir/Projetos/mir/captura/src/parser.cpp
 	"parser.h"
 
-1411702374 source:/home/mir/Projetos/mir/captura/src/queue.cpp
+1411836255 source:/home/mir/Projetos/mir/captura/src/queue.cpp
 	"queue.h"
 
-1411703280 source:/home/mir/Projetos/mir/captura/src/rawdata.cpp
+1411779446 source:/home/mir/Projetos/mir/captura/src/rawdata.cpp
 	"rawdata.h"
 
-1411703103 source:/home/mir/Projetos/mir/captura/src/sliceprocess.cpp
+1411836137 source:/home/mir/Projetos/mir/captura/src/sliceprocess.cpp
 	"sliceprocess.h"
 
-1411702887 source:/home/mir/Projetos/mir/captura/src/streamradio.cpp
+1411829799 source:/home/mir/Projetos/mir/captura/src/streamradio.cpp
 	"streamradio.h"
 
-1411701836 source:/home/mir/Projetos/mir/captura/src/threadcapture.cpp
+1411754138 source:/home/mir/Projetos/mir/captura/src/threadcapture.cpp
 	"threadcapture.h"
 
-1411701865 source:/home/mir/Projetos/mir/captura/src/threadpool.cpp
+1411703653 source:/home/mir/Projetos/mir/captura/src/threadpool.cpp
 	"threadpool.h"
 
 1411664139 /usr/local/include/boost/config/user.hpp
@@ -20819,4 +20819,576 @@
 	<sql.h>
 	<sqltypes.h>
 	<sqlext.h>
+
+1411755564 source:/home/mir/Projetos/mir/captura/src/database_mysql.cpp
+	"database_mysql.h"
+
+1411694748 /home/mir/Projetos/mir/captura/include/database_mysql.h
+	<time.h>
+	<iostream>
+	<fstream>
+	<sstream>
+	<list>
+	<vector>
+	<string>
+	<cppconn/driver.h>
+	<cppconn/exception.h>
+	<cppconn/resultset.h>
+	<cppconn/statement.h>
+	<cppconn/prepared_statement.h>
+	<boost/algorithm/string.hpp>
+
+1364204720 /usr/local/include/cppconn/driver.h
+	"connection.h"
+	"build_config.h"
+
+1364204720 /usr/local/include/cppconn/connection.h
+	<map>
+	<boost/variant.hpp>
+	"build_config.h"
+	"warning.h"
+	"sqlstring.h"
+
+1411664138 /usr/local/include/boost/variant.hpp
+	"boost/variant/variant.hpp"
+	"boost/variant/recursive_variant.hpp"
+	"boost/variant/recursive_wrapper.hpp"
+	"boost/variant/get.hpp"
+	"boost/variant/apply_visitor.hpp"
+	"boost/variant/static_visitor.hpp"
+	"boost/variant/visitor_ptr.hpp"
+
+1411664140 /usr/local/include/boost/variant/variant.hpp
+	<cstddef>
+	<new>
+	<typeinfo>
+	"boost/variant/detail/config.hpp"
+	"boost/mpl/aux_/value_wknd.hpp"
+	"boost/variant/variant_fwd.hpp"
+	"boost/variant/detail/backup_holder.hpp"
+	"boost/variant/detail/enable_recursive_fwd.hpp"
+	"boost/variant/detail/forced_return.hpp"
+	"boost/variant/detail/initializer.hpp"
+	"boost/variant/detail/make_variant_list.hpp"
+	"boost/variant/detail/over_sequence.hpp"
+	"boost/variant/detail/visitation_impl.hpp"
+	"boost/variant/detail/hash_variant.hpp"
+	"boost/variant/detail/generic_result_type.hpp"
+	"boost/variant/detail/move.hpp"
+	"boost/detail/no_exceptions_support.hpp"
+	"boost/detail/reference_content.hpp"
+	"boost/aligned_storage.hpp"
+	"boost/blank.hpp"
+	"boost/math/common_factor_ct.hpp"
+	"boost/static_assert.hpp"
+	"boost/preprocessor/cat.hpp"
+	"boost/preprocessor/repeat.hpp"
+	"boost/type_traits/alignment_of.hpp"
+	"boost/type_traits/add_const.hpp"
+	"boost/type_traits/has_nothrow_constructor.hpp"
+	"boost/type_traits/has_nothrow_copy.hpp"
+	"boost/type_traits/is_nothrow_move_constructible.hpp"
+	"boost/type_traits/is_const.hpp"
+	"boost/type_traits/is_same.hpp"
+	"boost/type_traits/is_rvalue_reference.hpp"
+	"boost/utility/enable_if.hpp"
+	"boost/utility/declval.hpp"
+	"boost/variant/recursive_wrapper_fwd.hpp"
+	"boost/variant/static_visitor.hpp"
+	"boost/mpl/assert.hpp"
+	"boost/mpl/begin_end.hpp"
+	"boost/mpl/bool.hpp"
+	"boost/mpl/deref.hpp"
+	"boost/mpl/empty.hpp"
+	"boost/mpl/eval_if.hpp"
+	"boost/mpl/find_if.hpp"
+	"boost/mpl/fold.hpp"
+	"boost/mpl/front.hpp"
+	"boost/mpl/identity.hpp"
+	"boost/mpl/if.hpp"
+	"boost/mpl/int.hpp"
+	"boost/mpl/is_sequence.hpp"
+	"boost/mpl/iterator_range.hpp"
+	"boost/mpl/iter_fold_if.hpp"
+	"boost/mpl/logical.hpp"
+	"boost/mpl/max_element.hpp"
+	"boost/mpl/next.hpp"
+	"boost/mpl/not.hpp"
+	"boost/mpl/pair.hpp"
+	"boost/mpl/protect.hpp"
+	"boost/mpl/push_front.hpp"
+	"boost/mpl/same_as.hpp"
+	"boost/mpl/size_t.hpp"
+	"boost/mpl/sizeof.hpp"
+	"boost/mpl/transform.hpp"
+	<climits>
+	"boost/mpl/eval_if.hpp"
+	"boost/mpl/equal_to.hpp"
+	"boost/mpl/identity.hpp"
+	"boost/mpl/int.hpp"
+	"boost/mpl/if.hpp"
+	"boost/mpl/less.hpp"
+	"boost/mpl/long.hpp"
+	"boost/mpl/O1_size.hpp"
+	"boost/variant/detail/variant_io.hpp"
+
+1411664147 /usr/local/include/boost/variant/detail/config.hpp
+	"boost/config.hpp"
+	"boost/detail/workaround.hpp"
+
+1411664140 /usr/local/include/boost/variant/variant_fwd.hpp
+	"boost/variant/detail/config.hpp"
+	"boost/blank_fwd.hpp"
+	"boost/mpl/arg.hpp"
+	"boost/mpl/limits/arity.hpp"
+	"boost/mpl/aux_/na.hpp"
+	"boost/preprocessor/cat.hpp"
+	"boost/preprocessor/enum.hpp"
+	"boost/preprocessor/enum_params.hpp"
+	"boost/preprocessor/enum_shifted_params.hpp"
+	"boost/preprocessor/repeat.hpp"
+	"boost/variant/detail/substitute_fwd.hpp"
+	<boost/preprocessor/seq/size.hpp>
+	"boost/mpl/limits/list.hpp"
+	"boost/mpl/limits/arity.hpp"
+
+1411664147 /usr/local/include/boost/variant/detail/substitute_fwd.hpp
+	"boost/mpl/aux_/lambda_arity_param.hpp"
+	"boost/mpl/aux_/template_arity.hpp"
+	"boost/mpl/int_fwd.hpp"
+	"boost/mpl/aux_/config/ctps.hpp"
+	"boost/mpl/aux_/config/ttp.hpp"
+
+1411664147 /usr/local/include/boost/variant/detail/backup_holder.hpp
+	"boost/config.hpp"
+	"boost/assert.hpp"
+
+1411664147 /usr/local/include/boost/variant/detail/enable_recursive_fwd.hpp
+	"boost/mpl/aux_/config/ctps.hpp"
+	"boost/mpl/bool_fwd.hpp"
+	"boost/mpl/bool.hpp"
+
+1411664147 /usr/local/include/boost/variant/detail/forced_return.hpp
+	"boost/config.hpp"
+	"boost/variant/detail/generic_result_type.hpp"
+	"boost/assert.hpp"
+
+1411664147 /usr/local/include/boost/variant/detail/generic_result_type.hpp
+	"boost/config.hpp"
+
+1411664147 /usr/local/include/boost/variant/detail/initializer.hpp
+	<new>
+	"boost/config.hpp"
+	"boost/call_traits.hpp"
+	"boost/detail/reference_content.hpp"
+	"boost/variant/recursive_wrapper_fwd.hpp"
+	"boost/variant/detail/move.hpp"
+	"boost/mpl/aux_/value_wknd.hpp"
+	"boost/mpl/int.hpp"
+	"boost/mpl/iter_fold.hpp"
+	"boost/mpl/next.hpp"
+	"boost/mpl/deref.hpp"
+	"boost/mpl/pair.hpp"
+	"boost/mpl/protect.hpp"
+	"boost/variant/variant_fwd.hpp"
+	"boost/preprocessor/cat.hpp"
+	"boost/preprocessor/enum.hpp"
+	"boost/preprocessor/repeat.hpp"
+
+1411664140 /usr/local/include/boost/variant/recursive_wrapper_fwd.hpp
+	"boost/mpl/aux_/config/ctps.hpp"
+	"boost/mpl/aux_/lambda_support.hpp"
+	"boost/type_traits/detail/bool_trait_def.hpp"
+	"boost/type_traits/detail/bool_trait_undef.hpp"
+
+1411664147 /usr/local/include/boost/variant/detail/move.hpp
+	<iterator>
+	<new>
+	"boost/config.hpp"
+	"boost/detail/workaround.hpp"
+	"boost/move/move.hpp"
+
+1411664147 /usr/local/include/boost/variant/detail/make_variant_list.hpp
+	"boost/variant/variant_fwd.hpp"
+	"boost/mpl/list.hpp"
+	"boost/preprocessor/cat.hpp"
+	"boost/preprocessor/enum.hpp"
+
+1411664147 /usr/local/include/boost/variant/detail/over_sequence.hpp
+	"boost/mpl/aux_/config/ctps.hpp"
+
+1411664147 /usr/local/include/boost/variant/detail/visitation_impl.hpp
+	"boost/config.hpp"
+	"boost/variant/detail/backup_holder.hpp"
+	"boost/variant/detail/cast_storage.hpp"
+	"boost/variant/detail/forced_return.hpp"
+	"boost/variant/detail/generic_result_type.hpp"
+	"boost/mpl/eval_if.hpp"
+	"boost/mpl/bool.hpp"
+	"boost/mpl/identity.hpp"
+	"boost/mpl/int.hpp"
+	"boost/mpl/next.hpp"
+	"boost/mpl/deref.hpp"
+	"boost/mpl/or.hpp"
+	"boost/preprocessor/cat.hpp"
+	"boost/preprocessor/inc.hpp"
+	"boost/preprocessor/repeat.hpp"
+	"boost/type_traits/is_same.hpp"
+	"boost/type_traits/has_nothrow_copy.hpp"
+	"boost/type_traits/is_nothrow_move_constructible.hpp"
+	"boost/mpl/limits/list.hpp"
+
+1411664147 /usr/local/include/boost/variant/detail/cast_storage.hpp
+	"boost/config.hpp"
+
+1411664147 /usr/local/include/boost/variant/detail/hash_variant.hpp
+	<boost/variant/variant_fwd.hpp>
+	<boost/variant/static_visitor.hpp>
+	<boost/variant/apply_visitor.hpp>
+	<boost/functional/hash_fwd.hpp>
+
+1411664140 /usr/local/include/boost/variant/static_visitor.hpp
+	"boost/config.hpp"
+	"boost/detail/workaround.hpp"
+	"boost/mpl/if.hpp"
+	"boost/type_traits/is_base_and_derived.hpp"
+	"boost/type_traits/detail/bool_trait_def.hpp"
+	"boost/type_traits/detail/bool_trait_undef.hpp"
+
+1411664140 /usr/local/include/boost/variant/apply_visitor.hpp
+	"boost/variant/detail/apply_visitor_unary.hpp"
+	"boost/variant/detail/apply_visitor_binary.hpp"
+	"boost/variant/detail/apply_visitor_delayed.hpp"
+
+1411664147 /usr/local/include/boost/variant/detail/apply_visitor_unary.hpp
+	"boost/config.hpp"
+	"boost/detail/workaround.hpp"
+	"boost/variant/detail/generic_result_type.hpp"
+	"boost/utility/enable_if.hpp"
+	"boost/mpl/not.hpp"
+	"boost/type_traits/is_const.hpp"
+
+1411664147 /usr/local/include/boost/variant/detail/apply_visitor_binary.hpp
+	"boost/config.hpp"
+	"boost/detail/workaround.hpp"
+	"boost/variant/detail/generic_result_type.hpp"
+	"boost/variant/detail/apply_visitor_unary.hpp"
+	"boost/utility/enable_if.hpp"
+	"boost/mpl/not.hpp"
+	"boost/type_traits/is_const.hpp"
+
+1411664147 /usr/local/include/boost/variant/detail/apply_visitor_delayed.hpp
+	"boost/variant/detail/generic_result_type.hpp"
+	"boost/variant/detail/apply_visitor_unary.hpp"
+	"boost/variant/detail/apply_visitor_binary.hpp"
+
+1411664142 /usr/local/include/boost/math/common_factor_ct.hpp
+	<boost/math_fwd.hpp>
+	<boost/config.hpp>
+	<boost/mpl/integral_c.hpp>
+
+1411664141 /usr/local/include/boost/mpl/max_element.hpp
+	<boost/mpl/less.hpp>
+	<boost/mpl/iter_fold.hpp>
+	<boost/mpl/begin_end.hpp>
+	<boost/mpl/if.hpp>
+	<boost/mpl/deref.hpp>
+	<boost/mpl/apply.hpp>
+	<boost/mpl/aux_/common_name_wknd.hpp>
+	<boost/mpl/aux_/na_spec.hpp>
+
+1411664141 /usr/local/include/boost/mpl/sizeof.hpp
+	<boost/mpl/size_t.hpp>
+	<boost/mpl/aux_/na_spec.hpp>
+	<boost/mpl/aux_/lambda_support.hpp>
+
+1411664147 /usr/local/include/boost/variant/detail/variant_io.hpp
+	<iosfwd>
+	"boost/variant/variant_fwd.hpp"
+	"boost/detail/templated_streams.hpp"
+	"boost/variant/static_visitor.hpp"
+
+1411664140 /usr/local/include/boost/variant/recursive_variant.hpp
+	"boost/variant/variant_fwd.hpp"
+	"boost/variant/detail/enable_recursive.hpp"
+	"boost/variant/detail/substitute_fwd.hpp"
+	"boost/variant/detail/make_variant_list.hpp"
+	"boost/variant/detail/over_sequence.hpp"
+	"boost/mpl/aux_/lambda_arity_param.hpp"
+	"boost/mpl/equal.hpp"
+	"boost/mpl/eval_if.hpp"
+	"boost/mpl/identity.hpp"
+	"boost/mpl/if.hpp"
+	"boost/mpl/protect.hpp"
+	"boost/mpl/transform.hpp"
+	"boost/type_traits/is_same.hpp"
+	"boost/preprocessor/cat.hpp"
+	"boost/preprocessor/repeat.hpp"
+	"boost/mpl/bool.hpp"
+	"boost/mpl/is_sequence.hpp"
+	"boost/variant/variant.hpp"
+
+1411664147 /usr/local/include/boost/variant/detail/enable_recursive.hpp
+	"boost/variant/detail/enable_recursive_fwd.hpp"
+	"boost/variant/variant_fwd.hpp"
+	"boost/mpl/apply.hpp"
+	"boost/mpl/eval_if.hpp"
+	"boost/mpl/lambda.hpp"
+	"boost/variant/detail/substitute.hpp"
+	"boost/mpl/aux_/config/ctps.hpp"
+	"boost/mpl/bool_fwd.hpp"
+	"boost/mpl/if.hpp"
+	"boost/mpl/or.hpp"
+	"boost/type_traits/is_pointer.hpp"
+	"boost/type_traits/is_reference.hpp"
+	"boost/type_traits/is_same.hpp"
+	"boost/variant/recursive_wrapper.hpp"
+
+1411664147 /usr/local/include/boost/variant/detail/substitute.hpp
+	"boost/mpl/aux_/config/ctps.hpp"
+	"boost/variant/detail/substitute_fwd.hpp"
+	"boost/mpl/aux_/lambda_arity_param.hpp"
+	"boost/mpl/aux_/preprocessor/params.hpp"
+	"boost/mpl/aux_/preprocessor/repeat.hpp"
+	"boost/mpl/int_fwd.hpp"
+	"boost/mpl/limits/arity.hpp"
+	"boost/preprocessor/cat.hpp"
+	"boost/preprocessor/empty.hpp"
+	"boost/preprocessor/arithmetic/inc.hpp"
+	"boost/preprocessor/iterate.hpp"
+
+1411664140 /usr/local/include/boost/variant/recursive_wrapper.hpp
+	"boost/variant/recursive_wrapper_fwd.hpp"
+	"boost/variant/detail/move.hpp"
+	"boost/checked_delete.hpp"
+
+1411664141 /usr/local/include/boost/mpl/equal.hpp
+	<boost/mpl/aux_/iter_fold_if_impl.hpp>
+	<boost/mpl/aux_/iter_apply.hpp>
+	<boost/mpl/and.hpp>
+	<boost/mpl/not.hpp>
+	<boost/mpl/begin_end.hpp>
+	<boost/mpl/next.hpp>
+	<boost/mpl/always.hpp>
+	<boost/mpl/bool.hpp>
+	<boost/mpl/lambda.hpp>
+	<boost/mpl/bind.hpp>
+	<boost/mpl/apply.hpp>
+	<boost/mpl/void.hpp>
+	<boost/mpl/aux_/na_spec.hpp>
+	<boost/mpl/aux_/lambda_support.hpp>
+	<boost/mpl/aux_/msvc_eti_base.hpp>
+	<boost/type_traits/is_same.hpp>
+
+1411664140 /usr/local/include/boost/variant/get.hpp
+	<exception>
+	"boost/config.hpp"
+	"boost/detail/workaround.hpp"
+	"boost/throw_exception.hpp"
+	"boost/utility/addressof.hpp"
+	"boost/variant/variant_fwd.hpp"
+	"boost/type_traits/add_reference.hpp"
+	"boost/type_traits/add_pointer.hpp"
+
+1411664140 /usr/local/include/boost/variant/visitor_ptr.hpp
+	"boost/variant/bad_visit.hpp"
+	"boost/variant/static_visitor.hpp"
+	"boost/mpl/eval_if.hpp"
+	"boost/mpl/identity.hpp"
+	"boost/throw_exception.hpp"
+	"boost/type_traits/add_reference.hpp"
+	"boost/type_traits/is_reference.hpp"
+	"boost/type_traits/is_void.hpp"
+
+1411664140 /usr/local/include/boost/variant/bad_visit.hpp
+	<exception>
+
+1364204720 /usr/local/include/cppconn/build_config.h
+
+1364204720 /usr/local/include/cppconn/warning.h
+	<stdexcept>
+	<string>
+	<memory>
+	"sqlstring.h"
+
+1364204720 /usr/local/include/cppconn/sqlstring.h
+	<string>
+	"build_config.h"
+	<iostream>
+
+1364204720 /usr/local/include/cppconn/exception.h
+	"build_config.h"
+	<stdexcept>
+	<string>
+	<memory>
+
+1364204720 /usr/local/include/cppconn/resultset.h
+	"config.h"
+	<list>
+	<map>
+	<iostream>
+	"sqlstring.h"
+	"resultset_metadata.h"
+
+1411745149 /usr/local/include/cppconn/config.h
+	<stdint.h>
+	<inttypes.h>
+	<stdint.h>
+
+1364204720 /usr/local/include/cppconn/resultset_metadata.h
+	"sqlstring.h"
+	"datatype.h"
+
+1364204720 /usr/local/include/cppconn/datatype.h
+
+1364204720 /usr/local/include/cppconn/statement.h
+	"config.h"
+	"resultset.h"
+	<string>
+
+1364204720 /usr/local/include/cppconn/prepared_statement.h
+	<iostream>
+	"statement.h"
+
+1411664139 /usr/local/include/boost/algorithm/string.hpp
+	<boost/algorithm/string/std_containers_traits.hpp>
+	<boost/algorithm/string/trim.hpp>
+	<boost/algorithm/string/case_conv.hpp>
+	<boost/algorithm/string/predicate.hpp>
+	<boost/algorithm/string/find.hpp>
+	<boost/algorithm/string/split.hpp>
+	<boost/algorithm/string/join.hpp>
+	<boost/algorithm/string/replace.hpp>
+	<boost/algorithm/string/erase.hpp>
+	<boost/algorithm/string/classification.hpp>
+	<boost/algorithm/string/find_iterator.hpp>
+
+1411664144 /usr/local/include/boost/algorithm/string/std_containers_traits.hpp
+	<boost/config.hpp>
+	<boost/algorithm/string/std/string_traits.hpp>
+	<boost/algorithm/string/std/list_traits.hpp>
+	<boost/algorithm/string/std/slist_traits.hpp>
+
+1411664153 /usr/local/include/boost/algorithm/string/std/string_traits.hpp
+	<boost/algorithm/string/yes_no_type.hpp>
+	<string>
+	<boost/algorithm/string/sequence_traits.hpp>
+
+1411664153 /usr/local/include/boost/algorithm/string/std/list_traits.hpp
+	<boost/algorithm/string/yes_no_type.hpp>
+	<list>
+	<boost/algorithm/string/sequence_traits.hpp>
+
+1411664153 /usr/local/include/boost/algorithm/string/std/slist_traits.hpp
+	<boost/algorithm/string/config.hpp>
+	<boost/algorithm/string/yes_no_type.hpp>
+	<boost/algorithm/string/sequence_traits.hpp>
+
+1411664144 /usr/local/include/boost/algorithm/string/trim.hpp
+	<boost/algorithm/string/config.hpp>
+	<boost/range/begin.hpp>
+	<boost/range/end.hpp>
+	<boost/range/const_iterator.hpp>
+	<boost/range/as_literal.hpp>
+	<boost/range/iterator_range_core.hpp>
+	<boost/algorithm/string/detail/trim.hpp>
+	<boost/algorithm/string/classification.hpp>
+	<locale>
+
+1411664153 /usr/local/include/boost/algorithm/string/detail/trim.hpp
+	<boost/algorithm/string/config.hpp>
+	<boost/detail/iterator.hpp>
+
+1411664144 /usr/local/include/boost/algorithm/string/classification.hpp
+	<algorithm>
+	<locale>
+	<boost/range/value_type.hpp>
+	<boost/range/as_literal.hpp>
+	<boost/algorithm/string/detail/classification.hpp>
+	<boost/algorithm/string/predicate_facade.hpp>
+
+1411664153 /usr/local/include/boost/algorithm/string/detail/classification.hpp
+	<boost/algorithm/string/config.hpp>
+	<algorithm>
+	<functional>
+	<locale>
+	<boost/range/begin.hpp>
+	<boost/range/end.hpp>
+	<boost/algorithm/string/predicate_facade.hpp>
+	<boost/type_traits/remove_const.hpp>
+
+1411664144 /usr/local/include/boost/algorithm/string/predicate_facade.hpp
+	<boost/algorithm/string/config.hpp>
+
+1411664144 /usr/local/include/boost/algorithm/string/predicate.hpp
+	<boost/algorithm/string/config.hpp>
+	<boost/range/begin.hpp>
+	<boost/range/end.hpp>
+	<boost/range/iterator.hpp>
+	<boost/range/const_iterator.hpp>
+	<boost/range/as_literal.hpp>
+	<boost/range/iterator_range_core.hpp>
+	<boost/algorithm/string/compare.hpp>
+	<boost/algorithm/string/find.hpp>
+	<boost/algorithm/string/detail/predicate.hpp>
+
+1411664144 /usr/local/include/boost/algorithm/string/find.hpp
+	<boost/algorithm/string/config.hpp>
+	<boost/range/iterator_range_core.hpp>
+	<boost/range/begin.hpp>
+	<boost/range/end.hpp>
+	<boost/range/iterator.hpp>
+	<boost/range/as_literal.hpp>
+	<boost/algorithm/string/finder.hpp>
+	<boost/algorithm/string/compare.hpp>
+	<boost/algorithm/string/constants.hpp>
+
+1411664153 /usr/local/include/boost/algorithm/string/detail/predicate.hpp
+	<iterator>
+	<boost/algorithm/string/find.hpp>
+
+1411664144 /usr/local/include/boost/algorithm/string/split.hpp
+	<boost/algorithm/string/config.hpp>
+	<boost/algorithm/string/iter_find.hpp>
+	<boost/algorithm/string/finder.hpp>
+	<boost/algorithm/string/compare.hpp>
+
+1411664144 /usr/local/include/boost/algorithm/string/iter_find.hpp
+	<boost/algorithm/string/config.hpp>
+	<algorithm>
+	<iterator>
+	<boost/iterator/transform_iterator.hpp>
+	<boost/range/iterator_range_core.hpp>
+	<boost/range/begin.hpp>
+	<boost/range/end.hpp>
+	<boost/range/iterator.hpp>
+	<boost/range/value_type.hpp>
+	<boost/range/as_literal.hpp>
+	<boost/algorithm/string/concept.hpp>
+	<boost/algorithm/string/find_iterator.hpp>
+	<boost/algorithm/string/detail/util.hpp>
+
+1411664144 /usr/local/include/boost/algorithm/string/find_iterator.hpp
+	<boost/algorithm/string/config.hpp>
+	<boost/iterator/iterator_facade.hpp>
+	<boost/iterator/iterator_categories.hpp>
+	<boost/range/iterator_range_core.hpp>
+	<boost/range/begin.hpp>
+	<boost/range/end.hpp>
+	<boost/range/iterator.hpp>
+	<boost/range/as_literal.hpp>
+	<boost/algorithm/string/detail/find_iterator.hpp>
+
+1411664153 /usr/local/include/boost/algorithm/string/detail/find_iterator.hpp
+	<boost/algorithm/string/config.hpp>
+	<boost/range/iterator_range_core.hpp>
+	<boost/iterator/iterator_facade.hpp>
+	<boost/iterator/iterator_categories.hpp>
+	<boost/function.hpp>
+
+1411664144 /usr/local/include/boost/algorithm/string/join.hpp
+	<boost/algorithm/string/config.hpp>
+	<boost/algorithm/string/detail/sequence.hpp>
+	<boost/range/value_type.hpp>
+	<boost/range/as_literal.hpp>
 

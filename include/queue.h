@@ -18,8 +18,6 @@ extern "C"
 #include "util.h"
 #include "exceptionmir.h"
 
-#define FIFO
-
 using namespace std;
 
 class Queue
@@ -31,7 +29,9 @@ class Queue
         /** \brief
         * Retorna o tamanho da queue
         */
-        int getQueueSize();
+        int getQueueSize();     // quantidade de frames
+        int getNbBuffers();     // quantidade de buffers
+        int getSzBuffer();      // bytes por buffer
 
         /** \brief
         * Adiciona frame decodificado para a queue
@@ -39,29 +39,32 @@ class Queue
         * \param inputSamples   - dados decodificados que serão inseridos na queue
         * \param frameSize      - tamanho dos dados.
         */
-        void addQueueData(uint8_t **inputSamples, const int frameSize);
+        void addQueueData(AVFrame* frame);
 
         /** \brief
         * Retorna dados da queue, correspondente a um pacote
         */
 //        int getQueueData(uint8_t **dest, int nbSamples);
         vector<vector<uint8_t>> getQueueData();
-        int getChannelSize();
     protected:
     private:
         boost::mutex mtx_;  // controle de lock da thread
         bool mtx = false;
-        queue <vector<vector<uint8_t>>> queueData;
-        int SampleSize;
-        int FrameSize;
-        int nbChannel;
-        int bufSize;
-        int nbBuffers;
 
-#ifdef FIFO
-        AVAudioFifo *fifo = NULL;
-#endif // FIFO
-        void initFIFO(AVCodecContext* codecContext, AVFormatContext* formatContext);
+        bool isPlannar;
+        int szFrame;
+        int nbBuffers;
+        int szBuffers;
+        int szData;
+        int szBuffer;
+        int nbChannels;
+        enum AVSampleFormat Format;
+
+        queue <vector<vector<uint8_t>>> queueData;
+
+        // vetores auxiliares
+        vector<vector <uint8_t>> buf1;
+        vector <uint8_t> buf2;
 };
 
 #endif // QUEUE_H

@@ -2,16 +2,20 @@
 
 Queue::Queue(AVCodecContext* codecContext, AVFormatContext* formatContext)
 {
-    this->nbChannel = codecContext->channels;
-    this->FrameSize = codecContext->frame_size;
-    this->nbBuffers = av_sample_fmt_is_planar(codecContext->sample_fmt) ? this->nbChannel : 1;
-    av_samples_get_buffer_size(&this->bufSize, this->nbChannel, 1, codecContext->sample_fmt, 1);
-    this->SampleSize = bufSize;
+    this->nbChannels = codecContext->channels;
+    this->Format = codecContext->sample_fmt;
+    this->isPlannar = av_sample_fmt_is_planar(codecContext->sample_fmt);
+    this->szData = av_get_bytes_per_sample(codecContext->sample_fmt);
+    this->nbBuffers = av_sample_fmt_is_planar(codecContext->sample_fmt) ? codecContext->channels : 1;
+    this->szFrame = codecContext->frame_size;
+    szBuffers = av_samples_get_buffer_size(&this->szBuffer, codecContext->channels, codecContext->frame_size,
+                                           codecContext->sample_fmt, 1);
 }
 
 Queue::~Queue()
 {
-    //dtor
+    while(!queueData.empty())
+        queueData.pop();
 }
 
 int Queue::getQueueSize()
@@ -23,7 +27,7 @@ int Queue::getQueueSize()
     try
     {
         int ret;
-        ret = queueData.size() * FrameSize;
+        ret = queueData.size() * szFrame;
         mtx = false;
         return ret;
     }
@@ -34,7 +38,17 @@ int Queue::getQueueSize()
     }
 }
 
-void Queue::addQueueData(uint8_t **inputSamples, const int frameSize)
+int Queue::getSzBuffer()
+{
+    return this->szBuffer;
+}
+
+int Queue::getNbBuffers()
+{
+    return this->nbBuffers;
+}
+
+void Queue::addQueueData(AVFrame* frame)
 {
     /**
      * Make the FIFO as large as it needs to be to hold both,
@@ -44,22 +58,28 @@ void Queue::addQueueData(uint8_t **inputSamples, const int frameSize)
     while (mtx)
         boost::this_thread::sleep(boost::posix_time::milliseconds(10));
     mtx = true;
+
+    if (frame->linesize[0] != szBuffer)
+        throw FifoException() << errno_code(MIR_ERR_FIFO_BUFFER_SIZE);
+    if (frame->format != Format)
+        throw FifoException() << errno_code(MIR_ERR_FIFO_ADD_FORMAT);
+    if (frame->channels != nbChannels)
+        throw FifoException() << errno_code(MIR_ERR_FIFO_ADD_CHANNELS);
     try
     {
-        vector<vector <uint8_t>> buf1;
         for (int numBuf = 0; numBuf < nbBuffers; numBuf++)
         {
-            vector <uint8_t> buf2;
-            for (int data = 0; data < frameSize; data++)
-                for (int qntByte = 0; qntByte < bufSize; qntByte++)
-                    buf2.push_back(inputSamples[numBuf][data * bufSize + qntByte]);
+            for (int data = 0; data < szBuffer; data++)
+                buf2.push_back(frame->data[numBuf][data]);
             buf1.push_back(buf2);
+            buf2.clear();
         }
 
         queueData.push(buf1);
 
         for (int numBuf = 0; numBuf < nbBuffers; numBuf++)
             buf1[numBuf].clear();
+
         buf1.clear();
         mtx = false;
     }
@@ -79,7 +99,7 @@ vector<vector<uint8_t>> Queue::getQueueData()
     mtx = true;
     try
     {
-        if (queueData.size() > 0)
+        if (!queueData.empty())
         {
             ret = queueData.front();
 
@@ -94,9 +114,4 @@ vector<vector<uint8_t>> Queue::getQueueData()
         mtx = false;
         throw FifoException() << errno_code(MIR_ERR_FIFO_GET);
     }
-}
-
-int Queue::getChannelSize()
-{
-    return FrameSize * bufSize;
 }

@@ -49,6 +49,8 @@ void Parser::Config()
 
         // inicia o resample
         InitResampler();
+
+        nbBuffers = av_sample_fmt_is_planar(sampleFormatIn) ? this->nbChannelIn : 1;
     }
     catch(...)
     {
@@ -148,6 +150,8 @@ void Parser::setStream()
         if (error < 0)
             throw StreamException() << errno_code(MIR_ERR_OPEN_STREAM);
     }
+
+    av_dump_format(fmt_ctx_out, 0, fileName.c_str(), 1);
 }
 
 void Parser::InitResampler()
@@ -185,7 +189,7 @@ void Parser::Resample()
 
     frame_out = av_frame_alloc();
     if (frame_out == NULL)
-        throw BadAllocException() << errno_code(MIR_ERR_FRAME_ALLOC);
+        throw ResampleException() << errno_code(MIR_ERR_FRAME_ALLOC);
 
     frame_out->nb_samples = cdc_ctx_out->frame_size;
     frame_out->format = cdc_ctx_out->sample_fmt;
@@ -193,11 +197,11 @@ void Parser::Resample()
     frame_out->channel_layout = av_get_default_channel_layout(nbChannel);
 
     if (av_frame_get_buffer(frame_out, 1) < 0)
-        throw BadAllocException() << errno_code(MIR_ERR_BUFFER_ALLOC);
+        throw ResampleException() << errno_code(MIR_ERR_BUFFER_ALLOC);
 
     frame_in = av_frame_alloc();
     if (frame_in == NULL)
-        throw BadAllocException() << errno_code(MIR_ERR_FRAME_ALLOC);
+        throw ResampleException() << errno_code(MIR_ERR_FRAME_ALLOC);
 
     frame_in->nb_samples = nbSamplesIn;
     frame_in->format = sampleFormatIn;
@@ -205,15 +209,23 @@ void Parser::Resample()
     frame_in->channel_layout = channelLayoutIn;
 
     if (av_frame_get_buffer(frame_in, 1) < 0)
-        throw BadAllocException() << errno_code(MIR_ERR_BUFFER_ALLOC);
+        throw ResampleException() << errno_code(MIR_ERR_BUFFER_ALLOC);
 
     for (int idxFrame = 0; idxFrame < (int)this->bufFrames.size(); idxFrame++)
     {
-        boost::this_thread::sleep(boost::posix_time::milliseconds(1));
+//        boost::this_thread::sleep(boost::posix_time::milliseconds(1));
 
         vector<vector<uint8_t>> aux = bufFrames[idxFrame];
+
+        if (aux.size() != nbBuffers)
+            throw FifoException() << errno_code(MIR_ERR_FIFO_DATA1);
+
         for (int i = 0; i < (int)aux.size(); i++)
-            memcpy(frame_in->data[i], aux[i].data(), szChannel);
+        {
+            if (aux[i].size() != szBuffer)
+                throw FifoException() << errno_code(MIR_ERR_FIFO_DATA2);
+            memcpy(frame_in->data[i], aux[i].data(), szBuffer);
+        }
         for (int i = 0; i < (int)aux.size(); i++)
             aux[i].clear();
         aux.clear();
@@ -229,13 +241,13 @@ void Parser::Resample()
             if (avcodec_encode_audio2(cdc_ctx_out, &pkt_out, frame_out, &got_frame) >= 0)
                 EndResample();
             else
-                throw FFMpegException() << errno_code(MIR_ERR_ENCODE);
+                throw ResampleException() << errno_code(MIR_ERR_ENCODE);
 
             av_free_packet(&pkt_out);
 //            av_frame_unref(frame_out);
         }
         else
-            throw FFMpegException() << errno_code(MIR_ERR_RESAMPLE);
+            throw ResampleException() << errno_code(MIR_ERR_RESAMPLE);
     }
 
     for (int idxFrame = 0; idxFrame < (int)this->bufFrames.size(); idxFrame++)
@@ -305,10 +317,9 @@ void Parser::setChannels(unsigned int value)
     nbChannel = value;
 }
 
-void Parser::setBuffer(vector<vector<vector<uint8_t>>> value, int szChannel)
+void Parser::setBuffer(vector<vector<vector<uint8_t>>> value)
 {
     bufFrames = value;
-    this->szChannel = szChannel;
 }
 
 void Parser::Execute(){}

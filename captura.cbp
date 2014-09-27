@@ -61,6 +61,7 @@
 			<Add library="/usr/local/lib/libboost_timer.so" />
 			<Add library="/usr/local/lib/libboost_log.so" />
 			<Add library="/usr/local/lib/mir/libSkyLibs.so" />
+			<Add library="/usr/local/lib/libmysqlcppconn.so" />
 			<Add directory="/usr/local/lib" />
 		</Linker>
 		<Unit filename="config.ini">
@@ -87,10 +88,7 @@
 			<Option target="Release" />
 		</Unit>
 		<Unit filename="src/configuration.cpp" />
-		<Unit filename="src/database_mysql.cpp">
-			<Option compile="0" />
-			<Option link="0" />
-		</Unit>
+		<Unit filename="src/database_mysql.cpp" />
 		<Unit filename="src/database_sql.cpp" />
 		<Unit filename="src/filedata.cpp" />
 		<Unit filename="src/logger.cpp" />

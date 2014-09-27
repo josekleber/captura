@@ -140,27 +140,48 @@ void init()
     );
 }
 
-
-struct strPP
-{
-    int a;
-    int b;
-};
-
-
 /** \brief Sistema de Captura de Audios
     Captura através de streams web.
 */
 
 //#define TESTE
 
+#ifdef TESTE
+#include <sys/resource.h>
+struct strPP
+{
+    int a;
+    int b;
+};
+#endif // TESTE
+
 int main()
 {
     printf("\033[0m \033[2J\033[1;1H");
-    BOOST_LOG_TRIVIAL(info) <<  "Captura Version: " << prgVersion;
+    cout <<  "Captura Version: " << prgVersion << endl << endl;
 
 #ifdef TESTE
 /**/
+// teste de monitoramento de memoria
+struct rlimit limit;
+if (getrlimit(RLIMIT_AS, &limit) != 0) {
+    printf("getrlimit() failed with errno=%d\n", errno);
+    exit(1);
+  }
+
+  printf("Limite default para tamanho de processo:\n");
+  printf("O soft limit eh %ld MB\n", limit.rlim_cur/(1024*1024));       // ta dando -1
+  printf("O hard limit eh %ld MB\n", limit.rlim_max/(1024*1024));       // ta dando -1
+
+  if (getrlimit(RLIMIT_STACK, &limit) != 0) {
+    printf("getrlimit() failed with errno=%d\n", errno);
+    exit(1);
+  }
+
+  printf("\nLimite default para tamanho da area de pilha de um processo:\n");
+  printf("O soft limit eh %ld MB\n", limit.rlim_cur/(1024*1024));
+  printf("O hard limit eh %ld MB\n\n", limit.rlim_max/(1024*1024));      // ta dando -1
+
 // testes de vector
 vector<int> v01;
 vector<int> v02;
@@ -341,7 +362,8 @@ return 0;
     do
     {
         // carrega a lista de rádios
-        ret = loadStream();
+//        ret = loadStream();
+ret = readFileStream();
 
         if (ret < 0)
         {

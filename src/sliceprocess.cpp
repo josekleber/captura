@@ -102,7 +102,6 @@ void SliceProcess::thrProcessa()
                     // processamento para fingerprint
                     try
                     {
-/**/
                         objRawData = new RAWData();
                         objRawData->fileName = arqName + ".wav";
                         objRawData->channelLayoutIn = objRadio->getChannelLayout();
@@ -111,6 +110,7 @@ void SliceProcess::thrProcessa()
                         objRawData->sampleFormatIn = cdc_ctx_in->sample_fmt;
                         objRawData->nbSamplesIn = szFrame;
                         objRawData->nbChannelIn = cdc_ctx_in->channels;
+                        objRawData->szBuffer = objRadio->getSzBuffer();
 
                         objRawData->Filters = Filters;
                         objRawData->mrOn = mrOn;
@@ -122,12 +122,7 @@ void SliceProcess::thrProcessa()
 
                         objRawData->Config();
 
-//                        objRawData = new RAWData(arqName + ".wav", objRadio->getChannelLayout(),
-//                                                 cdc_ctx_in->sample_rate, cdc_ctx_in->bit_rate,
-//                                                 cdc_ctx_in->sample_fmt, szFrame, cdc_ctx_in->channels,
-//                                                 Filters, mrOn, svFP, ipRecognition, portRecognition, idRadio, idSlice);
-
-                        objRawData->setBuffer(Packets, objRadio->getChannelSize());
+                        objRawData->setBuffer(Packets);
                         objThreadRawParser = new boost::thread(boost::bind(&RAWData::Execute, objRawData));
                     }
                     catch(...)
@@ -137,7 +132,7 @@ void SliceProcess::thrProcessa()
                     }
 /**/
 
-/**
+/**/
                     // processamento para arquivo
                     try
                     {
@@ -149,14 +144,11 @@ void SliceProcess::thrProcessa()
                         objFileData->sampleFormatIn = cdc_ctx_in->sample_fmt;
                         objFileData->nbSamplesIn = szFrame;
                         objFileData->nbChannelIn = cdc_ctx_in->channels;
+                        objFileData->szBuffer = objRadio->getSzBuffer();
 
                         objFileData->Config();
 
-//                        objFileData = new FileData(arqName + ".mp3", objRadio->getChannelLayout(),
-//                                                 cdc_ctx_in->sample_rate, cdc_ctx_in->bit_rate,
-//                                                 cdc_ctx_in->sample_fmt, szFrame, cdc_ctx_in->channels);
-
-                        objFileData->setBuffer(Packets, objRadio->getChannelSize());
+                        objFileData->setBuffer(Packets);
                         objThreadArqParser = new boost::thread(boost::bind(&FileData::Execute, objFileData));
                     }
                     catch(...)
@@ -185,6 +177,10 @@ cout << "idRadio: " << idRadio << "    idSlice: " << idSlice << "    FIFO: " << 
         catch(exception& err)
         {
             BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED << "Error: " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
+        }
+        catch(FifoException& err)
+        {
+            BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED << "Fifo Error: " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
         }
         catch(...)
         {

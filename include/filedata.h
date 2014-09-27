@@ -20,8 +20,6 @@ class FileData : public Parser
         virtual ~FileData();
 
         virtual void Execute();
-
-        string fileName;
     protected:
 
         int setStreamOut();

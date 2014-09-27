@@ -208,7 +208,6 @@ void Database_MySql::open()
     }
 }
 
-
 string Database_MySql::getDateSqlString()
 {
     time_t rawtime;
@@ -220,7 +219,6 @@ string Database_MySql::getDateSqlString()
     strftime (buffer,80,"%F %T",timeinfo);
     return string(buffer);
 }
-
 
 void Database_MySql::close()
 {
