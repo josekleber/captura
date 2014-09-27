@@ -6,14 +6,14 @@ SliceProcess::SliceProcess()
     Status = 0;
 }
 
-SliceProcess::SliceProcess(int mrOn, bool svFP, string ipRecognition, string portRecognition, string sqlConnString,
+SliceProcess::SliceProcess(int mrOn, bool svFP, string ipRecognition, string portRecognition, string mySqlConnString,
                            string cutFolder, int idRadio, vector<Filter> *Filters, StreamRadio* objRadio)
 {
     this->mrOn = mrOn;
     this->svFP = svFP;
     this->ipRecognition = ipRecognition;
     this->portRecognition = portRecognition;
-    this->sqlConnString = sqlConnString;
+    this->mySqlConnString = mySqlConnString;
     this->cutFolder = cutFolder;
     this->idRadio = idRadio;
     this->Filters = Filters;
@@ -117,6 +117,7 @@ void SliceProcess::thrProcessa()
                         objRawData->svFP = svFP;
                         objRawData->ipRecognition = ipRecognition;
                         objRawData->portRecognition = portRecognition;
+                        objRawData->mySqlConnString = mySqlConnString;
                         objRawData->idRadio = idRadio;
                         objRawData->idSlice = idSlice;
 

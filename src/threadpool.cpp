@@ -3,14 +3,14 @@
 using namespace std;
 
 ThreadPool::ThreadPool(int mrOn, bool svFP, string ipRecognition, string portRecognition,
-                   string sqlConnString, string cutFolder, vector<Filter> *Filters)
+                   string mySqlConnString, string cutFolder, vector<Filter> *Filters)
 {
         this->mrOn = mrOn;
         this->svFP = svFP;
         this->ipRecognition = ipRecognition;
         this->portRecognition = portRecognition;
 
-        this->sqlConnString = sqlConnString;
+        this->mySqlConnString = mySqlConnString;
 
         this->cutFolder = cutFolder;
 
@@ -33,23 +33,17 @@ void ThreadPool::addThreads(string uriRadio, int idRadio)
         objThreadControl->idThread = idRadio;
         objThreadControl->uriRadio = uriRadio;
 
-/**
-        objThreadControl->objCapture = new ThreadCapture(mrOn, svFP, ipRecognition, portRecognition,
-                                                         sqlConnString, idRadio, uriRadio,
-                                                         Filters, cutFolder);
-/**/
         objThreadControl->objCapture = new ThreadCapture();
         objThreadControl->objCapture->mrOn = mrOn;
         objThreadControl->objCapture->svFP = svFP;
         objThreadControl->objCapture->ipRecognition = ipRecognition;
         objThreadControl->objCapture->portRecognition = portRecognition;
-        objThreadControl->objCapture->sqlConnString = sqlConnString;
+        objThreadControl->objCapture->mySqlConnString = mySqlConnString;
 
         objThreadControl->objCapture->idThread = idRadio;
         objThreadControl->objCapture->uriRadio = uriRadio;
         objThreadControl->objCapture->Filters = Filters;
         objThreadControl->objCapture->cutFolder = cutFolder;
-/**/
     }
     catch(...)
     {

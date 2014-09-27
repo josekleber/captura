@@ -40,7 +40,7 @@ class ThreadPool
         bool svFP;
         string ipRecognition;
         string portRecognition;
-        string sqlConnString;
+        string mySqlConnString;
 
         string cutFolder;
 

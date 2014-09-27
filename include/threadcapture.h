@@ -22,7 +22,7 @@ class ThreadCapture
     public:
         ThreadCapture();
         ThreadCapture(int mrOn, bool svFP, string ipRecognition, string portRecognition,
-                      string sqlConnString, int idThread, string uriRadio,
+                      string mySqlConnString, int idThread, string uriRadio,
                       vector<Filter> *Filters, string cutFolder);
         virtual ~ThreadCapture();
 
@@ -34,7 +34,7 @@ class ThreadCapture
         bool svFP;
         string ipRecognition;
         string portRecognition;
-        string sqlConnString;
+        string mySqlConnString;
 
         string uriRadio;
         int idThread;   // igual a idRadio

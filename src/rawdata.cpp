@@ -121,7 +121,20 @@ start = clock();
 
     if (bits != NULL)
     {
-        // TODO: cadastrar no mySql
+        int idMySql = 0;
+        try
+        {
+            string aux = fileName.substr(0, fileName.find_last_of(".")) + "mp3";
+            objMySql = new Database_MySql(mySqlConnString);
+
+            objMySql->open();
+            idMySql = objMySql->insertRecorte(idRadio, nbits, aux, bits);
+            objMySql->close();
+        }
+        catch(...)
+        {
+            printf(">>>>>>>> Erro ao registrar no banco de dados para contingencia\n");
+        }
 
         // enviando dados para o mrserver
         if (mrOn != 0)
@@ -136,7 +149,7 @@ start = clock();
             conv = (uint8_t*)&this->idRadio;
             for (int i = 0; i < 4; buff[pos++] = conv[i++]);
 
-            conv = (uint8_t*)&idSlice;
+            conv = (uint8_t*)&idMySql;
             for (int i = 0; i < 4; buff[pos++] = conv[i++]);
 
             conv = (uint8_t*)&nbits;

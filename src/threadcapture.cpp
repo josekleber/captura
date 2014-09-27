@@ -9,14 +9,14 @@ ThreadCapture::ThreadCapture()
 }
 
 ThreadCapture::ThreadCapture(int mrOn, bool svFP, string ipRecognition, string portRecognition,
-                      string sqlConnString, int idThread, string uriRadio,
+                      string mySqlConnString, int idThread, string uriRadio,
                       vector<Filter> *Filters, string cutFolder)
 {
     this->mrOn = mrOn;
     this->svFP = svFP;
     this->ipRecognition = ipRecognition;
     this->portRecognition = portRecognition;
-    this->sqlConnString = sqlConnString;
+    this->mySqlConnString = mySqlConnString;
 
     this->idThread = idThread;   // igual a idRadio
     this->uriRadio = uriRadio;
@@ -97,7 +97,7 @@ void ThreadCapture::thrRun()
             objSlice->svFP = svFP;
             objSlice->ipRecognition = ipRecognition;
             objSlice->portRecognition = portRecognition;
-            objSlice->sqlConnString = sqlConnString;
+            objSlice->mySqlConnString = mySqlConnString;
             objSlice->cutFolder = cutFolder;
             objSlice->idRadio = idThread;
             objSlice->Filters = Filters;
