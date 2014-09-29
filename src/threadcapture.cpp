@@ -108,7 +108,7 @@ void ThreadCapture::thrRun()
 
             do
             {
-                boost::this_thread::sleep(boost::posix_time::microseconds(500));
+                boost::this_thread::sleep(boost::posix_time::microseconds(100));
             } while (objRadio->getQueueSize() == 0);
 
             objThreadProcessa = new boost::thread(boost::bind(&SliceProcess::thrProcessa, objSlice));
@@ -121,7 +121,6 @@ void ThreadCapture::thrRun()
                     objSlice = NULL;
 
                     objRadio->close();
-                    delete objRadio;
                     objRadio = NULL;
 
                     break;

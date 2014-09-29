@@ -1,14 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="include/queue.h" open="0" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="src/parser.cpp" open="0" top="0" tabpos="10" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="1341" topLine="19" />
-		</Cursor>
-	</File>
-	<File name="src/threadpool.cpp" open="0" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="1454" topLine="10" />
+			<Cursor1 position="6789" topLine="3" />
 		</Cursor>
 	</File>
 	<File name="include/parser.h" open="0" top="0" tabpos="11" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
@@ -16,49 +11,14 @@
 			<Cursor1 position="1339" topLine="54" />
 		</Cursor>
 	</File>
-	<File name="src/rawdata.cpp" open="0" top="0" tabpos="8" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="4127" topLine="119" />
-		</Cursor>
-	</File>
 	<File name="include/sliceprocess.h" open="0" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="779" topLine="24" />
 		</Cursor>
 	</File>
-	<File name="src/streamradio.cpp" open="0" top="0" tabpos="16" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="makefile" open="0" top="0" tabpos="18" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="7766" topLine="245" />
-		</Cursor>
-	</File>
-	<File name="src/threadcapture.cpp" open="0" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="266" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="src/main.cpp" open="0" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="9258" topLine="345" />
-		</Cursor>
-	</File>
-	<File name="src/filedata.cpp" open="0" top="0" tabpos="12" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="1503" topLine="30" />
-		</Cursor>
-	</File>
-	<File name="config.ini" open="0" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="149" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="src/sliceprocess.cpp" open="0" top="0" tabpos="14" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="217" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="include/main.h" open="0" top="0" tabpos="19" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="303" topLine="0" />
+			<Cursor1 position="952" topLine="0" />
 		</Cursor>
 	</File>
 	<File name="include/threadpool.h" open="0" top="0" tabpos="17" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
@@ -66,19 +26,29 @@
 			<Cursor1 position="986" topLine="13" />
 		</Cursor>
 	</File>
-	<File name="makefile" open="0" top="0" tabpos="18" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="src/configuration.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="3498" topLine="64" />
+			<Cursor1 position="579" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="include/configuration.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="src/main.cpp" open="0" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="342" topLine="0" />
+			<Cursor1 position="9258" topLine="345" />
 		</Cursor>
 	</File>
-	<File name="include/threadcapture.h" open="0" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="include/streamradio.h" open="0" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="666" topLine="15" />
+			<Cursor1 position="447" topLine="12" />
+		</Cursor>
+	</File>
+	<File name="include/queue.h" open="0" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1341" topLine="19" />
+		</Cursor>
+	</File>
+	<File name="include/filedata.h" open="0" top="0" tabpos="13" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="540" topLine="0" />
 		</Cursor>
 	</File>
 	<File name="src/queue.cpp" open="0" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
@@ -90,24 +60,14 @@
 			<Collapse line="41" />
 		</Folding>
 	</File>
-	<File name="include/streamradio.h" open="0" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="include/util.h" open="0" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="3542" topLine="132" />
+			<Cursor1 position="288" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="src/configuration.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="include/threadcapture.h" open="0" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="579" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="include/logger.h" open="0" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="557" topLine="2" />
-		</Cursor>
-	</File>
-	<File name="include/filedata.h" open="0" top="0" tabpos="13" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="540" topLine="0" />
+			<Cursor1 position="666" topLine="15" />
 		</Cursor>
 	</File>
 	<File name="src/logger.cpp" open="0" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
@@ -115,19 +75,64 @@
 			<Cursor1 position="263" topLine="11" />
 		</Cursor>
 	</File>
+	<File name="src/threadpool.cpp" open="0" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1454" topLine="10" />
+		</Cursor>
+	</File>
+	<File name="src/sliceprocess.cpp" open="0" top="0" tabpos="14" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1741" topLine="70" />
+		</Cursor>
+	</File>
 	<File name="include/rawdata.h" open="0" top="0" tabpos="9" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="124" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="include/exceptionmir.h" open="0" top="0" tabpos="15" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="src/threadcapture.cpp" open="0" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="4135" topLine="131" />
+			<Cursor1 position="1902" topLine="65" />
 		</Cursor>
 	</File>
-	<File name="src/parser.cpp" open="0" top="0" tabpos="10" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="include/main.h" open="0" top="0" tabpos="19" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="6789" topLine="197" />
+			<Cursor1 position="303" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="src/rawdata.cpp" open="0" top="0" tabpos="8" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="3201" topLine="102" />
+		</Cursor>
+	</File>
+	<File name="src/filedata.cpp" open="0" top="0" tabpos="12" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1503" topLine="30" />
+		</Cursor>
+	</File>
+	<File name="src/streamradio.cpp" open="0" top="0" tabpos="16" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="7843" topLine="259" />
+		</Cursor>
+	</File>
+	<File name="config.ini" open="0" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="149" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="include/logger.h" open="0" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="557" topLine="2" />
+		</Cursor>
+	</File>
+	<File name="include/exceptionmir.h" open="0" top="0" tabpos="15" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="2572" topLine="77" />
+		</Cursor>
+	</File>
+	<File name="include/configuration.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="342" topLine="0" />
 		</Cursor>
 	</File>
 </CodeBlocks_layout_file>

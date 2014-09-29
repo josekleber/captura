@@ -32,6 +32,8 @@ enum EnumStatusConnect
     MIR_CONNECTION_ERROR
 };
 
+#define MAX_QUEUE_SIZE 1000000
+
 /** \brief
 * Estrutura que representa os streams de uma conexão
 */

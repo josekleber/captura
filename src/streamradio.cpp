@@ -26,14 +26,12 @@ StreamRadio::~StreamRadio()
     while (statusConnection == EnumStatusConnect::MIR_CONNECTION_OPEN)
         boost::this_thread::sleep(boost::posix_time::milliseconds(10));
 
-    if (formatContext)
-        avformat_free_context(formatContext);
     if (dictionary)
         av_free(dictionary);
+    if (formatContext)
+        avformat_free_context(formatContext);
     if (codecContext)
         avcodec_close(codecContext);
-    if (codec)
-        av_free(codec);
 }
 
 double StreamRadio::getConnectionTime()
@@ -277,6 +275,9 @@ int njn = 0;
                     objQueue->addQueueData(frame);
 
                     av_frame_free(&frame);
+
+                    if (getQueueSize() > MAX_QUEUE_SIZE)
+                        boost::this_thread::sleep(boost::posix_time::milliseconds(10));
 //cout << "pacote " << njn++ << endl;
                 }
                 catch(DecoderException& err)
@@ -288,8 +289,6 @@ int njn = 0;
                 {
                     BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Erro no FIFO: " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
                 }
-
-                //boost::this_thread::sleep(boost::posix_time::milliseconds(1));
             }
         }
         catch (...)

@@ -4203,7 +4203,7 @@
 	<boost/date_time/posix_time/posix_time.hpp>
 	<boost/thread/thread.hpp>
 
-1411847653 /usr/local/include/mir/filter.h
+1411996375 /usr/local/include/mir/filter.h
 	<stdio.h>
 	<stdlib.h>
 	<complex>
@@ -7403,7 +7403,7 @@
 	"streamradio.h"
 	"database.h"
 
-1411847653 /usr/local/include/mir/fingerprint.h
+1411996375 /usr/local/include/mir/fingerprint.h
 	<complex>
 	<fftw3.h>
 	<stdio.h>
@@ -7415,6 +7415,7 @@
 	<bitset>
 	<boost/exception/all.hpp>
 	"filter.h"
+	"exceptionclass.h"
 
 1404736135 /home/kleber/mir/git/captura/include/exceptionclass.h
 	<string>
@@ -7462,11 +7463,13 @@
 	"threadpool.h"
 	"database.h"
 
-1409857946 /usr/local/include/mir/exceptionclass.h
+1411996375 /usr/local/include/mir/exceptionclass.h
 	<string>
 	<exception>
+	<boost/exception/all.hpp>
+	<boost/log/trivial.hpp>
 
-1411847653 /usr/local/include/mir/tcpclient.h
+1411996375 /usr/local/include/mir/tcpclient.h
 	<cstdlib>
 	<deque>
 	<iostream>
@@ -7474,6 +7477,7 @@
 	<boost/asio.hpp>
 	<boost/bind.hpp>
 	<boost/thread/thread.hpp>
+	"exceptionclass.h"
 
 1411664138 /usr/local/include/boost/asio.hpp
 	<boost/asio/async_result.hpp>
@@ -17916,7 +17920,7 @@
 	"streamradio.h"
 	"sliceprocess.h"
 
-1411829188 /home/mir/Projetos/mir/captura/include/streamradio.h
+1411945299 /home/mir/Projetos/mir/captura/include/streamradio.h
 	<stdio.h>
 	<time.h>
 	<string.h>
@@ -17959,16 +17963,16 @@
 1411836255 source:/home/mir/Projetos/mir/captura/src/queue.cpp
 	"queue.h"
 
-1411844583 source:/home/mir/Projetos/mir/captura/src/rawdata.cpp
+1411946974 source:/home/mir/Projetos/mir/captura/src/rawdata.cpp
 	"rawdata.h"
 
-1411841001 source:/home/mir/Projetos/mir/captura/src/sliceprocess.cpp
+1411941532 source:/home/mir/Projetos/mir/captura/src/sliceprocess.cpp
 	"sliceprocess.h"
 
-1411829799 source:/home/mir/Projetos/mir/captura/src/streamradio.cpp
+1411945266 source:/home/mir/Projetos/mir/captura/src/streamradio.cpp
 	"streamradio.h"
 
-1411841001 source:/home/mir/Projetos/mir/captura/src/threadcapture.cpp
+1411941225 source:/home/mir/Projetos/mir/captura/src/threadcapture.cpp
 	"threadcapture.h"
 
 1411840927 source:/home/mir/Projetos/mir/captura/src/threadpool.cpp
@@ -21393,7 +21397,7 @@
 	<boost/range/value_type.hpp>
 	<boost/range/as_literal.hpp>
 
-1411847653 /usr/local/include/mir/database_sql.h
+1411934660 /usr/local/include/mir/database_sql.h
 	"exceptionmir.h"
 	<time.h>
 	<iostream>
@@ -21404,10 +21408,10 @@
 	<sqltypes.h>
 	<sqlext.h>
 
-1411847653 /usr/local/include/mir/exceptionmir.h
+1411934660 /usr/local/include/mir/exceptionmir.h
 	<boost/exception/all.hpp>
 
-1411847653 /usr/local/include/mir/database_mysql.h
+1411934660 /usr/local/include/mir/database_mysql.h
 	<time.h>
 	<iostream>
 	<fstream>

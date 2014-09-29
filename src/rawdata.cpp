@@ -56,11 +56,8 @@ unsigned int* RAWData::CreateFingerPrint(vector <uint8_t> Data, unsigned int* Fi
     unsigned int len = Data.size();
 
     uint8_t* convArray = new uint8_t[len];
-    for (unsigned int i = 0; i < len; i += 2)
-    {
-        convArray[i] = Data[i + 1] & 0xff;
-        convArray[i + 1] = Data[i] & 0xff;
-    }
+    for (unsigned int i = 0; i < len; i++)
+        convArray[i] = Data[i] & 0xff;
 
     try
     {
@@ -122,6 +119,8 @@ start = clock();
     if (bits != NULL)
     {
         int idMySql = 0;
+        bool okMySql = true;
+/**/
         try
         {
             string aux = fileName.substr(0, fileName.find_last_of(".")) + "mp3";
@@ -133,11 +132,38 @@ start = clock();
         }
         catch(...)
         {
-            printf(">>>>>>>> Erro ao registrar no banco de dados para contingencia\n");
+            okMySql = false;
+
+            BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Erro ao registrar no banco de dados para contingencia" ANSI_COLOR_RESET;
+        }
+/**/
+
+        try
+        {
+            if (svFP || !okMySql)
+            {
+                int p = fileName.find_last_of("/") + 1;
+                string aux = fileName.substr(0, p) + "FingerPrint";
+                boost::filesystem::path dirPath(aux);
+
+                if (!boost::filesystem::exists(dirPath))
+                {
+                    boost::filesystem::create_directories(dirPath);
+                }
+                aux += "/" + fileName.substr(p , fileName.find_last_of(".") - p) + ".bin";
+
+                FILE* fp = fopen(aux.c_str(), "wb");
+                fwrite((uint8_t*)&bits[0], nbits, 4, fp);
+                fclose(fp);
+            }
+        }
+        catch(...)
+        {
+                cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>> ERRO" << endl;
         }
 
         // enviando dados para o mrserver
-        if (mrOn != 0)
+        if ((mrOn != 0) && okMySql)
         {
             // preparando vetor com dados para envio via socket
             uint8_t* conv;
@@ -173,30 +199,6 @@ start = clock();
 
             try
             {
-                if (svFP)
-                {
-                    int p = fileName.find_last_of("/") + 1;
-                    string aux = fileName.substr(0, p) + "FingerPrint";
-                    boost::filesystem::path dirPath(aux);
-
-                    if (!boost::filesystem::exists(dirPath))
-                    {
-                        boost::filesystem::create_directories(dirPath);
-                    }
-                    aux += "/" + fileName.substr(p , fileName.find_last_of(".") - p) + ".bin";
-
-                    FILE* fp = fopen(aux.c_str(), "wb");
-                    fwrite(buff, 1, pos, fp);
-                    fclose(fp);
-                }
-            }
-            catch(...)
-            {
-                    cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>> ERRO" << endl;
-            }
-
-            try
-            {
                 boost::asio::io_service IO_Service;
                 tcp::resolver Resolver(IO_Service);
                 tcp::resolver::query Query(ipRecognition, portRecognition);
@@ -206,11 +208,18 @@ start = clock();
 
                 boost::thread ClientThread(boost::bind(&boost::asio::io_service::run, &IO_Service));
 
-                while (objClient->strResp == "")
+                int cntTimeOut = 0;
+                while ((objClient->strResp == "") && (cntTimeOut < 100))
+                {
                     boost::this_thread::sleep(boost::posix_time::milliseconds(10));
+                    cntTimeOut++;
+                }
 
                 if (objClient->strResp != "Received")
                     BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED << "Erro de envio : " << objClient->strResp << ANSI_COLOR_RESET;
+                if (cntTimeOut >= 100)
+                    BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED << "TimeOut no socket : " << objClient->strResp << ANSI_COLOR_RESET;
+
                 objClient->Close();
             }
             catch(ConvertException& err)
@@ -225,7 +234,7 @@ start = clock();
             delete[] buff;
         }
 
-cout << "Radio : " << this->idRadio << "    Recorte : " << idSlice << "    Tempo de processamento : " << (float)(clock() - start)/CLOCKS_PER_SEC << endl;
+cout << "Radio : " << this->idRadio << "    MySql : " << idMySql << "    Recorte : " << idSlice << "    Tempo de processamento : " << (float)(clock() - start)/CLOCKS_PER_SEC << endl;
 start = clock();
     }
 

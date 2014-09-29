@@ -27,7 +27,10 @@ SliceProcess::SliceProcess(int mrOn, bool svFP, string ipRecognition, string por
 SliceProcess::~SliceProcess()
 {
     stopThread = true;
+
+    boost::this_thread::sleep(boost::posix_time::seconds(10));
 }
+
 
 void SliceProcess::thrProcessa()
 {

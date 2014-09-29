@@ -60,6 +60,7 @@
 			<Add library="/usr/local/lib/libboost_timer.so" />
 			<Add library="/usr/local/lib/libboost_log.so" />
 			<Add library="/usr/local/lib/mir/libSkyLibs.so" />
+			<Add library="/usr/local/lib/mir/libSkyLibsDB.so" />
 			<Add directory="/usr/local/lib" />
 		</Linker>
 		<Unit filename="config.ini">
