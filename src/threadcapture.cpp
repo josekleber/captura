@@ -32,7 +32,7 @@ ThreadCapture::~ThreadCapture()
     stopThread = true;
 
     while (status == 0)
-        boost::this_thread::sleep(boost::posix_time::milliseconds(10));
+        usleep(10);
 
     if (objRadio != NULL)
     {
@@ -50,47 +50,43 @@ void ThreadCapture::thrRun()
             try
             {
                 objRadio = new StreamRadio;
-                objRadio->open(uriRadio);
+                objRadio->open(idThread, uriRadio);
             }
             catch(BadAllocException& err)
             {
-                BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED << "Error: " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
+                objLog->mr_printf(MR_LOG_ERROR, idThread, "%d\n", *boost::get_error_info<errno_code>(err));
             }
             catch(OpenConnectionException& err)
             {
-                BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED << "Error: " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
+                objLog->mr_printf(MR_LOG_ERROR, idThread, "%d\n", *boost::get_error_info<errno_code>(err));
             }
             catch(FifoException& err)
             {
-                BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED << "Fifo Error: " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
+                objLog->mr_printf(MR_LOG_ERROR, idThread, "%d\n", *boost::get_error_info<errno_code>(err));
             }
             catch(StreamRadioException& err)
             {
-                BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED << "StreamRadio Error: " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
+                objLog->mr_printf(MR_LOG_ERROR, idThread, "%d\n", *boost::get_error_info<errno_code>(err));
             }
             catch(GeneralException& err)
             {
-                BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED << "Error: " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
+                objLog->mr_printf(MR_LOG_ERROR, idThread, "%d\n", *boost::get_error_info<errno_code>(err));
             }
             catch(...)
             {
-                BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED << "Error: General erros" << ANSI_COLOR_RESET;
+                objLog->mr_printf(MR_LOG_ERROR, idThread, "General erros\n");
             }
 
             if (objRadio->getStatus() != EnumStatusConnect::MIR_CONNECTION_OPEN)
             {
                 delete objRadio;
                 objRadio = NULL;
-                boost::this_thread::sleep(boost::posix_time::seconds(30));
+                sleep(30);
             }
         } while (objRadio == NULL);
 
         try
         {
-/**
-            objSlice = new SliceProcess(mrOn, svFP, ipRecognition, portRecognition, sqlConnString,
-                                        cutFolder, idThread, Filters, objRadio);
-/**/
             objSlice = new SliceProcess();
 
             objSlice->mrOn = mrOn;
@@ -101,17 +97,17 @@ void ThreadCapture::thrRun()
             objSlice->cutFolder = cutFolder;
             objSlice->idRadio = idThread;
             objSlice->Filters = Filters;
+            objSlice->MutexAccess = MutexAccess;
 
             objSlice->objRadio = objRadio;
-/**/
-            objThreadRadio = new boost::thread(boost::bind(&StreamRadio::read, objRadio));
+            objThreadRadio = new thread(&StreamRadio::read, objRadio);
 
             do
             {
-                boost::this_thread::sleep(boost::posix_time::microseconds(100));
+                usleep(100);
             } while (objRadio->getQueueSize() == 0);
 
-            objThreadProcessa = new boost::thread(boost::bind(&SliceProcess::thrProcessa, objSlice));
+            objThreadProcessa = new thread(&SliceProcess::thrProcessa, objSlice);
 
             while (!stopThread)
             {
@@ -125,7 +121,7 @@ void ThreadCapture::thrRun()
 
                     break;
                 }
-                boost::this_thread::sleep(boost::posix_time::microseconds(1));
+                usleep(1);
             }
         }
         catch(...)

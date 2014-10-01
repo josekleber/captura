@@ -6,29 +6,11 @@ SliceProcess::SliceProcess()
     Status = 0;
 }
 
-SliceProcess::SliceProcess(int mrOn, bool svFP, string ipRecognition, string portRecognition, string mySqlConnString,
-                           string cutFolder, int idRadio, vector<Filter> *Filters, StreamRadio* objRadio)
-{
-    this->mrOn = mrOn;
-    this->svFP = svFP;
-    this->ipRecognition = ipRecognition;
-    this->portRecognition = portRecognition;
-    this->mySqlConnString = mySqlConnString;
-    this->cutFolder = cutFolder;
-    this->idRadio = idRadio;
-    this->Filters = Filters;
-
-    this->objRadio = objRadio;
-
-    stopThread = false;
-    Status = 0;
-}
-
 SliceProcess::~SliceProcess()
 {
     stopThread = true;
 
-    boost::this_thread::sleep(boost::posix_time::seconds(10));
+    sleep(10);
 }
 
 
@@ -48,7 +30,6 @@ void SliceProcess::thrProcessa()
 
     if (inFrame == NULL)
     {
-        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "catch open connection." ANSI_COLOR_RESET;
         Status = enumSliceProcess::ERROR;
         throw BadAllocException() << errno_code(MIR_ERR_FRAME_ALLOC);
     }
@@ -106,6 +87,7 @@ void SliceProcess::thrProcessa()
                     try
                     {
                         objRawData = new RAWData();
+                        objRawData->idRadio = idRadio;
                         objRawData->fileName = arqName + ".wav";
                         objRawData->channelLayoutIn = objRadio->getChannelLayout();
                         objRawData->sampleRateIn = cdc_ctx_in->sample_rate;
@@ -118,20 +100,19 @@ void SliceProcess::thrProcessa()
                         objRawData->Filters = Filters;
                         objRawData->mrOn = mrOn;
                         objRawData->svFP = svFP;
+                        objRawData->MutexAccess = MutexAccess;
                         objRawData->ipRecognition = ipRecognition;
                         objRawData->portRecognition = portRecognition;
                         objRawData->mySqlConnString = mySqlConnString;
-                        objRawData->idRadio = idRadio;
                         objRawData->idSlice = idSlice;
 
                         objRawData->Config();
 
                         objRawData->setBuffer(Packets);
-                        objThreadRawParser = new boost::thread(boost::bind(&RAWData::Execute, objRawData));
+                        objThreadRawParser = new thread(&RAWData::Execute, objRawData);
                     }
                     catch(...)
                     {
-                        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "catch do rawdata" ANSI_COLOR_RESET;
                         throw;
                     }
 /**/
@@ -141,6 +122,7 @@ void SliceProcess::thrProcessa()
                     try
                     {
                         objFileData = new FileData();
+                        objFileData->idRadio = idRadio;
                         objFileData->fileName = arqName + ".mp3";
                         objFileData->channelLayoutIn = objRadio->getChannelLayout();
                         objFileData->sampleRateIn = cdc_ctx_in->sample_rate;
@@ -150,18 +132,17 @@ void SliceProcess::thrProcessa()
                         objFileData->nbChannelIn = cdc_ctx_in->channels;
                         objFileData->szBuffer = objRadio->getSzBuffer();
 
+
                         objFileData->Config();
 
                         objFileData->setBuffer(Packets);
-                        objThreadArqParser = new boost::thread(boost::bind(&FileData::Execute, objFileData));
+                        objThreadArqParser = new thread(&FileData::Execute, objFileData);
                     }
                     catch(...)
                     {
-                        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "catch do filedata" ANSI_COLOR_RESET;
                         throw;
                     }
 /**/
-cout << "idRadio: " << idRadio << "    idSlice: " << idSlice << "    FIFO: " << szFifo << endl;
 
                     // reseta dados
                     for (int i = 0; i < Packets.size(); i++)
@@ -176,19 +157,19 @@ cout << "idRadio: " << idRadio << "    idSlice: " << idSlice << "    FIFO: " << 
                 }
             }
 
-            boost::this_thread::sleep(boost::posix_time::microseconds(1));
+            usleep(1);
         }
         catch(exception& err)
         {
-            BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED << "Error: " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
+            objLog->mr_printf(MR_LOG_ERROR, idRadio, "%d\n", *boost::get_error_info<errno_code>(err));
         }
         catch(FifoException& err)
         {
-            BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED << "Fifo Error: " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
+            objLog->mr_printf(MR_LOG_ERROR, idRadio, "FIFO %d\n", *boost::get_error_info<errno_code>(err));
         }
         catch(...)
         {
-            BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED << "Error" << ANSI_COLOR_RESET;
+            objLog->mr_printf(MR_LOG_ERROR, idRadio, "General Error\n");
         }
     }
 

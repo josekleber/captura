@@ -29,6 +29,11 @@ class Configuration
 
         std::string cutFolder;
 
+        bool toFile;
+        bool toScreen;
+        bool onMsg;
+        bool onDebug;
+
         virtual ~Configuration();
 
     protected:

@@ -11,41 +11,6 @@ RAWData::RAWData() : Parser ()
     this->freq = RAW_SAMPLE_RATE;
 }
 
-RAWData::RAWData(string fileName, uint64_t channelLayoutIn, int sampleRateIn, int bitRateIn,
-                 AVSampleFormat sampleFormatIn, int nbSamplesIn, int nbChannelIn,
-                 vector<Filter> *Filters, int mrOn, bool svFP, string ipRecognition, string portRecognition,
-                 int32_t idRadio, int32_t idSlice) :
-                     Parser (fileName, channelLayoutIn, sampleRateIn, bitRateIn,
-                             sampleFormatIn, nbSamplesIn, nbChannelIn)
-{
-    this->Filters = Filters;
-
-    this->mrOn = mrOn;
-    this->svFP = svFP;
-    this->ipRecognition = ipRecognition;
-    this->portRecognition = portRecognition;
-
-    this->idRadio = idRadio;
-    this->idSlice = idSlice;
-
-    this->audioFormat = RAWData::raw;
-
-    this->setBitRate(64000);
-    this->setChannels(1);
-    this->setSampleRate(11025);
-
-    this->freq = RAW_SAMPLE_RATE;
-
-    try
-    {
-        this->Config();
-    }
-    catch(...)
-    {
-        throw;
-    }
-}
-
 RAWData::~RAWData()
 {
     //dtor
@@ -63,7 +28,7 @@ unsigned int* RAWData::CreateFingerPrint(vector <uint8_t> Data, unsigned int* Fi
     {
         unsigned int *bits;
         FingerPrint* objFingerPrint = new FingerPrint(Filters, (short int*)convArray, len / 2,
-                cdc_ctx_out->sample_rate, mltFFT,
+                cdc_ctx_out->sample_rate, mltFFT, MutexAccess,
                 &bits, FingerPrintSize);
         objFingerPrint->Generate();
 
@@ -74,7 +39,7 @@ unsigned int* RAWData::CreateFingerPrint(vector <uint8_t> Data, unsigned int* Fi
     }
     catch(FingerPrintException& err)
     {
-        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "FingerPrint object create error : " << *boost::get_error_info<errmsg_info>(err) << ANSI_COLOR_RESET;
+        objLog->mr_printf(MR_LOG_ERROR, idRadio, "FingerPrint object create error : %d\n", (*boost::get_error_info<errmsg_info>(err)).c_str());
 
         return NULL;
     }
@@ -90,22 +55,22 @@ start = clock();
     }
     catch(ResampleException& err)
     {
-        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Error code (FP): " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
+        objLog->mr_printf(MR_LOG_ERROR, idRadio, "Error code (FP): %d\n", *boost::get_error_info<errno_code>(err));
         return;
     }
     catch(FifoException& err)
     {
-        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Error code (FP): " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
+        objLog->mr_printf(MR_LOG_ERROR, idRadio, "Error code (FP): %d\n", *boost::get_error_info<errno_code>(err));
         return;
     }
     catch(BadAllocException& err)
     {
-        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Error code (FP): " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
+        objLog->mr_printf(MR_LOG_ERROR, idRadio, "Error code (FP): %d\n", *boost::get_error_info<errno_code>(err));
         return;
     }
     catch(FFMpegException& err)
     {
-        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Error code (FP): " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
+        objLog->mr_printf(MR_LOG_ERROR, idRadio, "Error code (FP): %d\n", *boost::get_error_info<errno_code>(err));
         return;
     }
 
@@ -120,7 +85,7 @@ start = clock();
     {
         int idMySql = 0;
         bool okMySql = true;
-/**/
+/**
         try
         {
             string aux = fileName.substr(0, fileName.find_last_of(".")) + "mp3";
@@ -134,7 +99,7 @@ start = clock();
         {
             okMySql = false;
 
-            BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Erro ao registrar no banco de dados para contingencia" ANSI_COLOR_RESET;
+            objLog->mr_printf(MR_LOG_ERROR, idRadio, "Erro ao registrar no banco de dados para contingencia");
         }
 /**/
 
@@ -159,7 +124,7 @@ start = clock();
         }
         catch(...)
         {
-                cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>> ERRO" << endl;
+                objLog->mr_printf(MR_LOG_ERROR, idRadio, "Erro na gravacao do FingerPrint em arquivo\n");
         }
 
         // enviando dados para o mrserver
@@ -209,36 +174,37 @@ start = clock();
                 boost::thread ClientThread(boost::bind(&boost::asio::io_service::run, &IO_Service));
 
                 int cntTimeOut = 0;
-                while ((objClient->strResp == "") && (cntTimeOut < 100))
+                while ((objClient->strResp == "") && (cntTimeOut < SOCKET_TIMEOUT / 10))
                 {
-                    boost::this_thread::sleep(boost::posix_time::milliseconds(10));
+//                    boost::this_thread::sleep(boost::posix_time::milliseconds(10));
+                    usleep(10);
                     cntTimeOut++;
                 }
 
-                if (objClient->strResp != "Received")
-                    BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED << "Erro de envio : " << objClient->strResp << ANSI_COLOR_RESET;
-                if (cntTimeOut >= 100)
+                if (cntTimeOut >= SOCKET_TIMEOUT / 10)
                     BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED << "TimeOut no socket : " << objClient->strResp << ANSI_COLOR_RESET;
+                else if (objClient->strResp != "Received")
+                    BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED << "Erro de envio : " << objClient->strResp << ANSI_COLOR_RESET;
 
                 objClient->Close();
             }
             catch(ConvertException& err)
             {
-                BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED << err.what() << ANSI_COLOR_RESET;
+                objLog->mr_printf(MR_LOG_ERROR, idRadio, "%s\n", err.what());
             }
             catch (exception& err)
             {
-                BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED << err.what() << ANSI_COLOR_RESET;
+                objLog->mr_printf(MR_LOG_ERROR, idRadio, "%s\n", err.what());
             }
 
             delete[] buff;
         }
 
-cout << "Radio : " << this->idRadio << "    MySql : " << idMySql << "    Recorte : " << idSlice << "    Tempo de processamento : " << (float)(clock() - start)/CLOCKS_PER_SEC << endl;
+objLog->mr_printf(MR_LOG_DEBUG, idRadio, "MySql : %d    Recorte : %d    Tempo de processamento : %8.4f\n", idMySql, idSlice, (float)(clock() - start)/CLOCKS_PER_SEC);
 start = clock();
     }
 
-delete this;
+    delete this;
 }
 
 void RAWData::EndResample()

@@ -12,14 +12,13 @@ extern "C"
 #include <libavcodec/avcodec.h>
 }
 
-#include <boost/thread.hpp>
+#include <mir/exceptionclass.h>
 
 #include "util.h"
 #include "exceptionmir.h"
 #include "queue.h"
 
 using namespace std;
-namespace pt = boost::posix_time;
 
 /** \brief
 * Enumerador do status da conexão
@@ -75,7 +74,7 @@ public:
     *   \return retorna uma instãncia de AVFormatContext
     *   \exception BadAllocException, OpenConnectionException, ConnectionClosedException
     */
-    AVFormatContext* open(string uri);
+    AVFormatContext* open(int idRadio, string uri);
 
     /** \brief
     * Fecha uma conexão.
@@ -166,6 +165,7 @@ private:
     Queue* objQueue;
     int streamIndex; // contém o indice do stream de aúdio localizado av_find_best_stream.
     string uri; // URL ou arquivo de entrada de dados.
+    int idRadio;
     int channelLayout; // fix bug de entrada AAC, onde ao chamar o decode ele modifica o layout do channel de entrada.
 
     /** \brief

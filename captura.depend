@@ -4203,7 +4203,7 @@
 	<boost/date_time/posix_time/posix_time.hpp>
 	<boost/thread/thread.hpp>
 
-1411996375 /usr/local/include/mir/filter.h
+1412121597 /usr/local/include/mir/filter.h
 	<stdio.h>
 	<stdlib.h>
 	<complex>
@@ -7403,7 +7403,7 @@
 	"streamradio.h"
 	"database.h"
 
-1411996375 /usr/local/include/mir/fingerprint.h
+1412121597 /usr/local/include/mir/fingerprint.h
 	<complex>
 	<fftw3.h>
 	<stdio.h>
@@ -7413,6 +7413,7 @@
 	<string.h>
 	<vector>
 	<bitset>
+	<mutex>
 	<boost/exception/all.hpp>
 	"filter.h"
 	"exceptionclass.h"
@@ -7463,13 +7464,15 @@
 	"threadpool.h"
 	"database.h"
 
-1411996375 /usr/local/include/mir/exceptionclass.h
+1412121597 /usr/local/include/mir/exceptionclass.h
 	<string>
 	<exception>
-	<boost/exception/all.hpp>
+	<signal.h>
+	<errno.h>
+	<stdexcept>
 	<boost/log/trivial.hpp>
 
-1411996375 /usr/local/include/mir/tcpclient.h
+1412121597 /usr/local/include/mir/tcpclient.h
 	<cstdlib>
 	<deque>
 	<iostream>
@@ -17812,18 +17815,19 @@
 1411329103 source:/home/nelson/Projetos/mir/captura/src/queue.cpp
 	"queue.h"
 
-1411698282 source:/home/mir/Projetos/mir/captura/src/configuration.cpp
+1412083935 source:/home/mir/Projetos/mir/captura/src/configuration.cpp
 	"configuration.h"
 
-1411698241 /home/mir/Projetos/mir/captura/include/configuration.h
+1412079743 /home/mir/Projetos/mir/captura/include/configuration.h
 	<iostream>
 	<boost/property_tree/ptree.hpp>
 	<boost/property_tree/ini_parser.hpp>
 	"util.h"
 
-1411677290 /home/mir/Projetos/mir/captura/include/util.h
+1412080716 /home/mir/Projetos/mir/captura/include/util.h
 	<boost/filesystem.hpp>
 	<boost/log/trivial.hpp>
+	"LogClass.h"
 
 1411677290 source:/home/mir/Projetos/mir/captura/src/database.cpp
 	"database.h"
@@ -17838,25 +17842,25 @@
 	<sqlext.h>
 	<vector>
 
-1411828251 /home/mir/Projetos/mir/captura/include/exceptionmir.h
+1412112258 /home/mir/Projetos/mir/captura/include/exceptionmir.h
 	<boost/exception/all.hpp>
 
-1411779446 source:/home/mir/Projetos/mir/captura/src/filedata.cpp
+1412104953 source:/home/mir/Projetos/mir/captura/src/filedata.cpp
 	"filedata.h"
 
-1411775088 /home/mir/Projetos/mir/captura/include/filedata.h
-	"parser.h"
+1412093968 /home/mir/Projetos/mir/captura/include/filedata.h
 	<fstream>
 	<boost/filesystem.hpp>
+	"util.h"
+	"parser.h"
 
-1411829532 /home/mir/Projetos/mir/captura/include/parser.h
+1412120086 /home/mir/Projetos/mir/captura/include/parser.h
 	<iostream>
 	<cstdio>
 	<unistd.h>
 	<vector>
-	"util.h"
 	<dirent.h>
-	<boost/thread/thread.hpp>
+	<thread>
 	<libavformat/avformat.h>
 	<libavcodec/avcodec.h>
 	<libavutil/avstring.h>
@@ -17868,6 +17872,8 @@
 	<libavutil/avassert.h>
 	<libswresample/swresample.h>
 	<libavutil/opt.h>
+	<mir/exceptionclass.h>
+	"util.h"
 	"exceptionmir.h"
 
 1411677290 source:/home/mir/Projetos/mir/captura/src/logger.cpp
@@ -17887,46 +17893,40 @@
 	<boost/log/sources/global_logger_storage.hpp>
 	<boost/log/support/date_time.hpp>
 
-1411835650 source:/home/mir/Projetos/mir/captura/src/main.cpp
+1412124659 source:/home/mir/Projetos/mir/captura/src/main.cpp
 	"main.h"
 	<sys/resource.h>
 
-1411845674 /home/mir/Projetos/mir/captura/include/main.h
-	<iostream>
-	<fstream>
-	<libavformat/avformat.h>
-	<libavcodec/avcodec.h>
-	<mir/filter.h>
-	<mir/database_sql.h>
-	"configuration.h"
-	"threadpool.h"
-	"logger.h"
+1412123142 /home/mir/Projetos/mir/captura/include/main.h
+	<mir/exceptionclass.h>
+	"captura.h"
 
-1411840927 /home/mir/Projetos/mir/captura/include/threadpool.h
+1412107909 /home/mir/Projetos/mir/captura/include/threadpool.h
 	<stdlib.h>
 	<stdio.h>
 	<thread>
+	<mutex>
 	<chrono>
+	"util.h"
 	"threadcapture.h"
-	<boost/date_time/posix_time/posix_time.hpp>
-	<boost/thread/thread.hpp>
 
-1411841001 /home/mir/Projetos/mir/captura/include/threadcapture.h
+1412107908 /home/mir/Projetos/mir/captura/include/threadcapture.h
 	<stdlib.h>
 	<stdio.h>
+	<thread>
+	<mutex>
 	<mir/filter.h>
-	<boost/date_time/posix_time/posix_time.hpp>
-	<boost/thread/thread.hpp>
+	"util.h"
 	"streamradio.h"
 	"sliceprocess.h"
 
-1411945299 /home/mir/Projetos/mir/captura/include/streamradio.h
+1412120086 /home/mir/Projetos/mir/captura/include/streamradio.h
 	<stdio.h>
 	<time.h>
 	<string.h>
 	<libavformat/avformat.h>
 	<libavcodec/avcodec.h>
-	<boost/thread.hpp>
+	<mir/exceptionclass.h>
 	"util.h"
 	"exceptionmir.h"
 	"queue.h"
@@ -17942,40 +17942,46 @@
 	"util.h"
 	"exceptionmir.h"
 
-1411840927 /home/mir/Projetos/mir/captura/include/sliceprocess.h
+1412107909 /home/mir/Projetos/mir/captura/include/sliceprocess.h
 	<stdlib.h>
 	<stdio.h>
 	<string>
+	<thread>
+	<mutex>
+	"util.h"
 	"streamradio.h"
 	"rawdata.h"
 	"filedata.h"
 
-1411845674 /home/mir/Projetos/mir/captura/include/rawdata.h
+1412107909 /home/mir/Projetos/mir/captura/include/rawdata.h
+	<thread>
+	<mutex>
 	<mir/fingerprint.h>
 	<mir/tcpclient.h>
 	<mir/database_mysql.h>
+	"util.h"
 	"exceptionmir.h"
 	"parser.h"
 
-1411835867 source:/home/mir/Projetos/mir/captura/src/parser.cpp
+1412125789 source:/home/mir/Projetos/mir/captura/src/parser.cpp
 	"parser.h"
 
 1411836255 source:/home/mir/Projetos/mir/captura/src/queue.cpp
 	"queue.h"
 
-1411946974 source:/home/mir/Projetos/mir/captura/src/rawdata.cpp
+1412118876 source:/home/mir/Projetos/mir/captura/src/rawdata.cpp
 	"rawdata.h"
 
-1411941532 source:/home/mir/Projetos/mir/captura/src/sliceprocess.cpp
+1412107954 source:/home/mir/Projetos/mir/captura/src/sliceprocess.cpp
 	"sliceprocess.h"
 
-1411945266 source:/home/mir/Projetos/mir/captura/src/streamradio.cpp
+1412125816 source:/home/mir/Projetos/mir/captura/src/streamradio.cpp
 	"streamradio.h"
 
-1411941225 source:/home/mir/Projetos/mir/captura/src/threadcapture.cpp
+1412107909 source:/home/mir/Projetos/mir/captura/src/threadcapture.cpp
 	"threadcapture.h"
 
-1411840927 source:/home/mir/Projetos/mir/captura/src/threadpool.cpp
+1412107908 source:/home/mir/Projetos/mir/captura/src/threadpool.cpp
 	"threadpool.h"
 
 1411664139 /usr/local/include/boost/config/user.hpp
@@ -21425,4 +21431,51 @@
 	<cppconn/statement.h>
 	<cppconn/prepared_statement.h>
 	<boost/algorithm/string.hpp>
+
+1412095652 source:/home/mir/Projetos/mir/captura/src/LogClass.cpp
+	"LogClass.h"
+
+1412082652 /home/mir/Projetos/mir/captura/include/LogClass.h
+	<syslog.h>
+	<time.h>
+	<stdio.h>
+	<stdarg.h>
+	<pthread.h>
+	<unistd.h>
+	<sys/stat.h>
+	<stdint.h>
+	<unistd.h>
+	<dirent.h>
+	<queue>
+	<string>
+	<algorithm>
+	<vector>
+
+1412118660 /home/mir/Projetos/mir/captura/include/ExceptionClass.h
+	<string>
+	<stdexcept>
+	<exception>
+
+1412126843 /home/mir/Projetos/mir/captura/include/captura.h
+	<iostream>
+	<fstream>
+	<signal.h>
+	<libavformat/avformat.h>
+	<libavcodec/avcodec.h>
+	<mir/filter.h>
+	<mir/database_sql.h>
+	<mir/exceptionclass.h>
+	"util.h"
+	"configuration.h"
+	"threadpool.h"
+	"logger.h"
+	"LogClass.h"
+
+1412126798 source:/home/mir/Projetos/mir/captura/src/captura.cpp
+	"captura.h"
+
+1412118758 source:/home/mir/Projetos/mir/captura/src/ExceptionClass.cpp
+	<signal.h>
+	<errno.h>
+	"ExceptionClass.h"
 

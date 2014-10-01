@@ -5,10 +5,8 @@
 #include <cstdio>
 #include <unistd.h>
 #include <vector>
-#include "util.h"
-
 #include <dirent.h>
-#include <boost/thread/thread.hpp>
+#include <thread>
 
 extern "C"
 {
@@ -25,6 +23,9 @@ extern "C"
 #include <libavutil/opt.h>
 }
 
+#include <mir/exceptionclass.h>
+
+#include "util.h"
 #include "exceptionmir.h"
 
 using namespace std;
@@ -38,8 +39,8 @@ public:
 
     /** Default constructor */
     Parser();
-    Parser(string fileName, uint64_t channelLayoutIn, int sampleRateIn, int bitRateIn,
-           AVSampleFormat sampleFormatIn, int nbSamplesIn, int nbChannelIn);
+    Parser(int32_t idRadio, string fileName, uint64_t channelLayoutIn, int sampleRateIn,
+           int bitRateIn, AVSampleFormat sampleFormatIn, int nbSamplesIn, int nbChannelIn);
 
     /** Default destructor */
     virtual ~Parser();
@@ -65,6 +66,7 @@ public:
     void Config();
 
 
+    int32_t idRadio;
     string fileName;
     uint64_t channelLayoutIn;
     int sampleRateIn;

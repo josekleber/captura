@@ -1,24 +1,10 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-/**< controle de versao */
-#define prgVersion "1.0.0.0"
+#include <mir/exceptionclass.h>
 
-#include <iostream>
-#include <fstream>
+#include "captura.h"
 
-extern "C"
-{
-    /** inclusão dos headers FFMPEG */
-#include <libavformat/avformat.h>
-#include <libavcodec/avcodec.h>
-}
-
-#include <mir/filter.h>
-#include <mir/database_sql.h>
-
-#include "configuration.h"
-#include "threadpool.h"
-#include "logger.h"
+LogClass* objLog;
 
 #endif

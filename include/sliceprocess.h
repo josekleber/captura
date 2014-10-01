@@ -4,7 +4,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>
+#include <thread>
+#include <mutex>
 
+#include "util.h"
 #include "streamradio.h"
 #include "rawdata.h"
 #include "filedata.h"
@@ -22,8 +25,6 @@ class SliceProcess
         };
 
         SliceProcess();
-        SliceProcess(int mrOn, bool svFP, string ipRecognition, string portRecognition, string sqlConnString,
-                     string cutFolder, int idRadio, vector<Filter> *Filters, StreamRadio* objRadio);
         virtual ~SliceProcess();
 
         void thrProcessa();
@@ -40,6 +41,8 @@ class SliceProcess
 
         int idRadio;
 
+        mutex* MutexAccess;
+
         vector<Filter> *Filters;
 
         StreamRadio* objRadio;
@@ -50,8 +53,8 @@ class SliceProcess
         int idSlice;
         int Status;
 
-        boost::thread* objThreadRawParser;
-        boost::thread* objThreadArqParser;
+        thread* objThreadRawParser;
+        thread* objThreadArqParser;
 
         string getDate();
         string getHour();

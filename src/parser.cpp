@@ -3,38 +3,34 @@ Parser::Parser()
 {
 }
 
-Parser::Parser(string fileName, uint64_t channelLayoutIn, int sampleRateIn,
-               int bitRateIn, AVSampleFormat sampleFormatIn,int nbSamplesIn,int nbChannelIn)
-{
-    this->fileName = fileName;
-    this->channelLayoutIn = channelLayoutIn;
-    this->sampleRateIn = sampleRateIn;
-    this->bitRateIn = bitRateIn;
-    this->sampleFormatIn = sampleFormatIn;
-    this->nbSamplesIn = nbSamplesIn;
-    this->nbChannelIn = nbChannelIn;
-}
-
 Parser::~Parser()
 {
     // para dar tempo de terminar algum processo pendente
-    boost::this_thread::sleep(boost::posix_time::seconds(2));
+    sleep(2);
+//    boost::this_thread::sleep(boost::posix_time::seconds(2));
 
     EndProcess();
 }
 
 void Parser::EndProcess()
 {
-    if (dic)
-        av_free(dic);
-    if (io_ctx)
-        avio_close(io_ctx);
-    if (swr_ctx)
-        swr_free(&swr_ctx);
-    if (fmt_ctx_out)
-        avformat_free_context(fmt_ctx_out);
-    if (cdc_ctx_out)
-        avcodec_close(cdc_ctx_out);
+    try
+    {
+        if (dic)
+            av_free(dic);
+        if (io_ctx)
+            avio_close(io_ctx);
+        if (swr_ctx)
+            swr_free(&swr_ctx);
+        if (fmt_ctx_out)
+            avformat_free_context(fmt_ctx_out);
+        if (cdc_ctx_out)
+            avcodec_close(cdc_ctx_out);
+    }
+    catch (SignalException& e)
+    {
+         objLog->mr_printf(MR_LOG_ERROR, idRadio, "Destructor Parser: %s\n", e.what());
+    }
 }
 
 void Parser::Config()
@@ -77,7 +73,7 @@ void Parser::CreateContext()
         {
             char error_buffer[255];
             av_strerror(error, error_buffer, sizeof(error_buffer));
-            BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Error: " << error_buffer << ANSI_COLOR_RESET;
+            objLog->mr_printf(MR_LOG_ERROR, idRadio, "Error: %s\n", error_buffer);
             throw ConvertException() << errno_code(MIR_ERR_OPEN_OUTPUT_FILE);
         }
     }

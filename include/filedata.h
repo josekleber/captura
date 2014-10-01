@@ -1,9 +1,12 @@
 #ifndef FILEDATA_H
 #define FILEDATA_H
 
-#include "parser.h"
 #include <fstream>
+
 #include <boost/filesystem.hpp>
+
+#include "util.h"
+#include "parser.h"
 
 using namespace std;
 
@@ -14,12 +17,12 @@ class FileData : public Parser
     public:
         /** Default constructor */
         FileData();
-        FileData(string fileName, uint64_t channelLayoutIn, int sampleRateIn,
-                 int bitRateIn, AVSampleFormat sampleFormatIn, int nbSamplesIn, int nbChannelIn);
         /** Default destructor */
         virtual ~FileData();
 
         virtual void Execute();
+
+        int32_t idRadio;
     protected:
 
         int setStreamOut();
@@ -27,10 +30,9 @@ class FileData : public Parser
         virtual void EndResample();
 
     private:
+//        string cutFolder;
 
-        string cutFolder;
-
-        int cntFileDayCut;
+//        int cntFileDayCut;
 
         /** \brief Grava os dados em disco */
         int Write();

@@ -4,12 +4,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <thread>
+#include <mutex>
 #include <chrono>
 
+#include "util.h"
 #include "threadcapture.h"
-
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/thread/thread.hpp>
 
 struct ctrlThread
 {
@@ -17,7 +16,7 @@ struct ctrlThread
     int idThread;
     string uriRadio;
     ThreadCapture *objCapture;
-    boost::thread *objThread;
+    thread *objThread;
 };
 
 
@@ -47,6 +46,8 @@ class ThreadPool
         vector<Filter> *Filters;
 
         map<unsigned int, ctrlThread*> ctrlThreads;
+
+        mutex MutexAccess;
 };
 
 #endif // THREADPOOL_H

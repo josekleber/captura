@@ -66,6 +66,8 @@
 		<Unit filename="config.ini">
 			<Option target="Release" />
 		</Unit>
+		<Unit filename="include/LogClass.h" />
+		<Unit filename="include/captura.h" />
 		<Unit filename="include/configuration.h" />
 		<Unit filename="include/exceptionmir.h" />
 		<Unit filename="include/filedata.h" />
@@ -73,7 +75,6 @@
 		<Unit filename="include/main.h" />
 		<Unit filename="include/parser.h" />
 		<Unit filename="include/queue.h" />
-		<Unit filename="include/queuehandler.h" />
 		<Unit filename="include/rawdata.h" />
 		<Unit filename="include/sliceprocess.h" />
 		<Unit filename="include/streamradio.h" />
@@ -84,6 +85,8 @@
 		<Unit filename="makefile">
 			<Option target="Release" />
 		</Unit>
+		<Unit filename="src/LogClass.cpp" />
+		<Unit filename="src/captura.cpp" />
 		<Unit filename="src/configuration.cpp" />
 		<Unit filename="src/filedata.cpp" />
 		<Unit filename="src/logger.cpp" />

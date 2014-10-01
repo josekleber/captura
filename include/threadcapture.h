@@ -3,11 +3,12 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <thread>
+#include <mutex>
+
 #include <mir/filter.h>
 
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/thread/thread.hpp>
-
+#include "util.h"
 #include "streamradio.h"
 #include "sliceprocess.h"
 
@@ -36,6 +37,8 @@ class ThreadCapture
         string portRecognition;
         string mySqlConnString;
 
+        mutex* MutexAccess;
+
         string uriRadio;
         int idThread;   // igual a idRadio
         vector<Filter> *Filters;
@@ -47,8 +50,8 @@ class ThreadCapture
         StreamRadio* objRadio;
         SliceProcess* objSlice;
 
-        boost::thread* objThreadRadio;
-        boost::thread* objThreadProcessa;
+        thread* objThreadRadio;
+        thread* objThreadProcessa;
 };
 
 #endif // CAPTURE_H

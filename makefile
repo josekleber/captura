@@ -45,7 +45,7 @@ OBJDIR = obj/$(DIR)
 BINDIR = bin/$(DIR)
 OUT = $(BINDIR)/$(OUTNAME)
 
-OBJ = $(OBJDIR)/src/main.o $(OBJDIR)/src/configuration.o $(OBJDIR)/src/logger.o $(OBJDIR)/src/threadpool.o $(OBJDIR)/src/threadcapture.o $(OBJDIR)/src/queue.o $(OBJDIR)/src/streamradio.o $(OBJDIR)/src/sliceprocess.o $(OBJDIR)/src/parser.o $(OBJDIR)/src/rawdata.o $(OBJDIR)/src/filedata.o
+OBJ = $(OBJDIR)/src/main.o $(OBJDIR)/src/captura.o $(OBJDIR)/src/configuration.o $(OBJDIR)/src/logger.o $(OBJDIR)/src/LogClass.o $(OBJDIR)/src/threadpool.o $(OBJDIR)/src/threadcapture.o $(OBJDIR)/src/queue.o $(OBJDIR)/src/streamradio.o $(OBJDIR)/src/sliceprocess.o $(OBJDIR)/src/parser.o $(OBJDIR)/src/rawdata.o $(OBJDIR)/src/filedata.o
 
 all: debug release
 
@@ -64,11 +64,17 @@ out: before $(OBJ) $(DEP)
 $(OBJDIR)/src/main.o: src/main.cpp
 	$(CXX) $(CFLAGS) $(INC) -c src/main.cpp -o $(OBJDIR)/src/main.o
 
+$(OBJDIR)/src/captura.o: src/captura.cpp
+	$(CXX) $(CFLAGS) $(INC) -c src/captura.cpp -o $(OBJDIR)/src/captura.o
+
 $(OBJDIR)/src/configuration.o: src/configuration.cpp
 	$(CXX) $(CFLAGS) $(INC) -c src/configuration.cpp -o $(OBJDIR)/src/configuration.o
 
 $(OBJDIR)/src/logger.o: src/logger.cpp
 	$(CXX) $(CFLAGS) $(INC) -c src/logger.cpp -o $(OBJDIR)/src/logger.o
+
+$(OBJDIR)/src/LogClass.o: src/LogClass.cpp
+	$(CXX) $(CFLAGS) $(INC) -c src/LogClass.cpp -o $(OBJDIR)/src/LogClass.o
 
 $(OBJDIR)/src/threadpool.o: src/threadpool.cpp
 	$(CXX) $(CFLAGS) $(INC) -c src/threadpool.cpp -o $(OBJDIR)/src/threadpool.o

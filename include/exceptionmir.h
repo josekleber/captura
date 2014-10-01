@@ -23,11 +23,6 @@ typedef boost::error_info<struct tag_errmsg, std::string> errmsg_info;
 struct BaseException : virtual std::exception, virtual boost::exception{};
 
 /** \brief
-* Exceção geral, usado no caso de erro pego por catch(...)
-*/
-struct GeneralException : virtual BaseException {};
-
-/** \brief
 * Exceção ocorre quando não for possível alocar memória
 */
 struct BadAllocException : virtual BaseException {};
@@ -82,6 +77,11 @@ struct OpenFileException : virtual BaseException{};
 
 
 
+
+/** \brief
+* Exceção geral, usado no caso de erro pego por catch(...)
+*/
+struct GeneralException : virtual BaseException {};
 
 /** \brief
 * Erro de abertura de arquivo
@@ -163,7 +163,7 @@ enum MIR_EXCEPTION
 
     // usado para rastrear erros (pode ser dados temporarios, somente criados em modo de desenvolvimento)
     MIR_DES_STMRADIO_1     = -30000,
+    MIR_DES_SIGNAL         = -30001,
+    MIR_DES_PIPE           = -30002,
 };
-
-
 #endif // EXCEPTIONMIR_INCLUDED

@@ -5,16 +5,16 @@ using namespace std;
 ThreadPool::ThreadPool(int mrOn, bool svFP, string ipRecognition, string portRecognition,
                    string mySqlConnString, string cutFolder, vector<Filter> *Filters)
 {
-        this->mrOn = mrOn;
-        this->svFP = svFP;
-        this->ipRecognition = ipRecognition;
-        this->portRecognition = portRecognition;
+    this->mrOn = mrOn;
+    this->svFP = svFP;
+    this->ipRecognition = ipRecognition;
+    this->portRecognition = portRecognition;
 
-        this->mySqlConnString = mySqlConnString;
+    this->mySqlConnString = mySqlConnString;
 
-        this->cutFolder = cutFolder;
+    this->cutFolder = cutFolder;
 
-        this->Filters = Filters;
+    this->Filters = Filters;
 }
 
 ThreadPool::~ThreadPool()
@@ -44,6 +44,8 @@ void ThreadPool::addThreads(string uriRadio, int idRadio)
         objThreadControl->objCapture->uriRadio = uriRadio;
         objThreadControl->objCapture->Filters = Filters;
         objThreadControl->objCapture->cutFolder = cutFolder;
+
+        objThreadControl->objCapture->MutexAccess = &MutexAccess;
     }
     catch(...)
     {
@@ -52,7 +54,7 @@ void ThreadPool::addThreads(string uriRadio, int idRadio)
 
     try
     {
-        objThreadControl->objThread = new boost::thread(boost::bind(&ThreadCapture::thrRun, objThreadControl->objCapture));
+        objThreadControl->objThread = new thread(&ThreadCapture::thrRun, std::ref(objThreadControl->objCapture));
         objThreadControl->isStop = false;
 
         if (objThreadControl->objCapture->status == 0)

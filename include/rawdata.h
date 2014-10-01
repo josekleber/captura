@@ -1,24 +1,25 @@
 #ifndef RAWDATA_H
 #define RAWDATA_H
 
+#include <thread>
+#include <mutex>
+
 #include <mir/fingerprint.h>
 #include <mir/tcpclient.h>
 #include <mir/database_mysql.h>
 
+#include "util.h"
 #include "exceptionmir.h"
 #include "parser.h"
 
 #define RAW_SAMPLE_RATE 11025
+#define SOCKET_TIMEOUT  20000          // milisegundos
 
 class RAWData : public Parser
 {
     public:
         /** Default constructor */
         RAWData();
-        RAWData(string fileName, uint64_t channelLayoutIn, int sampleRateIn, int bitRateIn,
-                AVSampleFormat sampleFormatIn, int nbSamplesIn, int nbChannelIn,
-                vector<Filter> *Filters, int mrOn, bool svFP, string ipRecognition, string portRecognition,
-                int32_t idRadio, int32_t idSlice);
         /** Default destructor */
         virtual ~RAWData();
 
@@ -30,8 +31,8 @@ class RAWData : public Parser
         string ipRecognition;
         string portRecognition;
         string mySqlConnString;
-        int32_t idRadio;
         int32_t idSlice;
+        mutex* MutexAccess;
 
     protected:
         virtual void EndResample();

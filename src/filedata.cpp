@@ -9,26 +9,6 @@ FileData::FileData() : Parser()
     this->setSampleRate(11025);
 }
 
-FileData::FileData(string fileName, uint64_t channelLayoutIn, int sampleRateIn,
-                   int bitRateIn, AVSampleFormat sampleFormatIn, int nbSamplesIn, int nbChannelIn)
-    : Parser(fileName, channelLayoutIn, sampleRateIn, bitRateIn, sampleFormatIn, nbSamplesIn, nbChannelIn)
-{
-    this->audioFormat = AUDIOFORMAT::arq;
-
-    this->setBitRate(24000);
-    this->setChannels(1);
-    this->setSampleRate(11025);
-
-    try
-    {
-        this->Config();
-    }
-    catch(...)
-    {
-        throw;
-    }
-}
-
 FileData::~FileData()
 {
     //dtor
@@ -42,22 +22,22 @@ void FileData::Execute()
     }
     catch(ResampleException& err)
     {
-        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Error code (File): " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
+        objLog->mr_printf(MR_LOG_ERROR, idRadio, "Error code (File): %d\n", *boost::get_error_info<errno_code>(err));
         return;
     }
     catch(FifoException& err)
     {
-        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Error code (File): " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
+        objLog->mr_printf(MR_LOG_ERROR, idRadio, "Error code (File): %d\n", *boost::get_error_info<errno_code>(err));
         return;
     }
     catch(BadAllocException& err)
     {
-        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Error code (File): " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
+        objLog->mr_printf(MR_LOG_ERROR, idRadio, "Error code (File): %d\n", *boost::get_error_info<errno_code>(err));
         return;
     }
     catch(FFMpegException& err)
     {
-        BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED "Error code (File): " << *boost::get_error_info<errno_code>(err) << ANSI_COLOR_RESET;
+        objLog->mr_printf(MR_LOG_ERROR, idRadio, "Error code (File): %d\n", *boost::get_error_info<errno_code>(err));
         return;
     }
 
@@ -70,5 +50,3 @@ void FileData::EndResample()
     // arruma os pacotes antes de gravar
     av_interleaved_write_frame(fmt_ctx_out,&pkt_out);
 }
-
-
