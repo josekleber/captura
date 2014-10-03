@@ -46,6 +46,58 @@ void SliceProcess::thrProcessa()
 
     vector<vector<vector<uint8_t>>> Packets;
 
+    // criando objeto para fingerprint
+    try
+    {
+        objRawData = new RAWData();
+        objRawData->idRadio = idRadio;
+        objRawData->channelLayoutIn = objRadio->getChannelLayout();
+        objRawData->sampleRateIn = cdc_ctx_in->sample_rate;
+        objRawData->bitRateIn = cdc_ctx_in->bit_rate;
+        objRawData->sampleFormatIn = cdc_ctx_in->sample_fmt;
+        objRawData->nbSamplesIn = inFrameSize;
+        objRawData->nbChannelIn = cdc_ctx_in->channels;
+        objRawData->szBuffer = objRadio->getSzBuffer();
+
+        objRawData->Filters = Filters;
+        objRawData->mrOn = mrOn;
+        objRawData->svFP = svFP;
+        objRawData->MutexAccess = MutexAccess;
+        objRawData->ipRecognition = ipRecognition;
+        objRawData->portRecognition = portRecognition;
+        objRawData->mySqlConnString = mySqlConnString;
+        objRawData->idSlice = idSlice;
+
+        objRawData->Config();
+    }
+    catch(...)
+    {
+        throw;
+    }
+/**/
+
+/**/
+    // criando objeto para arquivo
+    try
+    {
+        objFileData = new FileData();
+        objFileData->idRadio = idRadio;
+        objFileData->channelLayoutIn = objRadio->getChannelLayout();
+        objFileData->sampleRateIn = cdc_ctx_in->sample_rate;
+        objFileData->bitRateIn = cdc_ctx_in->bit_rate;
+        objFileData->sampleFormatIn = cdc_ctx_in->sample_fmt;
+        objFileData->nbSamplesIn = inFrameSize;
+        objFileData->nbChannelIn = cdc_ctx_in->channels;
+        objFileData->szBuffer = objRadio->getSzBuffer();
+
+        objFileData->Config();
+    }
+    catch(...)
+    {
+        throw;
+    }
+/**/
+
     while (!stopThread)
     {
         try
@@ -83,66 +135,28 @@ void SliceProcess::thrProcessa()
                         throw;
                     }
 /**/
-                    // processamento para fingerprint
+
+                    // rodando a thread do fingerprint
                     try
                     {
-                        objRawData = new RAWData();
-                        objRawData->idRadio = idRadio;
-                        objRawData->fileName = arqName + ".wav";
-                        objRawData->channelLayoutIn = objRadio->getChannelLayout();
-                        objRawData->sampleRateIn = cdc_ctx_in->sample_rate;
-                        objRawData->bitRateIn = cdc_ctx_in->bit_rate;
-                        objRawData->sampleFormatIn = cdc_ctx_in->sample_fmt;
-                        objRawData->nbSamplesIn = szFrame;
-                        objRawData->nbChannelIn = cdc_ctx_in->channels;
-                        objRawData->szBuffer = objRadio->getSzBuffer();
-
-                        objRawData->Filters = Filters;
-                        objRawData->mrOn = mrOn;
-                        objRawData->svFP = svFP;
-                        objRawData->MutexAccess = MutexAccess;
-                        objRawData->ipRecognition = ipRecognition;
-                        objRawData->portRecognition = portRecognition;
-                        objRawData->mySqlConnString = mySqlConnString;
-                        objRawData->idSlice = idSlice;
-
-                        objRawData->Config();
-
-                        objRawData->setBuffer(Packets);
+                        objRawData->setBuffer(arqName + ".wav", Packets);
                         objThreadRawParser = new thread(&RAWData::Execute, objRawData);
                     }
                     catch(...)
                     {
                         throw;
                     }
-/**/
 
-/**/
-                    // processamento para arquivo
+                    // rodando a thread da gravacao do arquivo mp3
                     try
                     {
-                        objFileData = new FileData();
-                        objFileData->idRadio = idRadio;
-                        objFileData->fileName = arqName + ".mp3";
-                        objFileData->channelLayoutIn = objRadio->getChannelLayout();
-                        objFileData->sampleRateIn = cdc_ctx_in->sample_rate;
-                        objFileData->bitRateIn = cdc_ctx_in->bit_rate;
-                        objFileData->sampleFormatIn = cdc_ctx_in->sample_fmt;
-                        objFileData->nbSamplesIn = szFrame;
-                        objFileData->nbChannelIn = cdc_ctx_in->channels;
-                        objFileData->szBuffer = objRadio->getSzBuffer();
-
-
-                        objFileData->Config();
-
-                        objFileData->setBuffer(Packets);
+                        objFileData->setBuffer(arqName + ".mp3", Packets);
                         objThreadArqParser = new thread(&FileData::Execute, objFileData);
                     }
                     catch(...)
                     {
                         throw;
                     }
-/**/
 
                     // reseta dados
                     for (int i = 0; i < Packets.size(); i++)

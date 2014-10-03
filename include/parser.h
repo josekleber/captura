@@ -57,7 +57,7 @@ public:
     void setBitRate(int value);
     void setSampleRate(int value);
     void setChannels(unsigned int value);
-    void setBuffer(vector<vector<vector<uint8_t>>> value);
+    void setBuffer(string arqName, vector<vector<vector<uint8_t>>> value);
 
     /** \brief Processa os frames e gera a saída */
     virtual void Execute();

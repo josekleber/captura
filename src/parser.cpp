@@ -240,7 +240,6 @@ void Parser::Resample()
                 throw ResampleException() << errno_code(MIR_ERR_ENCODE);
 
             av_free_packet(&pkt_out);
-//            av_frame_unref(frame_out);
         }
         else
             throw ResampleException() << errno_code(MIR_ERR_RESAMPLE);
@@ -313,8 +312,9 @@ void Parser::setChannels(unsigned int value)
     nbChannel = value;
 }
 
-void Parser::setBuffer(vector<vector<vector<uint8_t>>> value)
+void Parser::setBuffer(string arqName, vector<vector<vector<uint8_t>>> value)
 {
+    this->fileName = arqName;
     bufFrames = value;
 }
 
