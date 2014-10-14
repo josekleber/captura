@@ -21,10 +21,15 @@ using namespace std;
 class ThreadCapture
 {
     public:
+        enum CAPTURE_STATUS
+        {
+            ERROR    = -1,
+            STANDBY,
+            OFF,
+            ON,
+        };
+
         ThreadCapture();
-        ThreadCapture(int mrOn, bool svFP, string ipRecognition, string portRecognition,
-                      string mySqlConnString, int idThread, string uriRadio,
-                      vector<Filter> *Filters, string cutFolder);
         virtual ~ThreadCapture();
 
         int status;

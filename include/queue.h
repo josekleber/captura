@@ -16,7 +16,6 @@ extern "C"
 #include <boost/thread.hpp>
 
 #include "util.h"
-#include "exceptionmir.h"
 
 using namespace std;
 
@@ -46,6 +45,7 @@ class Queue
         */
 //        int getQueueData(uint8_t **dest, int nbSamples);
         vector<vector<uint8_t>> getQueueData();
+        void delQueueData();
     protected:
     private:
         boost::mutex mtx_;  // controle de lock da thread

@@ -89,7 +89,7 @@ AVFormatContext* StreamRadio::open(int idRadio, string uri)
         throw StreamRadioException() <<errno_code(MIR_ERR_STREAM_CONNECTION);
     }
 
-    objLog->mr_printf(MR_LOG_MESSAGE, idRadio, "Conectado ao stream %s\n", uri.c_str());
+    objLog->mr_printf(MR_LOG_MESSAGE, idRadio, MR_LOG_BOLDGREEN "Conectado ao stream %s\n" MR_LOG_RESET, uri.c_str());
 
     statusConnection = MIR_CONNECTION_OPEN;
 
@@ -125,7 +125,7 @@ AVFormatContext* StreamRadio::open(int idRadio, string uri)
 void StreamRadio::read()
 {
     if (statusConnection != MIR_CONNECTION_OPEN)
-        throw StreamRadioException() <<errno_code(MIR_ERR_CONNECTION_CLOSED);
+        throw StreamRadioException() << errno_code(MIR_ERR_CONNECTION_CLOSED);
 
     readFrame();
 }
@@ -162,7 +162,6 @@ void StreamRadio::setStreamType()
     }
 
     stream = formatContext->streams[streamIndex];
-    codecContext = avcodec_alloc_context3(codec);
     codecContext = stream->codec;
 
     if ((ret = avcodec_open2(codecContext,codec,NULL)) < 0)
@@ -232,7 +231,6 @@ void StreamRadio::rtspDetect()
 
 void StreamRadio::readFrame()
 {
-    bool isTrue = true;
     int finished = 0;
     int error;
     int haveData;
@@ -240,9 +238,14 @@ void StreamRadio::readFrame()
     // Pacote para dados temporários.
     AVPacket inputPacket;
 
-    while (isTrue && (finished == 0) && !isExit)
+int njn = 0;
+    do
     {
-        frame = NULL;
+        frame = av_frame_alloc();
+    } while (!frame);
+
+    while ((finished == 0) && !isExit)
+    {
         av_init_packet(&inputPacket);
         // ainda não entendi o porquê setar os dados abaixo. Porém, em todos os
         // exemplos da ferramenta foi inicializado então...
@@ -251,11 +254,6 @@ void StreamRadio::readFrame()
 
         try
         {
-            if (!(frame = av_frame_alloc()))
-            {
-                throw StreamRadioException() << errno_code(MIR_ERR_BADALLOC_CONTEXT);
-            }
-
             // Lê um frame do áudio e coloca no pacote temporário.
             if ((error = av_read_frame(formatContext, &inputPacket)) < 0)
             {
@@ -277,11 +275,7 @@ void StreamRadio::readFrame()
                 try
                 {
                     // decodifica o frame
-                    decodeAudioFrame(&haveData, &finished, &inputPacket);
-
-                    // Se o decodificador não terminar de processar os dados, esta função será chamada novamente.
-                    if (finished && haveData)
-                        finished = 0;
+                    decodeAudioFrame(&haveData, &inputPacket);
 
                     // libera memória do pacote temporário
                     av_free_packet(&inputPacket);
@@ -289,6 +283,7 @@ void StreamRadio::readFrame()
                 catch(StreamRadioException& err)
                 {
                     av_free_packet(&inputPacket);
+                    av_frame_unref(frame);
                     throw;
                 }
 
@@ -296,16 +291,17 @@ void StreamRadio::readFrame()
                 {
                     // Adiciona ao FIFO
                     objQueue->addQueueData(frame);
+                    av_frame_unref(frame);
+//objLog->mr_printf(MR_LOG_DEBUG, idRadio, "Frame : %5d    Fifo : %d\n", njn++, objQueue->getQueueSize());
 
                     if (getQueueSize() > MAX_QUEUE_SIZE)
                         usleep(10);
                 }
                 catch(FifoException& err)
                 {
+                    av_frame_unref(frame);
                     throw;
                 }
-
-                av_frame_free(&frame);
             }
         }
         catch(StreamRadioException& err)
@@ -321,11 +317,12 @@ void StreamRadio::readFrame()
             objLog->mr_printf(MR_LOG_ERROR, idRadio, "Ocorreu um erro no stream de entrada.\n");
         }
     }
+    av_frame_free(&frame);
 
     statusConnection = MIR_CONNETION_CLOSING;
 }
 
-void StreamRadio::decodeAudioFrame(int *haveData, int *finished, AVPacket *inputPacket)
+void StreamRadio::decodeAudioFrame(int *haveData, AVPacket *inputPacket)
 {
     int error=0;
 
@@ -372,4 +369,9 @@ int StreamRadio::getQueueSize()
 int StreamRadio::getSzBuffer()
 {
     return objQueue->getSzBuffer();
+}
+
+void StreamRadio::delQueueData()
+{
+    objQueue->delQueueData();
 }

@@ -6,5 +6,6 @@
 #include "captura.h"
 
 LogClass* objLog;
+Captura* objCapura;
 
 #endif

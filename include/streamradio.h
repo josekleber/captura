@@ -15,7 +15,6 @@ extern "C"
 #include <mir/exceptionclass.h>
 
 #include "util.h"
-#include "exceptionmir.h"
 #include "queue.h"
 
 using namespace std;
@@ -147,6 +146,7 @@ public:
     int getQueueSize();
     int getSzBuffer();
     vector<vector<uint8_t>> getQueueData();
+    void delQueueData();
 protected:
 private:
     AVFormatContext *formatContext;
@@ -200,7 +200,7 @@ private:
     * \param finished       - controle para verificar se chegou a processar todos os dados do frame.
     *
     */
-    void decodeAudioFrame(int *data, int *finished, AVPacket *inputPacket);
+    void decodeAudioFrame(int *data, AVPacket *inputPacket);
 };
 
 #endif // CONNECT_H

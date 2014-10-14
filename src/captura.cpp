@@ -24,10 +24,12 @@ Captura::Captura()
         return;
     }
 
-    ThreadPool* objThreadPool = new ThreadPool(config->mrOn, config->svFP, config->mrIP, config->mrPort,
-                                               config->ConnectionStringMySQL, config->cutFolder,
-                                               &Filters);
+    objThreadPool = new ThreadPool(config->mrOn, config->svFP, config->mrIP, config->mrPort,
+                                   config->ConnectionStringMySQL, config->cutFolder, &Filters);
+}
 
+void Captura::initLoop()
+{
     // laço principal da aplicação.
     // dentro deste laço :
     //  - carrrega lista de rádios;
@@ -36,7 +38,8 @@ Captura::Captura()
     do
     {
         // carrega a lista de rádios
-        int ret = loadStream();
+//        int ret = loadStream();
+int ret = readFileStream();
 
         try
         {
@@ -56,7 +59,7 @@ Captura::Captura()
 
                         string urlRadio = objThreadPool->getUrlRadio(urlStream[idxRadio]->radio);
                         if (urlRadio == "")
-                            objThreadPool->addThreads(urlStream[idxRadio]->url, urlStream[idxRadio]->radio);
+                          objThreadPool->addThreads(urlStream[idxRadio]->url, urlStream[idxRadio]->radio);
                         else if (urlRadio != urlStream[idxRadio]->url)
                         {
                             // se a url da rádio for diferente da url atual na thread
@@ -70,8 +73,7 @@ Captura::Captura()
                     catch(...)
                     {
                         objLog->mr_printf(MR_LOG_ERROR, urlStream[idxRadio]->radio,
-                                          "Erro ao capturar a rádio %s\n",
-                                          urlStream[idxRadio]->url.c_str());
+                                          "Erro ao capturar a rádio %s\n", urlStream[idxRadio]->url.c_str());
                     }
                 }
             }
@@ -119,7 +121,7 @@ int Captura::readFileStream()
     std::string line;
     int lineCount = 0;
 
-    for (int i = 0; i < urlStream.size(); i++)
+    for (int i = 0; i < (int)urlStream.size(); i++)
         delete urlStream[i];
     urlStream.clear();
 
@@ -146,17 +148,20 @@ int Captura::readFileStream()
             if (line.find("Total",0) != std::string::npos)
                 break;
 
-            UrlStream* us = new UrlStream();
-            std::string lineTAB;
-            std::istringstream linestrm(line);
-            getline(linestrm,lineTAB,'\t');
-            us->id = atoi(lineTAB.c_str());
-            getline(linestrm,lineTAB,'\t');
-            us->radio = atoi(lineTAB.c_str());
-            getline(linestrm,lineTAB,'\t');
-            us->url = lineTAB;
+            if (line.substr(0, 1) != "#")
+            {
+                UrlStream* us = new UrlStream();
+                std::string lineTAB;
+                std::istringstream linestrm(line);
+                getline(linestrm,lineTAB,'\t');
+                us->id = atoi(lineTAB.c_str());
+                getline(linestrm,lineTAB,'\t');
+                us->radio = atoi(lineTAB.c_str());
+                getline(linestrm,lineTAB,'\t');
+                us->url = lineTAB;
 
-            urlStream.push_back(us);
+                urlStream.push_back(us);
+            }
         }
 
         lineCount++;
@@ -176,7 +181,7 @@ int Captura::loadStream()
 
     try
     {
-        for (int i = 0; i < urlStream.size(); i++)
+        for (int i = 0; i < (int)urlStream.size(); i++)
             delete urlStream[i];
         urlStream.clear();
         // carrega do banco de dados a lista de streams

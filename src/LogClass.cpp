@@ -1,20 +1,5 @@
-/**
- *
- * Author: Nelson Nagamine
- * 2013
- *
- */
-
 #include "LogClass.h"
 
-/** \brief Construtor da classe. acerta os flags de saida.
- *
- * \param flFile bool
- * \param flScreen bool
- * \param flMsg bool
- * \param flDebug bool
- *
- */
 LogClass::LogClass(bool flFile, bool flScreen, bool flMsg, bool flDebug)
 {
     toFile = flFile;
@@ -30,7 +15,7 @@ LogClass::LogClass(bool flFile, bool flScreen, bool flMsg, bool flDebug)
 
     tmPause = false;
 
-    sprintf(strPosicao, "");
+    strPosicao[0] = 0;
 
     OpenMRLog();
 }
@@ -41,28 +26,11 @@ LogClass::~LogClass()
     fclose(log);
 }
 
-/** \brief rotina para ordenar, utilizado no controle de quantidade de arquivos log.
- *
- * \param a string
- * \param b string
- * \return bool
- *
- */
 bool LogClass::decSort(string a, string b)
 {
     return (a > b);
 }
 
-/** \brief imprime comentario no log. caso uma das saidas for na tela, posiciona a mensagem na linha/coluna
- *
- * \param type unsigned int
- * \param Lin int
- * \param Col int
- * \param fmt const char*
- * \param ...
- * \return void
- *
- */
 void LogClass::mr_printf(unsigned int type, int ident, int Lin, int Col, const char *fmt, ...)
 {
     char strAux[256];
@@ -76,14 +44,6 @@ void LogClass::mr_printf(unsigned int type, int ident, int Lin, int Col, const c
     mr_printf(type, ident, strAux);
 }
 
-/** \brief imprime comentario no log. o uso dele e o mesmo que o printf (formatacao)
- *
- * \param type unsigned int
- * \param fmt const char*
- * \param ...
- * \return void
- *
- */
 void LogClass::mr_printf(unsigned int type, int ident, const char *fmt, ...)
 {
     char strLog[256];
@@ -94,7 +54,7 @@ void LogClass::mr_printf(unsigned int type, int ident, const char *fmt, ...)
     va_start(args, fmt);
     vsprintf(strLog, fmt, args);
 
-/**< escolhe o cabecario da mensagem */
+//!< escolhe o cabecario da mensagem
     strTipo[0] = 0;
 
     if ((type & MR_LOG_SYSTEM) != 0)
@@ -112,13 +72,13 @@ void LogClass::mr_printf(unsigned int type, int ident, const char *fmt, ...)
     if ((type & (MR_LOG_ERROR | MR_LOG_WARNING | MR_LOG_CRITICAL)) != 0)
         sprintf(strTipo, "Erro ");
 
-/**< coloca a data/hora, se necessario */
+//!< coloca a data/hora, se necessario
     if ((type & MR_LOG_NO_DATATIME) == 0)
-        sprintf(strLog1, "[%s] %s : [%5d] %s", getDate(true), strTipo, ident, strLog);
+        sprintf(strLog1, "[%s] %s : [%5d] %s", getDate(true).c_str(), strTipo, ident, strLog);
     else
         sprintf(strLog1, "[%5d] %s", ident, strLog);
 
-/**< se for tipo auditoria, escreve no arquivo */
+//!< se for tipo auditoria, escreve no arquivo
     if ((type & MR_LOG_AUDIT) != 0)
     {
         printf("%s", strLog1);
@@ -127,7 +87,7 @@ void LogClass::mr_printf(unsigned int type, int ident, const char *fmt, ...)
         fflush(log);
     }
 
-/**< se for mensagem de erro, escreve no arquivo */
+//!< se for mensagem de erro, escreve no arquivo
     if ((type & (MR_LOG_ERROR | MR_LOG_WARNING | MR_LOG_CRITICAL)) != 0)
     {
         if (fileSize() >= MR_LOG_MAXSIZE)
@@ -140,8 +100,8 @@ void LogClass::mr_printf(unsigned int type, int ident, const char *fmt, ...)
         fflush(log);
     }
 
-/**< processa mensagem do tipo tela. aqui temos a verificacao de posicionamento na tela */
-/**< se for tipo erro, muda a cor da fonte */
+//!< processa mensagem do tipo tela. aqui temos a verificacao de posicionamento na tela
+//!< se for tipo erro, muda a cor da fonte
     if (toScreen || ((type & MR_LOG_SYSTEM) != 0))
     {
         char strPos[30];
@@ -165,15 +125,15 @@ void LogClass::mr_printf(unsigned int type, int ident, const char *fmt, ...)
             else
                 sprintf(strPos, "%s", strPosicao);
 
-        	printf(MR_LOG_RED"%s%s"MR_LOG_RESET, strPos, strLog1);
+        	printf(MR_LOG_RED "%s%s" MR_LOG_RESET, strPos, strLog1);
         }
 
-        sprintf(strPosicao, "");
+        strPosicao[0] = 0;
     }
 
-/**< processa mensagem do tipo arquivo. */
-/**< verifica se o arquivo e maior que o limite. */
-/**< se a quantidade de logs for maior que o limite, apaga os mais antigos */
+//!< processa mensagem do tipo arquivo.
+//!< verifica se o arquivo e maior que o limite.
+//!< se a quantidade de logs for maior que o limite, apaga os mais antigos
     if (toFile)
     {
         if ((onMsg && ((type & MR_LOG_MESSAGE) != 0))
@@ -191,13 +151,7 @@ void LogClass::mr_printf(unsigned int type, int ident, const char *fmt, ...)
     }
 }
 
-/** \brief devolve a data/hora atual.
- *
- * \param withSep bool com ou sem separadores
- * \return char*
- *
- */
-char *LogClass::getDate(bool withSep)
+string LogClass::getDate(bool withSep)
 {
     struct tm *DtHr;
     time_t t;
@@ -211,32 +165,25 @@ char *LogClass::getDate(bool withSep)
     else
         sprintf(strAux, "%d%02d%02d_%02d%02d%02d", DtHr->tm_year + 1900, DtHr->tm_mon + 1, DtHr->tm_mday, DtHr->tm_hour, DtHr->tm_min, DtHr->tm_sec);
 
-    return strAux;
+    return (string)strAux;
 }
 
-/** \brief apaga logs antigos
- *
- * \param void
- * \return void
- *
- */
 void LogClass::delLog(void)
 {
     DIR *dir;
     struct dirent *arq;
     unsigned char isFile = 0x08;
-    int qntLogs = 0;
     vector <string> lstLogs;
 
-/**< se nao existir a pasta log, cria */
+//!< se nao existir a pasta log, cria
     if ((dir = opendir("./log")) == NULL)
     {
         mkdir("log", 0777);
     }
     else
     {
-/**< armazena todos os arquivos na lista */
-        while (arq = readdir(dir))
+//!< armazena todos os arquivos na lista
+        while ((arq = readdir(dir)))
         {
             if (arq->d_type == isFile)
             {
@@ -248,10 +195,10 @@ void LogClass::delLog(void)
 
         closedir(dir);
 
-/**< ordena descrescente */
+//!< ordena descrescente
         sort(lstLogs.begin(), lstLogs.end(), &decSort);
 
-/**< apaga os mais antigos */
+//!< apaga os mais antigos
         if (lstLogs.size() > MR_LOG_MAXFILE)
         {
             int cnt = 0;
@@ -265,12 +212,6 @@ void LogClass::delLog(void)
     }
 }
 
-/** \brief pega o tamanho do arquivo
- *
- * \param void
- * \return uintmax_t
- *
- */
 uintmax_t LogClass::fileSize(void)
 {
     struct stat statbuf;
@@ -283,12 +224,6 @@ uintmax_t LogClass::fileSize(void)
     return (uintmax_t) statbuf.st_size;
 }
 
-/** \brief abre um novo arquivo de log. verifica se a pasta existe bem como a quantidade de arquivos
- *
- * \param void
- * \return void
- *
- */
 void LogClass::OpenMRLog(void)
 {
     DIR *dir;
@@ -298,7 +233,7 @@ void LogClass::OpenMRLog(void)
     else
         closedir(dir);
 
-    sprintf(LogName, "./log/mrserver_%s.log", getDate(false));
+    sprintf(LogName, "./log/mrserver_%s.log", getDate(false).c_str());
     log = fopen(LogName, "a");
 
     delLog();

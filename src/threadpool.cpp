@@ -24,6 +24,9 @@ ThreadPool::~ThreadPool()
 
 void ThreadPool::addThreads(string uriRadio, int idRadio)
 {
+    if ((idRadio <= 0) || (uriRadio == ""))
+        throw ExceptionClass("threadpool", "addThreads", "id ou url errado");
+
     ctrlThread* objThreadControl;
 
     try
@@ -49,6 +52,9 @@ void ThreadPool::addThreads(string uriRadio, int idRadio)
     }
     catch(...)
     {
+        if (objThreadControl->objCapture)
+            delete objThreadControl->objCapture;
+
         throw;
     }
 
@@ -57,13 +63,11 @@ void ThreadPool::addThreads(string uriRadio, int idRadio)
         objThreadControl->objThread = new thread(&ThreadCapture::thrRun, std::ref(objThreadControl->objCapture));
         objThreadControl->isStop = false;
 
-        if (objThreadControl->objCapture->status == 0)
-            ctrlThreads[idRadio] = objThreadControl;
-        else
-        {
-            delete objThreadControl->objCapture;
-            delete objThreadControl;
-        }
+        ctrlThreads[idRadio] = objThreadControl;
+    }
+    catch (SignalException& e)
+    {
+        objLog->mr_printf(MR_LOG_ERROR, idRadio, "Erro : %s\n", e.what());
     }
     catch(...)
     {
@@ -74,13 +78,11 @@ void ThreadPool::addThreads(string uriRadio, int idRadio)
 void ThreadPool::stopThread(int idRadio)
 {
     std::map<unsigned int, ctrlThread*>::iterator itAux;
-    ctrlThread* objThreadControl;
 
     itAux = ctrlThreads.find(idRadio);
 
     if (itAux != ctrlThreads.end())
     {
-        objThreadControl = itAux->second;
         ctrlThreads.erase(itAux);
     }
 }

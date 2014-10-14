@@ -9,7 +9,6 @@
 #include <mir/database_mysql.h>
 
 #include "util.h"
-#include "exceptionmir.h"
 #include "parser.h"
 
 #define RAW_SAMPLE_RATE 11025
@@ -31,7 +30,6 @@ class RAWData : public Parser
         string ipRecognition;
         string portRecognition;
         string mySqlConnString;
-        int32_t idSlice;
         mutex* MutexAccess;
 
     protected:

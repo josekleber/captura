@@ -4,6 +4,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/log/trivial.hpp>
 
+#include "exceptionmir.h"
 #include "LogClass.h"
 
 #define ANSI_COLOR_RED     "\x1b[31m"

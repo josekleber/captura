@@ -84,9 +84,19 @@ struct OpenFileException : virtual BaseException{};
 struct GeneralException : virtual BaseException {};
 
 /** \brief
+* Exceção geral, usado no caso de erro pego por catch(...)
+*/
+struct SliceProcessException : virtual BaseException {};
+
+/** \brief
 * Erro de abertura de arquivo
 */
 struct ResampleException : virtual BaseException{};
+
+/** \brief
+* Erro de abertura de arquivo
+*/
+struct ThreadCaptureException : virtual BaseException{};
 
 /** \brief
 * Erro de abertura de arquivo
@@ -97,6 +107,21 @@ struct StreamRadioException : virtual BaseException{};
 * Erro de abertura de arquivo
 */
 struct FifoException : virtual BaseException{};
+
+/** \brief
+* Erro de abertura de arquivo
+*/
+struct RawDataException : virtual BaseException{};
+
+/** \brief
+* Erro de abertura de arquivo
+*/
+struct FileDataException : virtual BaseException{};
+
+
+
+
+
 
 /** @brief Enumerodor com as exceções dos processos MIR (AudioMonitor) */
 enum MIR_EXCEPTION
@@ -145,6 +170,14 @@ enum MIR_EXCEPTION
     MIR_ERR_FIFO_GET                = -13007,
     MIR_ERR_FIFO_DATA1              = -13008,
     MIR_ERR_FIFO_DATA2              = -13009,
+    MIR_ERR_FIFO_DATA3              = -13010,
+
+    MIR_ERR_RAWDATA_GENERATION      = -13500,
+    MIR_ERR_FILEDATA_GENERATION     = -13501,
+
+    // THREAD CAPTURE
+    MIR_ERR_NOT_ID_OR_URL           = -14000,
+    MIR_ERR_BAD_ALLOC               = -14001,
 
 
     // MIR_ERR_

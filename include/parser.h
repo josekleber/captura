@@ -26,7 +26,6 @@ extern "C"
 #include <mir/exceptionclass.h>
 
 #include "util.h"
-#include "exceptionmir.h"
 
 using namespace std;
 
@@ -75,6 +74,8 @@ public:
     int nbSamplesIn;
     int nbChannelIn;
     int szBuffer;
+    int32_t idSlice;
+    int32_t szFifo;
 
 protected:
     AUDIOFORMAT audioFormat;
@@ -106,6 +107,9 @@ protected:
 
     virtual void initObject();
 private:
+    bool FrameInCreated = false;
+    bool FrameOutCreated = false;
+
     /** \brief Cria contexto de saída */
     void CreateContext();
 

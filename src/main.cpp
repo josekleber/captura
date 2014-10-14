@@ -4,7 +4,7 @@
     Captura através de streams web.
 */
 
-//#define TESTE
+//define TESTE
 
 #ifdef TESTE
 #include <sys/resource.h>
@@ -18,7 +18,8 @@ struct strPP
 int main()
 {
 #ifdef TESTE
-/**/
+
+/**
 signal(SIGSEGV, Captura::signal_callback_handler1);
 
 //  try
@@ -187,5 +188,6 @@ log->Teste();
 return 0;
 #endif
 
-    Captura* objCapura = new Captura;
+    objCapura = new Captura;
+    objCapura->initLoop();
 }

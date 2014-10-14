@@ -66,6 +66,7 @@ void Parser::CreateContext()
 
     if(audioFormat == AUDIOFORMAT::raw)
         fmt_ctx_out->oformat->flags |= AVFMT_NOFILE;
+/**
     else
     {
         error = avio_open(&io_ctx, fileName.c_str(), AVIO_FLAG_WRITE);
@@ -73,10 +74,11 @@ void Parser::CreateContext()
         {
             char error_buffer[255];
             av_strerror(error, error_buffer, sizeof(error_buffer));
-            objLog->mr_printf(MR_LOG_ERROR, idRadio, "Error: %s\n", error_buffer);
+            objLog->mr_printf(MR_LOG_ERROR, idRadio, "Error: %s - %s\n", fileName.c_str(), error_buffer);
             throw ConvertException() << errno_code(MIR_ERR_OPEN_OUTPUT_FILE);
         }
     }
+/**/
 
     fmt_ctx_out->pb = io_ctx;
 }
@@ -94,8 +96,6 @@ void Parser::setStream()
 
     if (!stm_out)
         throw StreamException() << errno_code(MIR_ERR_OPEN_STREAM);
-
-    cdc_ctx_out = avcodec_alloc_context3(codec);
 
     cdc_ctx_out = stm_out->codec;
     cdc_ctx_out->codec = codec;
@@ -141,10 +141,10 @@ void Parser::setStream()
     if (audioFormat == AUDIOFORMAT::arq)
     {
         fmt_ctx_out->oformat->flags |= AVFMT_ALLOW_FLUSH;
-        error = avformat_write_header(fmt_ctx_out, NULL);
+//        error = avformat_write_header(fmt_ctx_out, NULL);
 
-        if (error < 0)
-            throw StreamException() << errno_code(MIR_ERR_OPEN_STREAM);
+//        if (error < 0)
+//            throw StreamException() << errno_code(MIR_ERR_OPEN_STREAM);
     }
 
     av_dump_format(fmt_ctx_out, 0, fileName.c_str(), 1);
@@ -177,85 +177,186 @@ void Parser::InitResampler()
 
     if (swr_init(swr_ctx) < 0)
         throw ContextCreatorException() << errno_code(MIR_ERR_INIT_SWR_CONTEXT);
+
+    frame_in = NULL;
+    frame_out = NULL;
+
+    try
+    {
+        frame_in = av_frame_alloc();
+        if (frame_in == NULL)
+            throw ResampleException() << errno_code(MIR_ERR_FRAME_ALLOC);
+    }
+    catch(ResampleException& err)
+    {
+        throw;
+    }
+
+    try
+    {
+        frame_out = av_frame_alloc();
+        if (frame_out == NULL)
+            throw ResampleException() << errno_code(MIR_ERR_FRAME_ALLOC);
+    }
+    catch(ResampleException& err)
+    {
+        throw;
+    }
 }
 
 void Parser::Resample()
 {
     int got_frame;
+    vector<vector<uint8_t>> aux;
 
-    frame_out = av_frame_alloc();
-    if (frame_out == NULL)
-        throw ResampleException() << errno_code(MIR_ERR_FRAME_ALLOC);
-
-    frame_out->nb_samples = cdc_ctx_out->frame_size;
-    frame_out->format = cdc_ctx_out->sample_fmt;
-    frame_out->sample_rate = sampleRate;
-    frame_out->channel_layout = av_get_default_channel_layout(nbChannel);
-
-    if (av_frame_get_buffer(frame_out, 1) < 0)
-        throw ResampleException() << errno_code(MIR_ERR_BUFFER_ALLOC);
-
-    frame_in = av_frame_alloc();
-    if (frame_in == NULL)
-        throw ResampleException() << errno_code(MIR_ERR_FRAME_ALLOC);
-
-    frame_in->nb_samples = nbSamplesIn;
-    frame_in->format = sampleFormatIn;
-    frame_in->sample_rate = sampleRateIn;
-    frame_in->channel_layout = channelLayoutIn;
-
-    if (av_frame_get_buffer(frame_in, 1) < 0)
-        throw ResampleException() << errno_code(MIR_ERR_BUFFER_ALLOC);
-
-    for (int idxFrame = 0; idxFrame < (int)this->bufFrames.size(); idxFrame++)
+    try
     {
-//        boost::this_thread::sleep(boost::posix_time::milliseconds(1));
-
-        vector<vector<uint8_t>> aux = bufFrames[idxFrame];
-
-        if (aux.size() != nbBuffers)
-            throw FifoException() << errno_code(MIR_ERR_FIFO_DATA1);
-
-        for (int i = 0; i < (int)aux.size(); i++)
+        try
         {
-            if (aux[i].size() != szBuffer)
-                throw FifoException() << errno_code(MIR_ERR_FIFO_DATA2);
-            memcpy(frame_in->data[i], aux[i].data(), szBuffer);
+            if (!FrameInCreated)
+            {
+                frame_in->nb_samples = nbSamplesIn;
+                frame_in->format = sampleFormatIn;
+                frame_in->sample_rate = sampleRateIn;
+                frame_in->channel_layout = channelLayoutIn;
+
+                if (av_frame_get_buffer(frame_in, 1) < 0)
+                    throw ResampleException() << errno_code(MIR_ERR_BUFFER_ALLOC);
+
+                FrameInCreated = true;
+            }
         }
+        catch(ResampleException& err)
+        {
+            throw;
+        }
+
+        try
+        {
+            if (!FrameOutCreated)
+            {
+                frame_out->nb_samples = cdc_ctx_out->frame_size;
+                frame_out->format = cdc_ctx_out->sample_fmt;
+                frame_out->sample_rate = sampleRate;
+                frame_out->channel_layout = av_get_default_channel_layout(nbChannel);
+
+                if (av_frame_get_buffer(frame_out, 1) < 0)
+                    throw ResampleException() << errno_code(MIR_ERR_BUFFER_ALLOC);
+
+                FrameOutCreated = true;
+            }
+        }
+        catch(ResampleException& err)
+        {
+            throw;
+        }
+
+        for (int idxFrame = 0; idxFrame < (int)this->bufFrames.size(); idxFrame++)
+        {
+            try
+            {
+                aux = bufFrames[idxFrame];
+
+                try
+                {
+                    if ((int)aux.size() != nbBuffers)
+                        throw FifoException() << errno_code(MIR_ERR_FIFO_DATA1);
+
+                    for (int i = 0; i < (int)aux.size(); i++)
+                    {
+                        if ((int)aux[i].size() != szBuffer)
+                            throw FifoException() << errno_code(MIR_ERR_FIFO_DATA2);
+
+                        memcpy(frame_in->data[i], aux[i].data(), szBuffer);
+                    }
+
+                    for (int i = 0; i < (int)aux.size(); i++)
+                        aux[i].clear();
+                    aux.clear();
+                }
+                catch(FifoException& err)
+                {
+                    throw;
+                }
+                catch(...)
+                {
+                    throw FifoException() << errno_code(MIR_ERR_FIFO_DATA3);
+                }
+
+/**/
+                if (swr_convert(swr_ctx, (uint8_t**)&frame_out->data, frame_out->nb_samples,
+                                 (const uint8_t**)&frame_in->data, frame_in->nb_samples) >= 0)
+                {
+                    got_frame = 0;
+                    av_init_packet(&pkt_out);
+                    pkt_out.data = NULL;
+                    pkt_out.size = 0;
+
+                    if (avcodec_encode_audio2(cdc_ctx_out, &pkt_out, frame_out, &got_frame) >= 0)
+                        EndResample();
+                    else
+                    {
+                        av_free_packet(&pkt_out);
+                        throw ResampleException() << errno_code(MIR_ERR_ENCODE);
+                    }
+
+                    av_free_packet(&pkt_out);
+                }
+                else
+                    throw ResampleException() << errno_code(MIR_ERR_RESAMPLE);
+/**/
+            }
+            catch(FifoException& err)
+            {
+                objLog->mr_printf(MR_LOG_ERROR, idRadio, "Frame allocation error : %d", *boost::get_error_info<errno_code>(err));
+
+                if (aux.size() > 0)
+                {
+                    for (int i = 0; i < (int)aux.size(); i++)
+                        aux[i].clear();
+                    aux.clear();
+                }
+            }
+            catch(ResampleException& err)
+            {
+                objLog->mr_printf(MR_LOG_ERROR, idRadio, "Frame Resample Exception : %d", *boost::get_error_info<errno_code>(err));
+            }
+        }
+/**/
+
+        for (int idxFrame = 0; idxFrame < (int)this->bufFrames.size(); idxFrame++)
+        {
+            for (int i = 0; i < (int)bufFrames[idxFrame].size(); i++)
+                bufFrames[idxFrame][i].clear();
+            bufFrames[idxFrame].clear();
+        }
+        bufFrames.clear();
+
+//        av_frame_unref(frame_in);
+//        av_frame_unref(frame_out);
+    }
+    catch(...)
+    {
+        if (frame_in)
+            av_frame_free(&frame_in);
+
+        if (frame_out)
+            av_frame_free(&frame_out);
+
         for (int i = 0; i < (int)aux.size(); i++)
             aux[i].clear();
         aux.clear();
 
-        if (swr_convert(swr_ctx, (uint8_t**)&frame_out->data, frame_out->nb_samples,
-                         (const uint8_t**)&frame_in->data, frame_in->nb_samples) >= 0)
+        for (int idxFrame = 0; idxFrame < (int)this->bufFrames.size(); idxFrame++)
         {
-            got_frame = 0;
-            av_init_packet(&pkt_out);
-            pkt_out.data = NULL;
-            pkt_out.size = 0;
-
-            if (avcodec_encode_audio2(cdc_ctx_out, &pkt_out, frame_out, &got_frame) >= 0)
-                EndResample();
-            else
-                throw ResampleException() << errno_code(MIR_ERR_ENCODE);
-
-            av_free_packet(&pkt_out);
+            for (int i = 0; i < (int)bufFrames[idxFrame].size(); i++)
+                bufFrames[idxFrame][i].clear();
+            bufFrames[idxFrame].clear();
         }
-        else
-            throw ResampleException() << errno_code(MIR_ERR_RESAMPLE);
-    }
+        bufFrames.clear();
 
-    for (int idxFrame = 0; idxFrame < (int)this->bufFrames.size(); idxFrame++)
-    {
-        for (int i = 0; i < (int)bufFrames[idxFrame].size(); i++)
-            bufFrames[idxFrame][i].clear();
-        bufFrames[idxFrame].clear();
+        throw;
     }
-    bufFrames.clear();
-/**/
-
-    av_frame_free(&frame_in);
-    av_frame_free(&frame_out);
 }
 
 AVCodecID Parser::getCodecID()
@@ -316,6 +417,28 @@ void Parser::setBuffer(string arqName, vector<vector<vector<uint8_t>>> value)
 {
     this->fileName = arqName;
     bufFrames = value;
+
+    if (audioFormat == AUDIOFORMAT::arq)
+    {
+        if (io_ctx)
+            avio_close(io_ctx);
+
+        int error = avio_open(&io_ctx, fileName.c_str(), AVIO_FLAG_WRITE);
+        if (error < 0)
+        {
+            char error_buffer[255];
+            av_strerror(error, error_buffer, sizeof(error_buffer));
+            objLog->mr_printf(MR_LOG_ERROR, idRadio, "Error: %s - %s\n", fileName.c_str(), error_buffer);
+            throw ConvertException() << errno_code(MIR_ERR_OPEN_OUTPUT_FILE);
+        }
+
+        fmt_ctx_out->pb = io_ctx;
+
+        error = avformat_write_header(fmt_ctx_out, NULL);
+
+        if (error < 0)
+            throw StreamException() << errno_code(MIR_ERR_OPEN_STREAM);
+    }
 }
 
 void Parser::Execute(){}

@@ -53,6 +53,11 @@ class SliceProcess
         int idSlice;
         int Status;
 
+        AVCodecContext* cdc_ctx_in;
+
+        RAWData* objRawData;
+        FileData* objFileData;
+
         thread* objThreadRawParser;
         thread* objThreadArqParser;
 
@@ -60,6 +65,11 @@ class SliceProcess
         string getHour();
         string getDateTime();
         string getSaveCutDir();
+
+        AVFrame* inFrame;
+
+        vector<vector<vector<uint8_t>>> Packets;
+        vector<vector <uint8_t>> aux;
 };
 
 #endif // SLICEPROCESS_H

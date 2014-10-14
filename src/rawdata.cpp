@@ -47,6 +47,8 @@ unsigned int* RAWData::CreateFingerPrint(vector <uint8_t> Data, unsigned int* Fi
 
 void RAWData::Execute()
 {
+    int idMySql = 0;
+
 clock_t start;
 start = clock();
     try
@@ -77,15 +79,15 @@ start = clock();
     // gerando fingerprints
     unsigned int nbits;
     unsigned int* bits = NULL;
-    bits = CreateFingerPrint(binOutput, &nbits, true);
+//    if (binOutput.size() > 0)
+//        bits = CreateFingerPrint(binOutput, &nbits, true);
 
     binOutput.clear();
 
     if (bits != NULL)
     {
-        int idMySql = 0;
         bool okMySql = true;
-/**
+/**  Rotina para o MySQL
         try
         {
             string aux = fileName.substr(0, fileName.find_last_of(".")) + "mp3";
@@ -160,8 +162,6 @@ start = clock();
                 for (int i = 0; i < 4; buff[pos++] = conv[i++]);
             }
 
-            delete[] bits;
-
             try
             {
                 boost::asio::io_service IO_Service;
@@ -176,35 +176,34 @@ start = clock();
                 int cntTimeOut = 0;
                 while ((objClient->strResp == "") && (cntTimeOut < SOCKET_TIMEOUT / 10))
                 {
-//                    boost::this_thread::sleep(boost::posix_time::milliseconds(10));
                     usleep(10);
                     cntTimeOut++;
                 }
 
                 if (cntTimeOut >= SOCKET_TIMEOUT / 10)
-                    BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED << "TimeOut no socket : " << objClient->strResp << ANSI_COLOR_RESET;
+                    objLog->mr_printf(MR_LOG_ERROR, idRadio, "TimeOut no socket : %s\n", objClient->strResp.c_str());
                 else if (objClient->strResp != "Received")
-                    BOOST_LOG_TRIVIAL(error) << ANSI_COLOR_RED << "Erro de envio : " << objClient->strResp << ANSI_COLOR_RESET;
+                    objLog->mr_printf(MR_LOG_ERROR, idRadio, "Erro de envio : %s\n", objClient->strResp.c_str());
 
                 objClient->Close();
-            }
-            catch(ConvertException& err)
-            {
-                objLog->mr_printf(MR_LOG_ERROR, idRadio, "%s\n", err.what());
             }
             catch (exception& err)
             {
                 objLog->mr_printf(MR_LOG_ERROR, idRadio, "%s\n", err.what());
             }
+            catch (...)
+            {
+                objLog->mr_printf(MR_LOG_ERROR, idRadio, "Erro geral na class RAWData, Execute\n");
+            }
 
             delete[] buff;
         }
+/**/
 
-objLog->mr_printf(MR_LOG_DEBUG, idRadio, "MySql : %d    Recorte : %d    Tempo de processamento : %8.4f\n", idMySql, idSlice, (float)(clock() - start)/CLOCKS_PER_SEC);
-start = clock();
+        delete[] bits;
     }
-
-    delete this;
+objLog->mr_printf(MR_LOG_DEBUG, idRadio, "MySql : %5d    Recorte : %5d    Tempo de processamento : %8.4f    Fifo : %d\n", idMySql, idSlice, (float)(clock() - start)/CLOCKS_PER_SEC, szFifo);
+start = clock();
 }
 
 void RAWData::EndResample()

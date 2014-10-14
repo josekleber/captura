@@ -23,13 +23,13 @@ extern "C"
 #include "configuration.h"
 #include "threadpool.h"
 #include "logger.h"
-#include "LogClass.h"
 
 class Captura
 {
     public:
         Captura();
         virtual ~Captura();
+        void initLoop();
     protected:
     private:
         void writeFileStream();
@@ -46,6 +46,8 @@ class Captura
         vector<UrlStream*> urlStream;
         // filtro utilizado pelo fingerprint
         vector<Filter> Filters;
+
+        ThreadPool* objThreadPool;
 };
 
 #endif

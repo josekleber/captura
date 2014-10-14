@@ -59,14 +59,15 @@ void Queue::addQueueData(AVFrame* frame)
         boost::this_thread::sleep(boost::posix_time::milliseconds(10));
     mtx = true;
 
-    if (frame->linesize[0] != szBuffer)
-        throw FifoException() << errno_code(MIR_ERR_FIFO_BUFFER_SIZE);
-    if (frame->format != Format)
-        throw FifoException() << errno_code(MIR_ERR_FIFO_ADD_FORMAT);
-    if (frame->channels != nbChannels)
-        throw FifoException() << errno_code(MIR_ERR_FIFO_ADD_CHANNELS);
     try
     {
+        if (frame->linesize[0] != szBuffer)
+            throw FifoException() << errno_code(MIR_ERR_FIFO_BUFFER_SIZE);
+        if (frame->format != Format)
+            throw FifoException() << errno_code(MIR_ERR_FIFO_ADD_FORMAT);
+        if (frame->channels != nbChannels)
+            throw FifoException() << errno_code(MIR_ERR_FIFO_ADD_CHANNELS);
+
         for (int numBuf = 0; numBuf < nbBuffers; numBuf++)
         {
             for (int data = 0; data < szBuffer; data++)
@@ -82,6 +83,11 @@ void Queue::addQueueData(AVFrame* frame)
 
         buf1.clear();
         mtx = false;
+    }
+    catch(FifoException& err)
+    {
+        mtx = false;
+        throw;
     }
     catch(...)
     {
@@ -108,6 +114,25 @@ vector<vector<uint8_t>> Queue::getQueueData()
 
         mtx = false;
         return ret;
+    }
+    catch(...)
+    {
+        mtx = false;
+        throw FifoException() << errno_code(MIR_ERR_FIFO_GET);
+    }
+}
+
+void Queue::delQueueData()
+{
+    while (mtx)
+        boost::this_thread::sleep(boost::posix_time::milliseconds(10));
+    mtx = true;
+    try
+    {
+        if (!queueData.empty())
+            queueData.pop();
+
+        mtx = false;
     }
     catch(...)
     {
