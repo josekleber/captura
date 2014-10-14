@@ -86,7 +86,7 @@ AVFormatContext* StreamRadio::open(int idRadio, string uri)
         objLog->mr_printf(MR_LOG_ERROR, idRadio, "Error (%d) : %s\n", ret, error_buffer);
 
         statusConnection = MIR_CONNECTION_ERROR;
-        throw StreamRadioException() <<errno_code(MIR_ERR_STREAM_CONNECTION);
+        throw StreamRadioException() <<errno_code(MIR_ERR_STREAM_CONNECTION1);
     }
 
     objLog->mr_printf(MR_LOG_MESSAGE, idRadio, MR_LOG_BOLDGREEN "Conectado ao stream %s\n" MR_LOG_RESET, uri.c_str());
@@ -145,7 +145,7 @@ void StreamRadio::setStreamType()
         objLog->mr_printf(MR_LOG_ERROR, idRadio, "Error (%d) : %s\n", ret, error_buffer);
 
         statusConnection = MIR_CONNECTION_ERROR;
-        throw StreamRadioException() << errno_code(MIR_ERR_STREAM_CONNECTION);
+        throw StreamRadioException() << errno_code(MIR_ERR_STREAM_CONNECTION1);
     }
 
     streamIndex = av_find_best_stream(formatContext, AVMEDIA_TYPE_AUDIO, -1, -1, &codec, 0);

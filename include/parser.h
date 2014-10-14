@@ -110,6 +110,8 @@ private:
     bool FrameInCreated = false;
     bool FrameOutCreated = false;
 
+    vector<vector<uint8_t>> vetAux;
+
     /** \brief Cria contexto de saída */
     void CreateContext();
 

@@ -163,18 +163,20 @@ void SliceProcess::thrProcessa()
                             objRawData->idSlice = idSlice;
                             objRawData->szFifo = objRadio->getQueueSize();
                             objThreadRawParser = new thread(&RAWData::Execute, objRawData);
+                            objThreadRawParser->detach();
                         }
                         catch(...)
                         {
                             throw;
                         }
 
-/**
+/**/
                         // rodando a thread da gravacao do arquivo mp3
                         try
                         {
                             objFileData->setBuffer(arqName + ".mp3", Packets);
                             objThreadArqParser = new thread(&FileData::Execute, objFileData);
+                            objThreadArqParser->detach();
                         }
                         catch(...)
                         {

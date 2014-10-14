@@ -51,6 +51,7 @@ void RAWData::Execute()
 
 clock_t start;
 start = clock();
+
     try
     {
         Resample();
@@ -79,8 +80,8 @@ start = clock();
     // gerando fingerprints
     unsigned int nbits;
     unsigned int* bits = NULL;
-//    if (binOutput.size() > 0)
-//        bits = CreateFingerPrint(binOutput, &nbits, true);
+    if (binOutput.size() > 0)
+        bits = CreateFingerPrint(binOutput, &nbits, true);
 
     binOutput.clear();
 
