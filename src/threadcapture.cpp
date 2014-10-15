@@ -116,9 +116,11 @@ void ThreadCapture::thrRun()
                 try
                 {
                     objThreadRadio = new thread(&StreamRadio::read, objRadio);
+                    objThreadRadio->detach();
                     while (objRadio->getQueueSize() <= 0)
                         usleep(10);
                     objThreadProcessa = new thread(&SliceProcess::thrProcessa, objSlice);
+                    objThreadProcessa->detach();
                 }
                 catch(...)
                 {

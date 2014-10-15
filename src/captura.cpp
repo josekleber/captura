@@ -70,6 +70,11 @@ int ret = readFileStream();
 
                          objLog->mr_printf(MR_LOG_DEBUG, 0, "Quantidade de Threads em funcionamento %d\n", objThreadPool->getActiveThread().size());
                     }
+                    catch (SignalException& err)
+                    {
+                        objLog->mr_printf(MR_LOG_ERROR, urlStream[idxRadio]->radio,
+                                          "Erro de memoria : %s\n", urlStream[idxRadio]->url.c_str());
+                    }
                     catch(...)
                     {
                         objLog->mr_printf(MR_LOG_ERROR, urlStream[idxRadio]->radio,
@@ -83,9 +88,9 @@ int ret = readFileStream();
             // sempre haverá um sleep para verificar novas rádios
             boost::this_thread::sleep(boost::posix_time::minutes(config->UpdateTimer));
         }
-        catch (SignalException& e)
+        catch (SignalException& err)
         {
-            objLog->mr_printf(MR_LOG_DEBUG, 0, "SignalException: %s\n", e.what());
+            objLog->mr_printf(MR_LOG_DEBUG, 0, "SignalException: %s\n", err.what());
         }
     }
     while (true);

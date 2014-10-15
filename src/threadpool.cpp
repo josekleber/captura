@@ -50,6 +50,10 @@ void ThreadPool::addThreads(string uriRadio, int idRadio)
 
         objThreadControl->objCapture->MutexAccess = &MutexAccess;
     }
+    catch(SignalException& err)
+    {
+        throw;
+    }
     catch(...)
     {
         if (objThreadControl->objCapture)
@@ -61,13 +65,14 @@ void ThreadPool::addThreads(string uriRadio, int idRadio)
     try
     {
         objThreadControl->objThread = new thread(&ThreadCapture::thrRun, std::ref(objThreadControl->objCapture));
+        objThreadControl->objThread->detach();
         objThreadControl->isStop = false;
 
         ctrlThreads[idRadio] = objThreadControl;
     }
-    catch (SignalException& e)
+    catch (SignalException& err)
     {
-        objLog->mr_printf(MR_LOG_ERROR, idRadio, "Erro : %s\n", e.what());
+        objLog->mr_printf(MR_LOG_ERROR, idRadio, "Erro : %s\n", err.what());
     }
     catch(...)
     {

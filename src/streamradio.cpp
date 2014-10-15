@@ -79,14 +79,14 @@ AVFormatContext* StreamRadio::open(int idRadio, string uri)
     rtspDetect();
 
     // abre a conexão
-    if ((ret=avformat_open_input(&formatContext,uri.c_str(),NULL,&dictionary))< 0)
+    if ((ret=avformat_open_input(&formatContext, uri.c_str(), NULL, &dictionary))< 0)
     {
         char error_buffer[255];
         av_strerror(ret, error_buffer, sizeof(error_buffer));
         objLog->mr_printf(MR_LOG_ERROR, idRadio, "Error (%d) : %s\n", ret, error_buffer);
 
         statusConnection = MIR_CONNECTION_ERROR;
-        throw StreamRadioException() <<errno_code(MIR_ERR_STREAM_CONNECTION1);
+        throw StreamRadioException() << errno_code(MIR_ERR_STREAM_CONNECTION1);
     }
 
     objLog->mr_printf(MR_LOG_MESSAGE, idRadio, MR_LOG_BOLDGREEN "Conectado ao stream %s\n" MR_LOG_RESET, uri.c_str());
