@@ -125,8 +125,6 @@ void SliceProcess::thrProcessa()
 
                 if (szFifo >= inFrameSize)
                 {
-                    int szFrame = FFMIN(szFifo, inFrameSize);
-
                     // carregando dados da FIFO
 //objRadio->delQueueData();
                     aux = objRadio->getQueueData();
@@ -137,7 +135,7 @@ void SliceProcess::thrProcessa()
                             aux[i].clear();
                         aux.clear();
 
-                        qtdPack += szFrame;
+                        qtdPack += inFrameSize;
                     }
 
                     if (qtdPack >= (inFrame->sample_rate  * 5.2))

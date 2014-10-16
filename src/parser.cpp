@@ -209,21 +209,6 @@ void Parser::InitResampler()
 
 void Parser::Resample()
 {
-for (int idxFrame = 0; idxFrame < (int)this->bufFrames.size(); idxFrame++)
-{
-    for (int i = 0; i < (int)bufFrames[idxFrame].size(); i++)
-        bufFrames[idxFrame][i].clear();
-    bufFrames[idxFrame].clear();
-}
-bufFrames.clear();
-return;
-
-
-
-
-
-
-
     int got_frame;
 
     try
@@ -303,7 +288,6 @@ return;
                     throw FifoException() << errno_code(MIR_ERR_FIFO_DATA3);
                 }
 
-/**
                 //!< convertendo dados
                 if (swr_convert(swr_ctx, (uint8_t**)&frame_out->data, frame_out->nb_samples,
                                  (const uint8_t**)&frame_in->data, frame_in->nb_samples) >= 0)
@@ -325,7 +309,6 @@ return;
                 }
                 else
                     throw ResampleException() << errno_code(MIR_ERR_RESAMPLE);
-/**/
             }
             catch(FifoException& err)
             {
