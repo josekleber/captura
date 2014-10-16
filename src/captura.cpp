@@ -54,7 +54,7 @@ int ret = readFileStream();
                     try
                     {
                         // cria as threads
-                        objLog->mr_printf(MR_LOG_MESSAGE, urlStream[idxRadio]->radio, "Conectando em %s\n",
+                        objLog->mr_printf(MR_LOG_MESSAGE, urlStream[idxRadio]->radio, MR_LOG_BOLDYELLOW "Conectando em %s\n" MR_LOG_RESET,
                                urlStream[idxRadio]->url.c_str());
 
                         string urlRadio = objThreadPool->getUrlRadio(urlStream[idxRadio]->radio);

@@ -87,6 +87,7 @@ void Queue::addQueueData(AVFrame* frame)
     catch(FifoException& err)
     {
         mtx = false;
+        usleep(50);
         throw;
     }
     catch(...)

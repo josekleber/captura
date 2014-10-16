@@ -66,6 +66,7 @@ AVFormatContext* StreamRadio::open(int idRadio, string uri)
     int ret = 0;
 
     this->idRadio = idRadio;
+    this->uri = uri;
 
     // verifica se conseguiu alocar o contexto
     formatContext = avformat_alloc_context();
@@ -221,11 +222,11 @@ AVStream * StreamRadio::getStream()
 
 void StreamRadio::rtspDetect()
 {
-    int pos = this->uri.find("rtsp://",0);
+    int pos = this->uri.find("rtsp:", 0);
 
-    if ((pos >= 0))
+    if (pos >= 0)
     {
-        av_dict_set(&dictionary,"rtsp_transport","tcp",0);
+        av_dict_set(&dictionary, "rtsp_transport", "tcp", 0);
     }
 }
 
