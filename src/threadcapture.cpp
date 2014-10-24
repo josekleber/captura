@@ -87,6 +87,8 @@ void ThreadCapture::thrRun()
                             delete objRadio;
                             objRadio = NULL;
                             sleep(30);
+
+                            continue;
                         }
 
                         try

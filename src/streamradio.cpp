@@ -154,7 +154,7 @@ void StreamRadio::setStreamType()
         objLog->mr_printf(MR_LOG_ERROR, idRadio, "Error (%d) : %s\n", ret, error_buffer);
 
         statusConnection = MIR_CONNECTION_ERROR;
-        throw StreamRadioException() << errno_code(MIR_ERR_STREAM_CONNECTION1);
+        throw StreamRadioException() << errno_code(MIR_ERR_STREAM_CONNECTION2);
     }
 
     streamIndex = av_find_best_stream(formatContext, AVMEDIA_TYPE_AUDIO, -1, -1, &codec, 0);
