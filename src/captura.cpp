@@ -17,15 +17,25 @@ Captura::Captura()
     try
     {
         init();
+
+        objThreadPool = new ThreadPool(config->mrOn, config->svFP, config->mrIP, config->mrPort,
+                                       config->ConnectionStringMySQL, config->cutFolder, &Filters);
+    }
+    catch(SignalException& err)
+    {
+        objLog->mr_printf(MR_LOG_ERROR, 0, "captura (contructor) : Erro de segmentacao");
+        return;
     }
     catch(ExceptionClass& err)
     {
         objLog->mr_printf(MR_LOG_ERROR, 0, err.what());
         return;
     }
-
-    objThreadPool = new ThreadPool(config->mrOn, config->svFP, config->mrIP, config->mrPort,
-                                   config->ConnectionStringMySQL, config->cutFolder, &Filters);
+    catch(...)
+    {
+        objLog->mr_printf(MR_LOG_ERROR, 0, "captura (contructor) : Erro desconhecido");
+        return;
+    }
 }
 
 void Captura::initLoop()
@@ -54,7 +64,7 @@ int ret = readFileStream();
                     try
                     {
                         // cria as threads
-                        objLog->mr_printf(MR_LOG_MESSAGE, urlStream[idxRadio]->radio, MR_LOG_BOLDYELLOW "Conectando em %s\n" MR_LOG_RESET,
+                        objLog->mr_printf(MR_LOG_MESSAGE, urlStream[idxRadio]->radio, MR_LOG_BOLDYELLOW "Conectando em %s" MR_LOG_RESET "\n",
                                urlStream[idxRadio]->url.c_str());
 
                         string urlRadio = objThreadPool->getUrlRadio(urlStream[idxRadio]->radio);
@@ -285,7 +295,9 @@ void Captura::init()
         objLog->mr_printf(MR_LOG_DEBUG, 0, "carregado FFMPEG.\n");
 
     // define o nível de log do FFMPEG
+// njn
     av_log_set_level(AV_LOG_QUIET);
+//    av_log_set_level(AV_LOG_DEBUG);
 
     // instancia objeto do banco de dados
     db = new Database_SQL(config->ConnectionStringSQLProducao);

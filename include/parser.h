@@ -51,7 +51,7 @@ public:
         arq=1
     };
 
-    vector<string> audioFormatList = {"wav","mp3"};
+    vector<string> audioFormatList = {"wav", "mp3"};
 
     void setBitRate(int value);
     void setSampleRate(int value);
@@ -96,7 +96,6 @@ protected:
     AVFrame *frame_in = NULL;
     AVFrame *frame_out = NULL;
     AVPacket pkt_out;
-    AVIOContext *io_ctx = NULL;
 
     vector<vector<vector<uint8_t>>> bufFrames;
 

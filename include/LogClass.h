@@ -18,6 +18,8 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <string.h>
+
 #include <queue>
 #include <string>
 #include <algorithm>

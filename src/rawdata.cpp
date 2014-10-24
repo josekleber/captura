@@ -49,12 +49,22 @@ void RAWData::Execute()
 {
     int idMySql = 0;
 
-clock_t start;
-start = clock();
+clock_t start = clock();
+
+    if (idRadio == 0)
+    {
+        objLog->mr_printf(MR_LOG_ERROR, idRadio, "Radio sem id\n");
+        return;
+    }
 
     try
     {
         Resample();
+    }
+    catch(SignalException& err)
+    {
+        objLog->mr_printf(MR_LOG_ERROR, idRadio, "Error code (FP): %s\n", err.what());
+        return;
     }
     catch(ResampleException& err)
     {
@@ -80,10 +90,22 @@ start = clock();
     // gerando fingerprints
     unsigned int nbits;
     unsigned int* bits = NULL;
-    if (binOutput.size() > 0)
-        bits = CreateFingerPrint(binOutput, &nbits, true);
+    try
+    {
+        if (binOutput.size() > 0)
+            bits = CreateFingerPrint(binOutput, &nbits, true);
 
-    binOutput.clear();
+        binOutput.clear();
+    }
+    catch(SignalException& err)
+    {
+        binOutput.clear();
+        if (bits != NULL)
+            delete[] bits;
+        bits = NULL;
+
+        objLog->mr_printf(MR_LOG_ERROR, idRadio, "Erro na criacao dos FingerPrints\n");
+    }
 
     if (bits != NULL)
     {
@@ -125,68 +147,106 @@ start = clock();
                 fclose(fp);
             }
         }
+        catch(ExceptionClass& err)
+        {
+            objLog->mr_printf(MR_LOG_ERROR, idRadio, "Erro de segmentacao na rotina de gravacao do FingerPrint\n");
+        }
         catch(...)
         {
-                objLog->mr_printf(MR_LOG_ERROR, idRadio, "Erro na gravacao do FingerPrint em arquivo\n");
+            objLog->mr_printf(MR_LOG_ERROR, idRadio, "Erro na gravacao do FingerPrint em arquivo\n");
         }
 
         // enviando dados para o mrserver
         if ((mrOn != 0) && okMySql)
         {
-            // preparando vetor com dados para envio via socket
-            uint8_t* conv;
-            int pos = 0;
-
-            int16_t arqNameSize = fileName.size();
-            uint8_t* buff  = new uint8_t[4 * nbits + arqNameSize + 14];
-
-            conv = (uint8_t*)&this->idRadio;
-            for (int i = 0; i < 4; buff[pos++] = conv[i++]);
-
-            conv = (uint8_t*)&idMySql;
-            for (int i = 0; i < 4; buff[pos++] = conv[i++]);
-
-            conv = (uint8_t*)&nbits;
-            for (int i = 0; i < 4; buff[pos++] = conv[i++]);
-
-            conv = (uint8_t*)&arqNameSize;
-            for (int i = 0; i < 2; buff[pos++] = conv[i++]);
-
-            for (int i = 0; i < arqNameSize - 3; buff[pos++] = (fileName.c_str())[i++]);
-            buff[pos++] = 'm';
-            buff[pos++] = 'p';
-            buff[pos++] = '3';
-
-            for (unsigned int j = 0; j < nbits; j++)
-            {
-                conv = (uint8_t*)&bits[j];
-                for (int i = 0; i < 4; buff[pos++] = conv[i++]);
-            }
-
             try
             {
-                boost::asio::io_service IO_Service;
-                tcp::resolver Resolver(IO_Service);
-                tcp::resolver::query Query(ipRecognition, portRecognition);
-                tcp::resolver::iterator EndPointIterator = Resolver.resolve(Query);
+                // preparando vetor com dados para envio via socket
+                uint8_t* conv;
+                uint8_t* buff;
+                int pos = 0;
 
-                TCPClient* objClient = new TCPClient(IO_Service, EndPointIterator, buff, pos);
+                int16_t arqNameSize = fileName.size();
 
-                boost::thread ClientThread(boost::bind(&boost::asio::io_service::run, &IO_Service));
-
-                int cntTimeOut = 0;
-                while ((objClient->strResp == "") && (cntTimeOut < SOCKET_TIMEOUT / 10))
+                try
                 {
-                    usleep(10);
-                    cntTimeOut++;
+                    buff  = new uint8_t[4 * nbits + arqNameSize + 14];
+                }
+                catch(...)
+                {
+                    throw ExceptionClass("rawdata", "Execute", "Erro na alocacao do vetor de dados para transmissao");
                 }
 
-                if (cntTimeOut >= SOCKET_TIMEOUT / 10)
-                    objLog->mr_printf(MR_LOG_ERROR, idRadio, "TimeOut no socket : %s\n", objClient->strResp.c_str());
-                else if (objClient->strResp != "Received")
-                    objLog->mr_printf(MR_LOG_ERROR, idRadio, "Erro de envio : %s\n", objClient->strResp.c_str());
+                conv = (uint8_t*)&this->idRadio;
+                for (int i = 0; i < 4; buff[pos++] = conv[i++]);
 
-                objClient->Close();
+                conv = (uint8_t*)&idMySql;
+                for (int i = 0; i < 4; buff[pos++] = conv[i++]);
+
+                conv = (uint8_t*)&nbits;
+                for (int i = 0; i < 4; buff[pos++] = conv[i++]);
+
+                conv = (uint8_t*)&arqNameSize;
+                for (int i = 0; i < 2; buff[pos++] = conv[i++]);
+
+                for (int i = 0; i < arqNameSize - 3; buff[pos++] = (fileName.c_str())[i++]);
+                buff[pos++] = 'm';
+                buff[pos++] = 'p';
+                buff[pos++] = '3';
+
+                for (unsigned int j = 0; j < nbits; j++)
+                {
+                    conv = (uint8_t*)&bits[j];
+                    for (int i = 0; i < 4; buff[pos++] = conv[i++]);
+                }
+
+                try
+                {
+                    boost::asio::io_service IO_Service;
+                    tcp::resolver Resolver(IO_Service);
+                    tcp::resolver::query Query(ipRecognition, portRecognition);
+                    tcp::resolver::iterator EndPointIterator = Resolver.resolve(Query);
+
+                    TCPClient* objClient = new TCPClient(IO_Service, EndPointIterator, buff, pos);
+
+                    boost::thread ClientThread(boost::bind(&boost::asio::io_service::run, &IO_Service));
+
+                    int cntTimeOut = 0;
+                    while ((objClient->strResp == "") && (cntTimeOut < SOCKET_TIMEOUT / 10))
+                    {
+                        usleep(10);
+                        cntTimeOut++;
+                    }
+
+                    if (cntTimeOut >= SOCKET_TIMEOUT / 10)
+                        objLog->mr_printf(MR_LOG_ERROR, idRadio, "TimeOut no socket : %s\n", objClient->strResp.c_str());
+                    else if (objClient->strResp != "Received")
+                        objLog->mr_printf(MR_LOG_ERROR, idRadio, "Erro de envio : %s\n", objClient->strResp.c_str());
+
+                    objClient->Close();
+                }
+                catch(SignalException& err)
+                {
+                    throw;
+                }
+                catch (exception& err)
+                {
+                    throw;
+                }
+                catch (...)
+                {
+                    throw ExceptionClass("rawdata", "Execute", "Erro geral na class RAWData, Execute");
+                }
+
+                delete[] buff;
+            }
+            catch(SignalException& err)
+            {
+                objLog->mr_printf(MR_LOG_ERROR, idRadio, "Erro de Segmentacao na rotina Execute do rawdata\n", err.what());
+            }
+            catch(ExceptionClass& err)
+            {
+                objLog->mr_printf(MR_LOG_ERROR, idRadio, "%s\n", err.what());
             }
             catch (exception& err)
             {
@@ -194,17 +254,14 @@ start = clock();
             }
             catch (...)
             {
-                objLog->mr_printf(MR_LOG_ERROR, idRadio, "Erro geral na class RAWData, Execute\n");
+                objLog->mr_printf(MR_LOG_ERROR, idRadio, "rawdata (Execute) : Erro Desconhecido\n");
             }
-
-            delete[] buff;
         }
 /**/
 
         delete[] bits;
     }
-objLog->mr_printf(MR_LOG_DEBUG, idRadio, "MySql : %5d    Recorte : %5d    Tempo de processamento : %8.4f    Fifo : %d\n", idMySql, idSlice, (float)(clock() - start)/CLOCKS_PER_SEC, szFifo);
-start = clock();
+objLog->mr_printf(MR_LOG_DEBUG, idRadio, "RawData >>> MySql : %5d    Recorte : %5d    Tempo de processamento : %8.4f    Fifo : %d\n", idMySql, idSlice, (float)(clock() - start)/CLOCKS_PER_SEC, szFifo);
 }
 
 void RAWData::EndResample()
@@ -213,6 +270,10 @@ void RAWData::EndResample()
     {
         for (int i = 0; i < pkt_out.size; i++)
             binOutput.push_back(pkt_out.data[i]);
+    }
+    catch(SignalException& err)
+    {
+        throw ExceptionClass("rawdata", "EndResample", "Erro de Segmentacao");
     }
     catch(...)
     {

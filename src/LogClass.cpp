@@ -125,7 +125,10 @@ void LogClass::mr_printf(unsigned int type, int ident, const char *fmt, ...)
             else
                 sprintf(strPos, "%s", strPosicao);
 
-        	printf(MR_LOG_RED "%s%s" MR_LOG_RESET, strPos, strLog1);
+            int fim = strlen(strLog1) - 1;
+            if (strLog1[fim] == '\n')
+                strLog1[fim] = 0;
+        	printf(MR_LOG_RED "%s%s" MR_LOG_RESET "\n", strPos, strLog1);
         }
 
         strPosicao[0] = 0;

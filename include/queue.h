@@ -15,14 +15,17 @@ extern "C"
 
 #include <boost/thread.hpp>
 
+#include <mir/exceptionclass.h>
+
 #include "util.h"
+
 
 using namespace std;
 
 class Queue
 {
     public:
-        Queue(AVCodecContext* codecContext, AVFormatContext* formatContext);
+        Queue(AVCodecContext* codecContext, AVFormatContext* formatContext, int idRadio);
         virtual ~Queue();
 
         /** \brief
@@ -50,6 +53,8 @@ class Queue
     private:
         boost::mutex mtx_;  // controle de lock da thread
         bool mtx = false;
+
+        int idRadio;
 
         bool isPlannar;
         int szFrame;

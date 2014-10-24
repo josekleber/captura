@@ -21,8 +21,6 @@ class FileData : public Parser
         virtual ~FileData();
 
         virtual void Execute();
-
-        int32_t idRadio;
     protected:
 
         int setStreamOut();
@@ -30,10 +28,6 @@ class FileData : public Parser
         virtual void EndResample();
 
     private:
-//        string cutFolder;
-
-//        int cntFileDayCut;
-
         /** \brief Grava os dados em disco */
         int Write();
 };

@@ -103,7 +103,7 @@
 			<debugger />
 			<envvars />
 			<DoxyBlocks>
-				<comment_style block="0" line="0" />
+				<comment_style block="0" line="1" />
 				<doxyfile_project output_language="Brazilian" />
 				<doxyfile_build />
 				<doxyfile_warnings />

@@ -3,7 +3,7 @@
 SliceProcess::SliceProcess()
 {
     stopThread = false;
-    Status = 0;
+    this->Status = enumSliceProcess::STOP;
 }
 
 SliceProcess::~SliceProcess()
@@ -13,16 +13,21 @@ SliceProcess::~SliceProcess()
     sleep(10);
 
     for (int i = 0; i < (int)aux.size(); i++)
-        aux[i].clear();
-    aux.clear();
+        if (aux[i].size() > 0)
+            aux[i].clear();
+    if (aux.size() > 0)
+        aux.clear();
 
     for (int i = 0; i < (int)Packets.size(); i++)
     {
         for (int j = 0; j < (int)Packets[i].size(); j++)
-            Packets[i][j].clear();
-        Packets[i].clear();
+            if (Packets[i][j].size() > 0)
+                Packets[i][j].clear();
+        if (Packets[i].size() > 0)
+            Packets[i].clear();
     }
-    Packets.clear();
+    if (Packets.size() > 0)
+        Packets.clear();
 
     av_frame_free(&inFrame);
 }
@@ -30,9 +35,18 @@ SliceProcess::~SliceProcess()
 
 void SliceProcess::thrProcessa()
 {
+    this->Status = enumSliceProcess::STOP;
+
     try
     {
-        cdc_ctx_in = objRadio->getCodecContext();
+        try
+        {
+            cdc_ctx_in = objRadio->getCodecContext();
+        }
+        catch(...)
+        {
+            throw ExceptionClass("sliceprocess", "thrProcessa", "erro ao tentar recuperar o codec context do objRadio.");
+        }
 
         int szFifo;
         int inFrameSize;
@@ -43,25 +57,23 @@ void SliceProcess::thrProcessa()
         idSlice = 0;
 
         inFrame = av_frame_alloc();
-
         if (inFrame == NULL)
-        {
-            Status = enumSliceProcess::ERROR;
             throw BadAllocException() << errno_code(MIR_ERR_FRAME_ALLOC);
-        }
 
         inFrameSize             = cdc_ctx_in->frame_size;
         inFrame->channel_layout = cdc_ctx_in->channel_layout;
         inFrame->format         = cdc_ctx_in->sample_fmt;
         inFrame->sample_rate    = cdc_ctx_in->sample_rate;
 
+        cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> inFrameSize = " << inFrameSize << endl;
+        cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> inFrame->nb_samples = " << inFrame->nb_samples << endl;
+
+        //sleep(10);
+
         inFrame->nb_samples = inFrameSize;
 
         if (av_frame_get_buffer(inFrame, 0) < 0)
-        {
-            Status = enumSliceProcess::ERROR;
             throw BadAllocException() << errno_code(MIR_ERR_FRAME_ALLOC);
-        }
 
         int qtdPack = 0;
 
@@ -89,6 +101,10 @@ void SliceProcess::thrProcessa()
 
             objRawData->Config();
         }
+        catch(SignalException& err)
+        {
+            throw ExceptionClass("sliceprocess", "thrProcessa", "Erro de Segmentacao na cricao do objRawData");
+        }
         catch(...)
         {
             av_frame_free(&inFrame);
@@ -107,9 +123,13 @@ void SliceProcess::thrProcessa()
             objFileData->nbSamplesIn = inFrameSize;
             objFileData->nbChannelIn = cdc_ctx_in->channels;
             objFileData->szBuffer = objRadio->getSzBuffer();
-            objRawData->fileName = "SkySoft.mp3";
+            objFileData->fileName = "SkySoft.mp3";
 
             objFileData->Config();
+        }
+        catch(SignalException& err)
+        {
+            throw ExceptionClass("sliceprocess", "thrProcessa", "Erro de Segmentacao na cricao do objFileData");
         }
         catch(...)
         {
@@ -117,8 +137,11 @@ void SliceProcess::thrProcessa()
             throw FileDataException() << errno_code(MIR_ERR_FILEDATA_GENERATION);
         }
 
+        this->Status = enumSliceProcess::RUN;
+
         while (!stopThread)
         {
+            boost::this_thread::sleep(boost::posix_time::milliseconds(30));
             try
             {
                 szFifo = objRadio->getQueueSize();
@@ -132,7 +155,8 @@ void SliceProcess::thrProcessa()
                     {
                         Packets.push_back(aux);
                         for (int i = 0; i < (int)aux.size(); i++)
-                            aux[i].clear();
+                            if (aux[i].size() > 0)
+                                aux[i].clear();
                         aux.clear();
 
                         qtdPack += inFrameSize;
@@ -147,6 +171,10 @@ void SliceProcess::thrProcessa()
                         try
                         {
                             arqName = getSaveCutDir() + "/" + arqName;
+                        }
+                        catch(SignalException& err)
+                        {
+                            throw ExceptionClass("sliceprocess", "thrProcessa", "Erro de Segmentacao");
                         }
                         catch(exception& err)
                         {
@@ -163,6 +191,10 @@ void SliceProcess::thrProcessa()
                             objThreadRawParser = new thread(&RAWData::Execute, objRawData);
                             objThreadRawParser->detach();
                         }
+                        catch(SignalException& err)
+                        {
+                            throw ExceptionClass("sliceprocess", "thrProcessa", "Erro de Segmentacao no thread do objRawData");
+                        }
                         catch(...)
                         {
                             throw;
@@ -176,6 +208,10 @@ void SliceProcess::thrProcessa()
                             objThreadArqParser = new thread(&FileData::Execute, objFileData);
                             objThreadArqParser->detach();
                         }
+                        catch(SignalException& err)
+                        {
+                            throw ExceptionClass("sliceprocess", "thrProcessa", "Erro de Segmentacao no thread do objFileData");
+                        }
                         catch(...)
                         {
                             throw;
@@ -183,20 +219,38 @@ void SliceProcess::thrProcessa()
 /**/
 
                         // reseta dados
-                        for (int i = 0; i < (int)Packets.size(); i++)
+                        try
                         {
-                            for (int j = 0; j < (int)Packets[i].size(); j++)
-                                Packets[i][j].clear();
-                            Packets[i].clear();
+                            for (int i = 0; i < (int)Packets.size(); i++)
+                            {
+                                for (int j = 0; j < (int)Packets[i].size(); j++)
+                                    if (Packets[i][j].size() > 0)
+                                        Packets[i][j].clear();
+                                if (Packets[i].size() > 0)
+                                    Packets[i].clear();
+                            }
+                            if (Packets.size() > 0)
+                                Packets.clear();
                         }
-                        Packets.clear();
+                        catch(SignalException& err)
+                        {
+                            throw ExceptionClass("sliceprocess", "thrProcessa", "Erro de Segmentacao na limpeza dos Packets");
+                        }
 
 //objLog->mr_printf(MR_LOG_DEBUG, idRadio, "Recorte : %5d    Fifo : %d\n", idSlice, objRadio->getQueueSize());
                         idSlice++;
+
+                        sleep(1);
                     }
                 }
-
-                usleep(1);
+            }
+            catch(SignalException& err)
+            {
+                objLog->mr_printf(MR_LOG_ERROR, idRadio, "Erro de segmentacao\n");
+            }
+            catch(ExceptionClass& err)
+            {
+                objLog->mr_printf(MR_LOG_ERROR, idRadio, "%s\n", err.what());
             }
             catch(FifoException& err)
             {
@@ -216,22 +270,38 @@ void SliceProcess::thrProcessa()
             }
         }
     }
+    catch(SignalException& err)
+    {
+        Status = enumSliceProcess::ERROR;
+        objLog->mr_printf(MR_LOG_ERROR, idRadio, "sliceprocess (thrProcessa) : Erro de segmentacao geral\n");
+    }
     catch(BadAllocException& err)
     {
+        Status = enumSliceProcess::ERROR;
         objLog->mr_printf(MR_LOG_ERROR, idRadio, "Erro de alocacao de memoria : %d\n", *boost::get_error_info<errno_code>(err));
     }
     catch(RawDataException& err)
     {
+        Status = enumSliceProcess::ERROR;
         objLog->mr_printf(MR_LOG_ERROR, idRadio, "Erro na criacao do objeto RawData : %d\n", *boost::get_error_info<errno_code>(err));
     }
     catch(FileDataException& err)
     {
+        Status = enumSliceProcess::ERROR;
         objLog->mr_printf(MR_LOG_ERROR, idRadio, "Erro na criacao do objeto FileData : %d\n", *boost::get_error_info<errno_code>(err));
+    }
+    catch (ExceptionClass& err)
+    {
+        Status = enumSliceProcess::ERROR;
+        objLog->mr_printf(MR_LOG_ERROR, idRadio, err.what());
     }
     catch(...)
     {
-        objLog->mr_printf(MR_LOG_ERROR, idRadio, ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>   Erro grave\n");
+        Status = enumSliceProcess::ERROR;
+        objLog->mr_printf(MR_LOG_ERROR, idRadio, ">>>>>>>>>>>>>>>>>>> Erro grave, sem indice. <<<<<<<<<<<<<<<<<<<\n");
     }
+
+    Status = enumSliceProcess::STOP;
 }
 
 string SliceProcess::getDate()

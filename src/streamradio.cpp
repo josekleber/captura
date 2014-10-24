@@ -90,13 +90,17 @@ AVFormatContext* StreamRadio::open(int idRadio, string uri)
         throw StreamRadioException() << errno_code(MIR_ERR_STREAM_CONNECTION1);
     }
 
-    objLog->mr_printf(MR_LOG_MESSAGE, idRadio, MR_LOG_BOLDGREEN "Conectado ao stream %s\n" MR_LOG_RESET, uri.c_str());
+    objLog->mr_printf(MR_LOG_MESSAGE, idRadio, MR_LOG_BOLDGREEN "Conectado ao stream %s" MR_LOG_RESET "\n", uri.c_str());
 
     statusConnection = MIR_CONNECTION_OPEN;
 
     try
     {
         setStreamType(); // pega os streams que a conexão contém
+    }
+    catch(SignalException& err)
+    {
+        throw ExceptionClass("streamradio", "open", "Erro de segmentacao na setagem do tipo de stream");
     }
     catch(...)
     {
@@ -109,7 +113,11 @@ AVFormatContext* StreamRadio::open(int idRadio, string uri)
 
     try
     {
-        objQueue = new Queue(codecContext, formatContext);
+        objQueue = new Queue(codecContext, formatContext, idRadio);
+    }
+    catch(SignalException& err)
+    {
+        throw ExceptionClass("streamradio", "open", "Erro de segmentacao na criacao do objQueue");
     }
     catch(FifoException& err)
     {
@@ -165,7 +173,7 @@ void StreamRadio::setStreamType()
     stream = formatContext->streams[streamIndex];
     codecContext = stream->codec;
 
-    if ((ret = avcodec_open2(codecContext,codec,NULL)) < 0)
+    if ((ret = avcodec_open2(codecContext, codec, NULL)) < 0)
     {
         char error_buffer[255];
         av_strerror(ret, error_buffer, sizeof(error_buffer));
@@ -243,10 +251,12 @@ int njn = 0;
     do
     {
         frame = av_frame_alloc();
+        boost::this_thread::sleep(boost::posix_time::milliseconds(1));  // jk
     } while (!frame);
 
     while ((finished == 0) && !isExit)
     {
+        boost::this_thread::sleep(boost::posix_time::milliseconds(15));  // jk
         av_init_packet(&inputPacket);
         // ainda não entendi o porquê setar os dados abaixo. Porém, em todos os
         // exemplos da ferramenta foi inicializado então...
@@ -298,12 +308,25 @@ int njn = 0;
                     if (getQueueSize() > MAX_QUEUE_SIZE)
                         usleep(10);
                 }
+                catch(ExceptionClass& err)
+                {
+                    av_frame_unref(frame);
+                    throw;
+                }
                 catch(FifoException& err)
                 {
                     av_frame_unref(frame);
                     throw;
                 }
             }
+        }
+        catch(SignalException& err)
+        {
+            objLog->mr_printf(MR_LOG_ERROR, idRadio, "streakradio (readFrame) : Erro de segmentacao\n");
+        }
+        catch(ExceptionClass& err)
+        {
+            objLog->mr_printf(MR_LOG_ERROR, idRadio, "%s\n", err.what());
         }
         catch(StreamRadioException& err)
         {
@@ -349,9 +372,17 @@ vector<vector<uint8_t>> StreamRadio::getQueueData()
     {
         return objQueue->getQueueData();
     }
+    catch(SignalException& err)
+    {
+        throw ExceptionClass("streamradio", "getQueueData", "Erro de segmentacao");
+    }
     catch(FifoException& err)
     {
-        throw err;
+        throw;
+    }
+    catch(...)
+    {
+        throw;
     }
 }
 
@@ -361,9 +392,17 @@ int StreamRadio::getQueueSize()
     {
         return objQueue->getQueueSize();
     }
+    catch(SignalException& err)
+    {
+        throw ExceptionClass("streamradio", "getQueueData", "Erro de segmentacao");
+    }
     catch(FifoException& err)
     {
-        throw err;
+        throw;
+    }
+    catch(...)
+    {
+        throw;
     }
 }
 
