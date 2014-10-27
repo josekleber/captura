@@ -28,8 +28,6 @@ SliceProcess::~SliceProcess()
     }
     if (Packets.size() > 0)
         Packets.clear();
-
-    av_frame_free(&inFrame);
 }
 
 
@@ -40,35 +38,43 @@ void SliceProcess::thrProcessa()
     try
     {
         int szFifo;
-        int inFrameSize;
+        int szFrame;
 
         objRawData = NULL;
         objFileData = NULL;
 
         idSlice = 0;
 
+/**
         inFrame = av_frame_alloc();
         if (inFrame == NULL)
-            throw BadAllocException() << errno_code(MIR_ERR_FRAME_ALLOC);
+            throw BadAllocException() << errno_code(MIR_ERR_FRAME_ALLOC_1);
+/**/
 
         try
         {
             cdc_ctx_in = objRadio->getCodecContext();
 
-            inFrameSize             = objRadio->getFrameSize();
+/**
+            inFrame->nb_samples     = objRadio->getFrameSize();
             inFrame->channel_layout = objRadio->getChannelLayout();
             inFrame->format         = objRadio->getFrameFormat();
             inFrame->sample_rate    = objRadio->getFrameSampleRate();
+/**/
         }
         catch(...)
         {
             throw ExceptionClass("sliceprocess", "thrProcessa", "erro ao tentar recuperar o codec context do objRadio.");
         }
 
-        inFrame->nb_samples = inFrameSize;
-
+/**
         if (av_frame_get_buffer(inFrame, 0) < 0)
-            throw BadAllocException() << errno_code(MIR_ERR_FRAME_ALLOC);
+{
+objLog->mr_printf(MR_LOG_DEBUG, idRadio, "FrameSize: %d    ChannelLayout: %d    Format: %d    SampleRate: %d\n",
+                  inFrame->nb_samples, inFrame->channel_layout, inFrame->format, inFrame->sample_rate);
+            throw BadAllocException() << errno_code(MIR_ERR_FRAME_ALLOC_2);
+}
+/**/
 
         int qtdPack = 0;
 
@@ -79,10 +85,10 @@ void SliceProcess::thrProcessa()
             objRawData->idRadio = idRadio;
             objRawData->bitRateIn = cdc_ctx_in->bit_rate;
             objRawData->nbChannelIn = cdc_ctx_in->channels;
-            objRawData->nbSamplesIn = inFrameSize;
-            objRawData->sampleFormatIn = inFrame->format;
-            objRawData->sampleRateIn = inFrame->sample_rate;
-            objRawData->channelLayoutIn = inFrame->channel_layout;
+            objRawData->nbSamplesIn = cdc_ctx_in->frame_size;
+            objRawData->sampleFormatIn = objRadio->getFrameFormat();
+            objRawData->sampleRateIn = cdc_ctx_in->sample_rate;
+            objRawData->channelLayoutIn = objRadio->getChannelLayout();
             objRawData->fileName = "SkySoft.wav";
 
             objRawData->Filters = Filters;
@@ -101,7 +107,6 @@ void SliceProcess::thrProcessa()
         }
         catch(...)
         {
-            av_frame_free(&inFrame);
             throw RawDataException() << errno_code(MIR_ERR_RAWDATA_GENERATION);
         }
 
@@ -112,10 +117,10 @@ void SliceProcess::thrProcessa()
             objFileData->idRadio = idRadio;
             objFileData->bitRateIn = cdc_ctx_in->bit_rate;
             objFileData->nbChannelIn = cdc_ctx_in->channels;
-            objFileData->nbSamplesIn = inFrameSize;
-            objFileData->sampleFormatIn = inFrame->format;
-            objFileData->sampleRateIn = inFrame->sample_rate;
-            objFileData->channelLayoutIn = inFrame->channel_layout;
+            objFileData->nbSamplesIn = cdc_ctx_in->frame_size;
+            objFileData->sampleFormatIn = objRadio->getFrameFormat();
+            objFileData->sampleRateIn = cdc_ctx_in->sample_rate;
+            objFileData->channelLayoutIn = objRadio->getChannelLayout();
             objFileData->fileName = "SkySoft.mp3";
 
             objFileData->Config();
@@ -126,7 +131,6 @@ void SliceProcess::thrProcessa()
         }
         catch(...)
         {
-            av_frame_free(&inFrame);
             throw FileDataException() << errno_code(MIR_ERR_FILEDATA_GENERATION);
         }
 
@@ -137,9 +141,10 @@ void SliceProcess::thrProcessa()
             boost::this_thread::sleep(boost::posix_time::milliseconds(30));
             try
             {
+                szFrame = objRadio->getFrameSize();
                 szFifo = objRadio->getQueueSize();
 
-                if (szFifo >= inFrameSize)
+                if (szFifo >= szFrame)
                 {
                     // carregando dados da FIFO
 //objRadio->delQueueData();
@@ -152,10 +157,10 @@ void SliceProcess::thrProcessa()
                                 aux[i].clear();
                         aux.clear();
 
-                        qtdPack += inFrameSize;
+                        qtdPack += szFrame;
                     }
 
-                    if (qtdPack >= (inFrame->sample_rate  * 5.2))
+                    if (qtdPack >= (objRadio->getFrameSampleRate()  * 5.2))
                     {
                         qtdPack = 0;
                         char chrArqName[28];
@@ -174,27 +179,12 @@ void SliceProcess::thrProcessa()
                             throw;
                         }
 
-                        // atualizando dados do codec context
-                        try
-                        {
-//                            cdc_ctx_in = objRadio->getCodecContext();
-
-                            inFrameSize             = objRadio->getFrameSize();
-                            inFrame->channel_layout = objRadio->getFrameChannelLayout();
-                            inFrame->format         = objRadio->getFrameFormat();
-                            inFrame->sample_rate    = objRadio->getFrameSampleRate();
-                        }
-                        catch(...)
-                        {
-                            throw ExceptionClass("sliceprocess", "thrProcessa", "erro ao tentar atualizar informacoes o codec context do objRadio.");
-                        }
-
 /**/
                         // rodando a thread do fingerprint
                         try
                         {
-                            objRawData->setBuffer(arqName + ".wav", Packets, inFrameSize, inFrame->format,
-                                                  inFrame->sample_rate, inFrame->channel_layout);
+                            objRawData->setBuffer(arqName + ".wav", Packets, szFrame, objRadio->getFrameFormat(),
+                                                  objRadio->getFrameSampleRate(), objRadio->getFrameChannelLayout());
                             objRawData->idSlice = idSlice;
                             objRawData->szFifo = objRadio->getQueueSize();
                             objThreadRawParser = new thread(&RAWData::Execute, objRawData);
@@ -213,8 +203,8 @@ void SliceProcess::thrProcessa()
                         // rodando a thread da gravacao do arquivo mp3
                         try
                         {
-                            objFileData->setBuffer(arqName + ".mp3", Packets, inFrameSize, inFrame->format,
-                                                  inFrame->sample_rate, inFrame->channel_layout);
+                            objFileData->setBuffer(arqName + ".mp3", Packets, szFrame, objRadio->getFrameFormat(),
+                                                  objRadio->getFrameSampleRate(), objRadio->getFrameChannelLayout());
                             objThreadArqParser = new thread(&FileData::Execute, objFileData);
                             objThreadArqParser->detach();
                         }

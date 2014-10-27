@@ -66,7 +66,7 @@ class SliceProcess
         string getDateTime();
         string getSaveCutDir();
 
-        AVFrame* inFrame;
+//        AVFrame* inFrame;
 
         vector<vector<vector<uint8_t>>> Packets;
         vector<vector <uint8_t>> aux;

@@ -7200,7 +7200,7 @@
 1403569888 /home/nelson/Projetos/mir/captura/include/queuehandler.h
 	<amqpcpp.h>
 
-1412975527 /home/nelson/Projetos/mir/captura/include/streamradio.h
+1414412590 /home/nelson/Projetos/mir/captura/include/streamradio.h
 	<stdio.h>
 	<time.h>
 	<string.h>
@@ -7213,7 +7213,7 @@
 1414016781 source:/home/nelson/Projetos/mir/captura/src/parser.cpp
 	"parser.h"
 
-1413922509 /home/nelson/Projetos/mir/captura/include/parser.h
+1414412590 /home/nelson/Projetos/mir/captura/include/parser.h
 	<iostream>
 	<cstdio>
 	<unistd.h>
@@ -16669,7 +16669,7 @@
 	"util.h"
 	"parser.h"
 
-1413294279 /home/nelson/Projetos/mir/captura/include/sliceprocess.h
+1414412126 /home/nelson/Projetos/mir/captura/include/sliceprocess.h
 	<stdlib.h>
 	<stdio.h>
 	<string>
@@ -17637,7 +17637,7 @@
 	<boost/log/detail/header.hpp>
 	<boost/log/detail/footer.hpp>
 
-1412975527 /home/nelson/Projetos/mir/captura/include/queue.h
+1414389693 /home/nelson/Projetos/mir/captura/include/queue.h
 	<string>
 	<vector>
 	<queue>
@@ -17645,6 +17645,7 @@
 	<libavcodec/avcodec.h>
 	<libavutil/audio_fifo.h>
 	<boost/thread.hpp>
+	<mir/exceptionclass.h>
 	"util.h"
 
 1413598967 source:/home/nelson/Projetos/mir/captura/src/queue.cpp

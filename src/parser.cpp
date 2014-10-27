@@ -166,7 +166,7 @@ void Parser::createFrames()
     {
         frame_in = av_frame_alloc();
         if (frame_in == NULL)
-            throw ResampleException() << errno_code(MIR_ERR_FRAME_ALLOC);
+            throw ResampleException() << errno_code(MIR_ERR_FRAME_ALLOC_3);
     }
     catch(ResampleException& err)
     {
@@ -178,7 +178,7 @@ void Parser::createFrames()
     {
         frame_out = av_frame_alloc();
         if (frame_out == NULL)
-            throw ResampleException() << errno_code(MIR_ERR_FRAME_ALLOC);
+            throw ResampleException() << errno_code(MIR_ERR_FRAME_ALLOC_4);
     }
     catch(ResampleException& err)
     {
@@ -227,13 +227,17 @@ void Parser::Resample()
         //!< alocando buffers para o frame de entrada, so roda uma vez
         try
         {
-            frame_in->nb_samples = nbSamplesIn;
-            frame_in->format = sampleFormatIn;
-            frame_in->sample_rate = sampleRateIn;
-            frame_in->channel_layout = channelLayoutIn;
-
-            if (av_frame_get_buffer(frame_in, 1) < 0)
-                throw ResampleException() << errno_code(MIR_ERR_BUFFER_ALLOC);
+            if (nbSamplesIn > 0)
+            {
+                frame_in->nb_samples = nbSamplesIn;
+                frame_in->format = sampleFormatIn;
+                frame_in->sample_rate = sampleRateIn;
+                frame_in->channel_layout = channelLayoutIn;
+                if (av_frame_get_buffer(frame_in, 1) < 0)
+                    throw ResampleException() << errno_code(MIR_ERR_BUFFER_ALLOC_IN);
+            }
+            else
+                throw ResampleException() << errno_code(MIR_ERR_BUFFER_ALLOC_NULL);
         }
         catch(ResampleException& err)
         {
@@ -249,7 +253,7 @@ void Parser::Resample()
             frame_out->channel_layout = av_get_default_channel_layout(nbChannel);
 
             if (av_frame_get_buffer(frame_out, 1) < 0)
-                throw ResampleException() << errno_code(MIR_ERR_BUFFER_ALLOC);
+                throw ResampleException() << errno_code(MIR_ERR_BUFFER_ALLOC_OUT);
         }
         catch(ResampleException& err)
         {
@@ -489,7 +493,7 @@ void Parser::setChannels(unsigned int value)
 }
 
 void Parser::setBuffer(string arqName, vector<vector<vector<uint8_t>>> value,
-                       int nbSampleIn, int sampleFormatIn, int sampleRateIn, uint64_t channelLayoutIn)
+                       int nbSamplesIn, int sampleFormatIn, int sampleRateIn, uint64_t channelLayoutIn)
 {
     int error;
 
