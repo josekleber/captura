@@ -146,6 +146,10 @@ public:
     int getQueueSize();
     vector<vector<uint8_t>> getQueueData();
     void delQueueData();
+    int getFrameSize();
+    int getFrameFormat();
+    int getFrameSampleRate();
+    uint64_t getFrameChannelLayout();
 protected:
 private:
     AVFormatContext *formatContext;
@@ -154,6 +158,17 @@ private:
     AVCodec *codec;
     AVFrame *frame = NULL;
     AVDictionary *dictionary;
+
+
+
+    int FrameSize;
+    int FrameFormat;
+    int FrameSampleRate;
+    uint64_t FrameChannelLayout;
+
+
+
+
 
     clock_t timer;
     EnumStatusConnect statusConnection;

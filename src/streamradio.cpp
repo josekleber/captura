@@ -364,6 +364,11 @@ void StreamRadio::decodeAudioFrame(int *haveData, AVPacket *inputPacket)
 
         throw StreamRadioException() << errno_code(MIR_ERR_DECODE);
     }
+
+    FrameSize          = frame->nb_samples;
+    FrameFormat        = frame->format;
+    FrameSampleRate    = frame->sample_rate;
+    FrameChannelLayout = frame->channel_layout;
 }
 
 vector<vector<uint8_t>> StreamRadio::getQueueData()
@@ -409,4 +414,24 @@ int StreamRadio::getQueueSize()
 void StreamRadio::delQueueData()
 {
     objQueue->delQueueData();
+}
+
+int StreamRadio::getFrameSize()
+{
+    return FrameSize;
+}
+
+int StreamRadio::getFrameFormat()
+{
+    return FrameFormat;
+}
+
+int StreamRadio::getFrameSampleRate()
+{
+    return FrameSampleRate;
+}
+
+uint64_t StreamRadio::getFrameChannelLayout()
+{
+    return FrameChannelLayout;
 }

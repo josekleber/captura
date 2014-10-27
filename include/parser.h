@@ -57,7 +57,7 @@ public:
     void setSampleRate(int value);
     void setChannels(unsigned int value);
     void setBuffer(string arqName, vector<vector<vector<uint8_t>>> value, int nbSampleIn,
-                   AVSampleFormat sampleFormatIn, int sampleRateIn, uint64_t channelLayoutIn);
+                   int sampleFormatIn, int sampleRateIn, uint64_t channelLayoutIn);
 
     /** \brief Processa os frames e gera a saída */
     virtual void Execute();
@@ -71,7 +71,7 @@ public:
     uint64_t channelLayoutIn;
     int sampleRateIn;
     int bitRateIn;
-    AVSampleFormat sampleFormatIn;
+    int sampleFormatIn;
     int nbSamplesIn;
     int nbChannelIn;
     int szBuffer;

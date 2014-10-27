@@ -63,7 +63,7 @@ void Parser::Config()
 {
     try
     {
-        nbBuffers = av_sample_fmt_is_planar(sampleFormatIn) ? this->nbChannelIn : 1;
+        nbBuffers = av_sample_fmt_is_planar((AVSampleFormat)sampleFormatIn) ? this->nbChannelIn : 1;
 
         // cria o contexto de saída
         CreateContext();
@@ -193,7 +193,7 @@ void Parser::InitResampler()
                                  cdc_ctx_out->sample_fmt,
                                  cdc_ctx_out->sample_rate,
                                  channelLayoutIn,
-                                 sampleFormatIn,
+                                 (AVSampleFormat)sampleFormatIn,
                                  sampleRateIn,
                                  0,0);
 
@@ -203,12 +203,12 @@ void Parser::InitResampler()
     // set options
     av_opt_set_int(swr_ctx, "in_channel_layout",    channelLayoutIn, 0);
     av_opt_set_int(swr_ctx, "in_sample_rate",       sampleRateIn, 0);
-    av_opt_set_int(swr_ctx, "in_bit_rate",       bitRateIn, 0);
-    av_opt_set_sample_fmt(swr_ctx, "in_sample_fmt", sampleFormatIn, 0);
+    av_opt_set_int(swr_ctx, "in_bit_rate",          bitRateIn, 0);
+    av_opt_set_sample_fmt(swr_ctx, "in_sample_fmt", (AVSampleFormat)sampleFormatIn, 0);
 
     av_opt_set_int(swr_ctx, "out_channel_layout",    cdc_ctx_out->channel_layout, 0);
     av_opt_set_int(swr_ctx, "out_sample_rate",       cdc_ctx_out->sample_rate, 0);
-    av_opt_set_int(swr_ctx, "out_bit_rate",       cdc_ctx_out->bit_rate, 0);
+    av_opt_set_int(swr_ctx, "out_bit_rate",          cdc_ctx_out->bit_rate, 0);
     av_opt_set_sample_fmt(swr_ctx, "out_sample_fmt", cdc_ctx_out->sample_fmt, 0);
 
     if (swr_init(swr_ctx) < 0)
@@ -489,7 +489,7 @@ void Parser::setChannels(unsigned int value)
 }
 
 void Parser::setBuffer(string arqName, vector<vector<vector<uint8_t>>> value,
-                       int nbSampleIn, AVSampleFormat sampleFormatIn, int sampleRateIn, uint64_t channelLayoutIn)
+                       int nbSampleIn, int sampleFormatIn, int sampleRateIn, uint64_t channelLayoutIn)
 {
     int error;
 

@@ -55,10 +55,10 @@ void SliceProcess::thrProcessa()
         {
             cdc_ctx_in = objRadio->getCodecContext();
 
-            inFrameSize             = cdc_ctx_in->frame_size;
-            inFrame->channel_layout = cdc_ctx_in->channel_layout;
-            inFrame->format         = cdc_ctx_in->sample_fmt;
-            inFrame->sample_rate    = cdc_ctx_in->sample_rate;
+            inFrameSize             = objRadio->getFrameSize();
+            inFrame->channel_layout = objRadio->getChannelLayout();
+            inFrame->format         = objRadio->getFrameFormat();
+            inFrame->sample_rate    = objRadio->getFrameSampleRate();
         }
         catch(...)
         {
@@ -80,9 +80,9 @@ void SliceProcess::thrProcessa()
             objRawData->bitRateIn = cdc_ctx_in->bit_rate;
             objRawData->nbChannelIn = cdc_ctx_in->channels;
             objRawData->nbSamplesIn = inFrameSize;
-            objRawData->sampleFormatIn = cdc_ctx_in->sample_fmt;
-            objRawData->sampleRateIn = cdc_ctx_in->sample_rate;
-            objRawData->channelLayoutIn = objRadio->getChannelLayout();
+            objRawData->sampleFormatIn = inFrame->format;
+            objRawData->sampleRateIn = inFrame->sample_rate;
+            objRawData->channelLayoutIn = inFrame->channel_layout;
             objRawData->fileName = "SkySoft.wav";
 
             objRawData->Filters = Filters;
@@ -113,9 +113,9 @@ void SliceProcess::thrProcessa()
             objFileData->bitRateIn = cdc_ctx_in->bit_rate;
             objFileData->nbChannelIn = cdc_ctx_in->channels;
             objFileData->nbSamplesIn = inFrameSize;
-            objFileData->sampleFormatIn = cdc_ctx_in->sample_fmt;
-            objFileData->sampleRateIn = cdc_ctx_in->sample_rate;
-            objFileData->channelLayoutIn = objRadio->getChannelLayout();
+            objFileData->sampleFormatIn = inFrame->format;
+            objFileData->sampleRateIn = inFrame->sample_rate;
+            objFileData->channelLayoutIn = inFrame->channel_layout;
             objFileData->fileName = "SkySoft.mp3";
 
             objFileData->Config();
@@ -177,12 +177,12 @@ void SliceProcess::thrProcessa()
                         // atualizando dados do codec context
                         try
                         {
-                            cdc_ctx_in = objRadio->getCodecContext();
+//                            cdc_ctx_in = objRadio->getCodecContext();
 
-                            inFrameSize             = cdc_ctx_in->frame_size;
-                            inFrame->channel_layout = cdc_ctx_in->channel_layout;
-                            inFrame->format         = cdc_ctx_in->sample_fmt;
-                            inFrame->sample_rate    = cdc_ctx_in->sample_rate;
+                            inFrameSize             = objRadio->getFrameSize();
+                            inFrame->channel_layout = objRadio->getFrameChannelLayout();
+                            inFrame->format         = objRadio->getFrameFormat();
+                            inFrame->sample_rate    = objRadio->getFrameSampleRate();
                         }
                         catch(...)
                         {
@@ -193,8 +193,8 @@ void SliceProcess::thrProcessa()
                         // rodando a thread do fingerprint
                         try
                         {
-                            objRawData->setBuffer(arqName + ".wav", Packets, inFrameSize, cdc_ctx_in->sample_fmt,
-                                                  cdc_ctx_in->sample_rate, objRadio->getChannelLayout());
+                            objRawData->setBuffer(arqName + ".wav", Packets, inFrameSize, inFrame->format,
+                                                  inFrame->sample_rate, inFrame->channel_layout);
                             objRawData->idSlice = idSlice;
                             objRawData->szFifo = objRadio->getQueueSize();
                             objThreadRawParser = new thread(&RAWData::Execute, objRawData);
@@ -213,8 +213,8 @@ void SliceProcess::thrProcessa()
                         // rodando a thread da gravacao do arquivo mp3
                         try
                         {
-                            objFileData->setBuffer(arqName + ".mp3", Packets, inFrameSize, cdc_ctx_in->sample_fmt,
-                                                  cdc_ctx_in->sample_rate, objRadio->getChannelLayout());
+                            objFileData->setBuffer(arqName + ".mp3", Packets, inFrameSize, inFrame->format,
+                                                  inFrame->sample_rate, inFrame->channel_layout);
                             objThreadArqParser = new thread(&FileData::Execute, objFileData);
                             objThreadArqParser->detach();
                         }
