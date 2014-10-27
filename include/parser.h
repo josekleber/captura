@@ -56,7 +56,8 @@ public:
     void setBitRate(int value);
     void setSampleRate(int value);
     void setChannels(unsigned int value);
-    void setBuffer(string arqName, vector<vector<vector<uint8_t>>> value);
+    void setBuffer(string arqName, vector<vector<vector<uint8_t>>> value, int nbSampleIn,
+                   AVSampleFormat sampleFormatIn, int sampleRateIn, uint64_t channelLayoutIn);
 
     /** \brief Processa os frames e gera a saída */
     virtual void Execute();
@@ -106,9 +107,6 @@ protected:
 
     virtual void initObject();
 private:
-    bool FrameInCreated = false;
-    bool FrameOutCreated = false;
-
     vector<vector<uint8_t>> vetAux;
 
     /** \brief Cria contexto de saída */
@@ -116,6 +114,9 @@ private:
 
     /** \brief Define os parâmetros para o stream de saída */
     void setStream();
+
+    /** \brief cria os frames de entrada e saida */
+    void createFrames();
 
     /** \brief Inicializa o resample */
     void InitResampler();

@@ -72,6 +72,8 @@ void Parser::Config()
         setStream();
         av_dump_format(fmt_ctx_out, 0, fileName.c_str(), 1);
 
+        createFrames();
+
         // inicia o resample
         InitResampler();
     }
@@ -93,8 +95,6 @@ void Parser::CreateContext()
 
     if(audioFormat == AUDIOFORMAT::raw)
         fmt_ctx_out->oformat->flags |= AVFMT_NOFILE;
-
-//    fmt_ctx_out->pb = io_ctx;
 }
 
 void Parser::setStream()
@@ -158,6 +158,34 @@ void Parser::setStream()
     }
 }
 
+void Parser::createFrames()
+{
+
+    frame_in = NULL;
+    try
+    {
+        frame_in = av_frame_alloc();
+        if (frame_in == NULL)
+            throw ResampleException() << errno_code(MIR_ERR_FRAME_ALLOC);
+    }
+    catch(ResampleException& err)
+    {
+        throw;
+    }
+
+    frame_out = NULL;
+    try
+    {
+        frame_out = av_frame_alloc();
+        if (frame_out == NULL)
+            throw ResampleException() << errno_code(MIR_ERR_FRAME_ALLOC);
+    }
+    catch(ResampleException& err)
+    {
+        throw;
+    }
+}
+
 void Parser::InitResampler()
 {
     swr_ctx = swr_alloc_set_opts(NULL,
@@ -185,53 +213,27 @@ void Parser::InitResampler()
 
     if (swr_init(swr_ctx) < 0)
         throw ContextCreatorException() << errno_code(MIR_ERR_INIT_SWR_CONTEXT);
-
-    frame_in = NULL;
-    try
-    {
-        frame_in = av_frame_alloc();
-        if (frame_in == NULL)
-            throw ResampleException() << errno_code(MIR_ERR_FRAME_ALLOC);
-    }
-    catch(ResampleException& err)
-    {
-        throw;
-    }
-
-    frame_out = NULL;
-    try
-    {
-        frame_out = av_frame_alloc();
-        if (frame_out == NULL)
-            throw ResampleException() << errno_code(MIR_ERR_FRAME_ALLOC);
-    }
-    catch(ResampleException& err)
-    {
-        throw;
-    }
 }
 
 void Parser::Resample()
 {
     int got_frame;
 
+    int idxFrame;
+    int idxBuff;
+
     try
     {
         //!< alocando buffers para o frame de entrada, so roda uma vez
         try
         {
-            if (!FrameInCreated)
-            {
-                frame_in->nb_samples = nbSamplesIn;
-                frame_in->format = sampleFormatIn;
-                frame_in->sample_rate = sampleRateIn;
-                frame_in->channel_layout = channelLayoutIn;
+            frame_in->nb_samples = nbSamplesIn;
+            frame_in->format = sampleFormatIn;
+            frame_in->sample_rate = sampleRateIn;
+            frame_in->channel_layout = channelLayoutIn;
 
-                if (av_frame_get_buffer(frame_in, 1) < 0)
-                    throw ResampleException() << errno_code(MIR_ERR_BUFFER_ALLOC);
-
-                FrameInCreated = true;
-            }
+            if (av_frame_get_buffer(frame_in, 1) < 0)
+                throw ResampleException() << errno_code(MIR_ERR_BUFFER_ALLOC);
         }
         catch(ResampleException& err)
         {
@@ -241,25 +243,20 @@ void Parser::Resample()
         //!< alocando buffers para o frame de saida, so roda uma vez
         try
         {
-            if (!FrameOutCreated)
-            {
-                frame_out->nb_samples = cdc_ctx_out->frame_size;
-                frame_out->format = cdc_ctx_out->sample_fmt;
-                frame_out->sample_rate = sampleRate;
-                frame_out->channel_layout = av_get_default_channel_layout(nbChannel);
+            frame_out->nb_samples = cdc_ctx_out->frame_size;
+            frame_out->format = cdc_ctx_out->sample_fmt;
+            frame_out->sample_rate = sampleRate;
+            frame_out->channel_layout = av_get_default_channel_layout(nbChannel);
 
-                if (av_frame_get_buffer(frame_out, 1) < 0)
-                    throw ResampleException() << errno_code(MIR_ERR_BUFFER_ALLOC);
-
-                FrameOutCreated = true;
-            }
+            if (av_frame_get_buffer(frame_out, 1) < 0)
+                throw ResampleException() << errno_code(MIR_ERR_BUFFER_ALLOC);
         }
         catch(ResampleException& err)
         {
             throw;
         }
 
-        for (int idxFrame = 0; idxFrame < (int)this->bufFrames.size(); idxFrame++)
+        for (idxFrame = 0; idxFrame < (int)this->bufFrames.size(); idxFrame++)
         {
             try
             {
@@ -268,25 +265,18 @@ void Parser::Resample()
                 //!< carregando dados no frame de entrada
                 try
                 {
+                    nbBuffers = av_sample_fmt_is_planar((AVSampleFormat)frame_in->format) ? frame_in->channels : 1;
                     if ((int)vetAux.size() != nbBuffers)
-// njn
-{
-cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>> vetAux : " <<  vetAux.size() << "    nbBuffers : " <<  nbBuffers << endl;
                         throw FifoException() << errno_code(MIR_ERR_FIFO_DATA1);
-}
 
-                    for (int idxBuff = 0; idxBuff < (int)vetAux.size(); idxBuff++)
+                    for (idxBuff = 0; idxBuff < (int)vetAux.size(); idxBuff++)
                     {
-//objLog->mr_printf(MR_LOG_DEBUG, idRadio, "idxFrame: %d/%d    idxBuff: %d/%d    vetAux[idxBuff].size(): %d    szBuffer: %d\n",
-//        idxFrame, (int)this->bufFrames.size(),
-//        idxBuff, (int)vetAux.size(),
-//        vetAux[idxBuff].size(), szBuffer);
-                        if ((int)vetAux[idxBuff].size() != szBuffer)
+                        if ((int)vetAux[idxBuff].size() != frame_in->linesize[0])
                             throw FifoException() << errno_code(MIR_ERR_FIFO_DATA2);
 
                         try
                         {
-                            memcpy(frame_in->data[idxBuff], vetAux[idxBuff].data(), szBuffer);
+                            memcpy(frame_in->data[idxBuff], vetAux[idxBuff].data(), frame_in->linesize[0]);
                         }
                         catch(SignalException& err)
                         {
@@ -314,8 +304,6 @@ cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>> vetAux : " <<  vetAux.size() << "    nbBuf
                 }
 
                 //!< convertendo dados
-// njn
-//cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  oia eu aqui 1" << endl;
                 if (swr_convert(swr_ctx, (uint8_t**)&frame_out->data, frame_out->nb_samples,
                                  (const uint8_t**)&frame_in->data, frame_in->nb_samples) >= 0)
                 {
@@ -324,16 +312,10 @@ cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>> vetAux : " <<  vetAux.size() << "    nbBuf
                     pkt_out.data = NULL;
                     pkt_out.size = 0;
 
-//cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  oia eu aqui 2" << endl;
                     if (avcodec_encode_audio2(cdc_ctx_out, &pkt_out, frame_out, &got_frame) >= 0)
-{
-//cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  oia eu aqui 3" << endl;
                         EndResample();
-//cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  oia eu aqui 4" << endl;
-}
                     else
                     {
-//cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  oia eu aqui 5" << endl;
                         av_free_packet(&pkt_out);
                         throw ResampleException() << errno_code(MIR_ERR_ENCODE);
                     }
@@ -341,11 +323,7 @@ cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>> vetAux : " <<  vetAux.size() << "    nbBuf
                     av_free_packet(&pkt_out);
                 }
                 else
-{
-//cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  oia eu aqui 6" << endl;
                     throw ResampleException() << errno_code(MIR_ERR_RESAMPLE);
-}
-//cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  oia eu aqui 7" << endl;
             }
             catch(ExceptionClass& err)
             {
@@ -353,7 +331,26 @@ cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>> vetAux : " <<  vetAux.size() << "    nbBuf
             }
             catch(FifoException& err)
             {
-                objLog->mr_printf(MR_LOG_ERROR, idRadio, "Frame allocation error : %d\n", *boost::get_error_info<errno_code>(err));
+                char aux[100];
+
+                switch(*boost::get_error_info<errno_code>(err))
+                {
+                    case MIR_ERR_FIFO_DATA1:
+                        sprintf(aux, "Error (%d) : vetAux.size = %d    nbBuffers = %d\n", MIR_ERR_FIFO_DATA1,
+                                (int)vetAux.size(), nbBuffers);
+                        break;
+                    case MIR_ERR_FIFO_DATA2:
+                        sprintf(aux, "Error (%d) : vetAux[idxBuff].size = %d    linesize = %d\n", MIR_ERR_FIFO_DATA2,
+                                (int)vetAux[idxBuff].size(), frame_in->linesize[0]);
+                        break;
+                    case MIR_ERR_FIFO_DATA3:
+                        sprintf(aux, "Error (%d) : General Frame allocation error\n", MIR_ERR_FIFO_DATA3);
+                        break;
+                    default :
+                        break;
+                }
+
+                objLog->mr_printf(MR_LOG_ERROR, idRadio, aux);
 
                 for (int idxBuff = 0; idxBuff < (int)vetAux.size(); idxBuff++)
                     if (vetAux[idxBuff].size() > 0)
@@ -367,8 +364,8 @@ cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>> vetAux : " <<  vetAux.size() << "    nbBuf
             }
         }
 
-//        av_frame_unref(frame_in);
-//        av_frame_unref(frame_out);
+        av_frame_unref(frame_in);
+        av_frame_unref(frame_out);
 
         for (int idxFrame = 0; idxFrame < (int)this->bufFrames.size(); idxFrame++)
         {
@@ -491,12 +488,22 @@ void Parser::setChannels(unsigned int value)
     nbChannel = value;
 }
 
-void Parser::setBuffer(string arqName, vector<vector<vector<uint8_t>>> value)
+void Parser::setBuffer(string arqName, vector<vector<vector<uint8_t>>> value,
+                       int nbSampleIn, AVSampleFormat sampleFormatIn, int sampleRateIn, uint64_t channelLayoutIn)
 {
     int error;
 
     this->fileName = arqName;
     this->bufFrames = value;
+    this->nbSamplesIn = nbSamplesIn;
+    this->sampleFormatIn = sampleFormatIn;
+    this->sampleRateIn = sampleRateIn;
+    this->channelLayoutIn = channelLayoutIn;
+
+    if (swr_ctx)
+        swr_free(&swr_ctx);
+
+    InitResampler();
 
     if (audioFormat == AUDIOFORMAT::arq)
     {

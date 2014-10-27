@@ -6,10 +6,7 @@ Queue::Queue(AVCodecContext* codecContext, AVFormatContext* formatContext, int i
     this->Format = codecContext->sample_fmt;
     this->isPlannar = av_sample_fmt_is_planar(codecContext->sample_fmt);
     this->szData = av_get_bytes_per_sample(codecContext->sample_fmt);
-    this->nbBuffers = av_sample_fmt_is_planar(codecContext->sample_fmt) ? codecContext->channels : 1;
     this->szFrame = codecContext->frame_size;
-    szBuffers = av_samples_get_buffer_size(&this->szBuffer, codecContext->channels, codecContext->frame_size,
-                                           codecContext->sample_fmt, 1);
     this->idRadio = idRadio;
 }
 
@@ -43,16 +40,6 @@ int Queue::getQueueSize()
     }
 }
 
-int Queue::getSzBuffer()
-{
-    return this->szBuffer;
-}
-
-int Queue::getNbBuffers()
-{
-    return this->nbBuffers;
-}
-
 void Queue::addQueueData(AVFrame* frame)
 {
     /**
@@ -64,15 +51,11 @@ void Queue::addQueueData(AVFrame* frame)
         boost::this_thread::sleep(boost::posix_time::milliseconds(10));
     mtx = true;
 
+    int nbBuffers = av_sample_fmt_is_planar((AVSampleFormat)frame->format) ? frame->channels : 1;
+    int szBuffer = frame->linesize[0];
+
     try
     {
-        if (frame->linesize[0] != szBuffer)
-            throw FifoException() << errno_code(MIR_ERR_FIFO_BUFFER_SIZE);
-        if (frame->format != Format)
-            throw FifoException() << errno_code(MIR_ERR_FIFO_ADD_FORMAT);
-        if (frame->channels != nbChannels)
-            throw FifoException() << errno_code(MIR_ERR_FIFO_ADD_CHANNELS);
-
         for (int numBuf = 0; numBuf < nbBuffers; numBuf++)
         {
             for (int data = 0; data < szBuffer; data++)
@@ -94,33 +77,8 @@ void Queue::addQueueData(AVFrame* frame)
     }
     catch(SignalException& err)
     {
-        throw ExceptionClass("queue", "addQueueData", "Erro de segmentacao");
-    }
-    catch(FifoException& err)
-    {
-        char aux[100];
-
-        switch(*boost::get_error_info<errno_code>(err))
-        {
-            case MIR_ERR_FIFO_BUFFER_SIZE:
-                sprintf(aux, "Error (%d) : linesize = %d    szBuffer = %d\n", MIR_ERR_FIFO_BUFFER_SIZE, frame->linesize[0], szBuffer);
-                break;
-            case MIR_ERR_FIFO_ADD_FORMAT:
-                sprintf(aux, "Error (%d) : linesize = %d    szBuffer = %d\n", MIR_ERR_FIFO_ADD_FORMAT, frame->format, Format);
-                break;
-            case MIR_ERR_FIFO_ADD_CHANNELS:
-                sprintf(aux, "Error (%d) : linesize = %d    szBuffer = %d\n", MIR_ERR_FIFO_ADD_CHANNELS, frame->channels, nbChannels);
-                break;
-            default :
-                break;
-        }
-
-        objLog->mr_printf(MR_LOG_ERROR, idRadio, aux);
-
         mtx = false;
-
-        usleep(50);
-        throw;
+        throw ExceptionClass("queue", "addQueueData", "Erro de segmentacao");
     }
     catch(...)
     {

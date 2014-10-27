@@ -32,8 +32,6 @@ class Queue
         * Retorna o tamanho da queue
         */
         int getQueueSize();     // quantidade de frames
-        int getNbBuffers();     // quantidade de buffers
-        int getSzBuffer();      // bytes por buffer
 
         /** \brief
         * Adiciona frame decodificado para a queue
@@ -46,7 +44,6 @@ class Queue
         /** \brief
         * Retorna dados da queue, correspondente a um pacote
         */
-//        int getQueueData(uint8_t **dest, int nbSamples);
         vector<vector<uint8_t>> getQueueData();
         void delQueueData();
     protected:
@@ -58,10 +55,8 @@ class Queue
 
         bool isPlannar;
         int szFrame;
-        int nbBuffers;
         int szBuffers;
         int szData;
-        int szBuffer;
         int nbChannels;
         enum AVSampleFormat Format;
 

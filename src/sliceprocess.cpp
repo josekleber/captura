@@ -39,15 +39,6 @@ void SliceProcess::thrProcessa()
 
     try
     {
-        try
-        {
-            cdc_ctx_in = objRadio->getCodecContext();
-        }
-        catch(...)
-        {
-            throw ExceptionClass("sliceprocess", "thrProcessa", "erro ao tentar recuperar o codec context do objRadio.");
-        }
-
         int szFifo;
         int inFrameSize;
 
@@ -60,15 +51,19 @@ void SliceProcess::thrProcessa()
         if (inFrame == NULL)
             throw BadAllocException() << errno_code(MIR_ERR_FRAME_ALLOC);
 
-        inFrameSize             = cdc_ctx_in->frame_size;
-        inFrame->channel_layout = cdc_ctx_in->channel_layout;
-        inFrame->format         = cdc_ctx_in->sample_fmt;
-        inFrame->sample_rate    = cdc_ctx_in->sample_rate;
+        try
+        {
+            cdc_ctx_in = objRadio->getCodecContext();
 
-        cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> inFrameSize = " << inFrameSize << endl;
-        cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> inFrame->nb_samples = " << inFrame->nb_samples << endl;
-
-        //sleep(10);
+            inFrameSize             = cdc_ctx_in->frame_size;
+            inFrame->channel_layout = cdc_ctx_in->channel_layout;
+            inFrame->format         = cdc_ctx_in->sample_fmt;
+            inFrame->sample_rate    = cdc_ctx_in->sample_rate;
+        }
+        catch(...)
+        {
+            throw ExceptionClass("sliceprocess", "thrProcessa", "erro ao tentar recuperar o codec context do objRadio.");
+        }
 
         inFrame->nb_samples = inFrameSize;
 
@@ -82,13 +77,12 @@ void SliceProcess::thrProcessa()
         {
             objRawData = new RAWData();
             objRawData->idRadio = idRadio;
-            objRawData->channelLayoutIn = objRadio->getChannelLayout();
-            objRawData->sampleRateIn = cdc_ctx_in->sample_rate;
             objRawData->bitRateIn = cdc_ctx_in->bit_rate;
-            objRawData->sampleFormatIn = cdc_ctx_in->sample_fmt;
-            objRawData->nbSamplesIn = inFrameSize;
             objRawData->nbChannelIn = cdc_ctx_in->channels;
-            objRawData->szBuffer = objRadio->getSzBuffer();
+            objRawData->nbSamplesIn = inFrameSize;
+            objRawData->sampleFormatIn = cdc_ctx_in->sample_fmt;
+            objRawData->sampleRateIn = cdc_ctx_in->sample_rate;
+            objRawData->channelLayoutIn = objRadio->getChannelLayout();
             objRawData->fileName = "SkySoft.wav";
 
             objRawData->Filters = Filters;
@@ -116,13 +110,12 @@ void SliceProcess::thrProcessa()
         {
             objFileData = new FileData();
             objFileData->idRadio = idRadio;
-            objFileData->channelLayoutIn = objRadio->getChannelLayout();
-            objFileData->sampleRateIn = cdc_ctx_in->sample_rate;
             objFileData->bitRateIn = cdc_ctx_in->bit_rate;
-            objFileData->sampleFormatIn = cdc_ctx_in->sample_fmt;
-            objFileData->nbSamplesIn = inFrameSize;
             objFileData->nbChannelIn = cdc_ctx_in->channels;
-            objFileData->szBuffer = objRadio->getSzBuffer();
+            objFileData->nbSamplesIn = inFrameSize;
+            objFileData->sampleFormatIn = cdc_ctx_in->sample_fmt;
+            objFileData->sampleRateIn = cdc_ctx_in->sample_rate;
+            objFileData->channelLayoutIn = objRadio->getChannelLayout();
             objFileData->fileName = "SkySoft.mp3";
 
             objFileData->Config();
@@ -181,11 +174,27 @@ void SliceProcess::thrProcessa()
                             throw;
                         }
 
+                        // atualizando dados do codec context
+                        try
+                        {
+                            cdc_ctx_in = objRadio->getCodecContext();
+
+                            inFrameSize             = cdc_ctx_in->frame_size;
+                            inFrame->channel_layout = cdc_ctx_in->channel_layout;
+                            inFrame->format         = cdc_ctx_in->sample_fmt;
+                            inFrame->sample_rate    = cdc_ctx_in->sample_rate;
+                        }
+                        catch(...)
+                        {
+                            throw ExceptionClass("sliceprocess", "thrProcessa", "erro ao tentar atualizar informacoes o codec context do objRadio.");
+                        }
+
 /**/
                         // rodando a thread do fingerprint
                         try
                         {
-                            objRawData->setBuffer(arqName + ".wav", Packets);
+                            objRawData->setBuffer(arqName + ".wav", Packets, inFrameSize, cdc_ctx_in->sample_fmt,
+                                                  cdc_ctx_in->sample_rate, objRadio->getChannelLayout());
                             objRawData->idSlice = idSlice;
                             objRawData->szFifo = objRadio->getQueueSize();
                             objThreadRawParser = new thread(&RAWData::Execute, objRawData);
@@ -204,7 +213,8 @@ void SliceProcess::thrProcessa()
                         // rodando a thread da gravacao do arquivo mp3
                         try
                         {
-                            objFileData->setBuffer(arqName + ".mp3", Packets);
+                            objFileData->setBuffer(arqName + ".mp3", Packets, inFrameSize, cdc_ctx_in->sample_fmt,
+                                                  cdc_ctx_in->sample_rate, objRadio->getChannelLayout());
                             objThreadArqParser = new thread(&FileData::Execute, objFileData);
                             objThreadArqParser->detach();
                         }

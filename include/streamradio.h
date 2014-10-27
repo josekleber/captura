@@ -144,7 +144,6 @@ public:
     int getChannelLayout();
 
     int getQueueSize();
-    int getSzBuffer();
     vector<vector<uint8_t>> getQueueData();
     void delQueueData();
 protected:

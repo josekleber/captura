@@ -406,11 +406,6 @@ int StreamRadio::getQueueSize()
     }
 }
 
-int StreamRadio::getSzBuffer()
-{
-    return objQueue->getSzBuffer();
-}
-
 void StreamRadio::delQueueData()
 {
     objQueue->delQueueData();
