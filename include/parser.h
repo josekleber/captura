@@ -38,8 +38,6 @@ public:
 
     /** Default constructor */
     Parser();
-    Parser(int32_t idRadio, string fileName, uint64_t channelLayoutIn, int sampleRateIn,
-           int bitRateIn, AVSampleFormat sampleFormatIn, int nbSamplesIn, int nbChannelIn);
 
     /** Default destructor */
     virtual ~Parser();
@@ -57,7 +55,7 @@ public:
     void setSampleRate(int value);
     void setChannels(unsigned int value);
     void setBuffer(string arqName, vector<vector<vector<uint8_t>>> value, int nbSamplesIn,
-                   int sampleFormatIn, int sampleRateIn, uint64_t channelLayoutIn);
+                   int sampleFormatIn, int sampleRateIn, uint64_t channelLayoutIn, int nbChannelsIn);
 
     /** \brief Processa os frames e gera a saída */
     virtual void Execute();
@@ -73,10 +71,12 @@ public:
     int bitRateIn;
     int sampleFormatIn;
     int nbSamplesIn;
-    int nbChannelIn;
+    int nbChannelsIn;
     int szBuffer;
     int32_t idSlice;
     int32_t szFifo;
+
+    AVCodecContext* cdc_ctx_in;
 
 protected:
     AUDIOFORMAT audioFormat;

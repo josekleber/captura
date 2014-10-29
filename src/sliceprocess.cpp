@@ -45,36 +45,15 @@ void SliceProcess::thrProcessa()
 
         idSlice = 0;
 
-/**
-        inFrame = av_frame_alloc();
-        if (inFrame == NULL)
-            throw BadAllocException() << errno_code(MIR_ERR_FRAME_ALLOC_1);
-/**/
-
         try
         {
             cdc_ctx_in = objRadio->getCodecContext();
 
-/**
-            inFrame->nb_samples     = objRadio->getFrameSize();
-            inFrame->channel_layout = objRadio->getChannelLayout();
-            inFrame->format         = objRadio->getFrameFormat();
-            inFrame->sample_rate    = objRadio->getFrameSampleRate();
-/**/
         }
         catch(...)
         {
             throw ExceptionClass("sliceprocess", "thrProcessa", "erro ao tentar recuperar o codec context do objRadio.");
         }
-
-/**
-        if (av_frame_get_buffer(inFrame, 0) < 0)
-{
-objLog->mr_printf(MR_LOG_DEBUG, idRadio, "FrameSize: %d    ChannelLayout: %d    Format: %d    SampleRate: %d\n",
-                  inFrame->nb_samples, inFrame->channel_layout, inFrame->format, inFrame->sample_rate);
-            throw BadAllocException() << errno_code(MIR_ERR_FRAME_ALLOC_2);
-}
-/**/
 
         int qtdPack = 0;
 
@@ -83,8 +62,9 @@ objLog->mr_printf(MR_LOG_DEBUG, idRadio, "FrameSize: %d    ChannelLayout: %d    
         {
             objRawData = new RAWData();
             objRawData->idRadio = idRadio;
+            objRawData->cdc_ctx_in = cdc_ctx_in;
             objRawData->bitRateIn = cdc_ctx_in->bit_rate;
-            objRawData->nbChannelIn = cdc_ctx_in->channels;
+            objRawData->nbChannelsIn = cdc_ctx_in->channels;
             objRawData->nbSamplesIn = cdc_ctx_in->frame_size;
             objRawData->sampleFormatIn = objRadio->getFrameFormat();
             objRawData->sampleRateIn = cdc_ctx_in->sample_rate;
@@ -115,8 +95,9 @@ objLog->mr_printf(MR_LOG_DEBUG, idRadio, "FrameSize: %d    ChannelLayout: %d    
         {
             objFileData = new FileData();
             objFileData->idRadio = idRadio;
+            objFileData->cdc_ctx_in = cdc_ctx_in;
             objFileData->bitRateIn = cdc_ctx_in->bit_rate;
-            objFileData->nbChannelIn = cdc_ctx_in->channels;
+            objFileData->nbChannelsIn = cdc_ctx_in->channels;
             objFileData->nbSamplesIn = cdc_ctx_in->frame_size;
             objFileData->sampleFormatIn = objRadio->getFrameFormat();
             objFileData->sampleRateIn = cdc_ctx_in->sample_rate;
@@ -184,7 +165,8 @@ objLog->mr_printf(MR_LOG_DEBUG, idRadio, "FrameSize: %d    ChannelLayout: %d    
                         try
                         {
                             objRawData->setBuffer(arqName + ".wav", Packets, szFrame, objRadio->getFrameFormat(),
-                                                  objRadio->getFrameSampleRate(), objRadio->getFrameChannelLayout());
+                                                  objRadio->getFrameSampleRate(), objRadio->getFrameChannelLayout(),
+                                                  objRadio->getFrameChannels());
                             objRawData->idSlice = idSlice;
                             objRawData->szFifo = objRadio->getQueueSize();
                             objThreadRawParser = new thread(&RAWData::Execute, objRawData);
@@ -204,7 +186,8 @@ objLog->mr_printf(MR_LOG_DEBUG, idRadio, "FrameSize: %d    ChannelLayout: %d    
                         try
                         {
                             objFileData->setBuffer(arqName + ".mp3", Packets, szFrame, objRadio->getFrameFormat(),
-                                                  objRadio->getFrameSampleRate(), objRadio->getFrameChannelLayout());
+                                                  objRadio->getFrameSampleRate(), objRadio->getFrameChannelLayout(),
+                                                  objRadio->getFrameChannels());
                             objThreadArqParser = new thread(&FileData::Execute, objFileData);
                             objThreadArqParser->detach();
                         }
@@ -236,6 +219,10 @@ objLog->mr_printf(MR_LOG_DEBUG, idRadio, "FrameSize: %d    ChannelLayout: %d    
                         {
                             throw ExceptionClass("sliceprocess", "thrProcessa", "Erro de Segmentacao na limpeza dos Packets");
                         }
+                        catch(...)
+                        {
+                            throw;
+                        }
 
 //objLog->mr_printf(MR_LOG_DEBUG, idRadio, "Recorte : %5d    Fifo : %d\n", idSlice, objRadio->getQueueSize());
                         idSlice++;
@@ -246,7 +233,7 @@ objLog->mr_printf(MR_LOG_DEBUG, idRadio, "FrameSize: %d    ChannelLayout: %d    
             }
             catch(SignalException& err)
             {
-                objLog->mr_printf(MR_LOG_ERROR, idRadio, "Erro de segmentacao\n");
+                objLog->mr_printf(MR_LOG_ERROR, idRadio, "sliceprocess (thrProcessa) : Erro de segmentacao\n");
             }
             catch(ExceptionClass& err)
             {
@@ -254,41 +241,45 @@ objLog->mr_printf(MR_LOG_DEBUG, idRadio, "FrameSize: %d    ChannelLayout: %d    
             }
             catch(FifoException& err)
             {
-                objLog->mr_printf(MR_LOG_ERROR, idRadio, "FIFO %d\n", *boost::get_error_info<errno_code>(err));
+                objLog->mr_printf(MR_LOG_ERROR, idRadio, "sliceprocess (thrProcessa) : FIFO %d\n", *boost::get_error_info<errno_code>(err));
             }
             catch(ConvertException& err)
             {
-                objLog->mr_printf(MR_LOG_ERROR, idRadio, "Erro na abertura de arquivo : %d\n", *boost::get_error_info<errno_code>(err));
+                objLog->mr_printf(MR_LOG_ERROR, idRadio, "sliceprocess (thrProcessa) : Erro na abertura de arquivo : %d\n", *boost::get_error_info<errno_code>(err));
             }
             catch(StreamException& err)
             {
-                objLog->mr_printf(MR_LOG_ERROR, idRadio, "Erro na abertura de arquivo : %d\n", *boost::get_error_info<errno_code>(err));
+                objLog->mr_printf(MR_LOG_ERROR, idRadio, "sliceprocess (thrProcessa) : Erro na abertura de arquivo : %d\n", *boost::get_error_info<errno_code>(err));
+            }
+            catch(exception& err)
+            {
+                objLog->mr_printf(MR_LOG_ERROR, idRadio, "sliceprocess (thrProcessa) : Erro desconhecido : %d\n", err.what());
             }
             catch(...)
             {
-                objLog->mr_printf(MR_LOG_ERROR, idRadio, "General Error\n");
+                objLog->mr_printf(MR_LOG_ERROR, idRadio, "sliceprocess (thrProcessa) : General Error\n");
             }
         }
     }
     catch(SignalException& err)
     {
         Status = enumSliceProcess::ERROR;
-        objLog->mr_printf(MR_LOG_ERROR, idRadio, "sliceprocess (thrProcessa) : Erro de segmentacao geral\n");
+        objLog->mr_printf(MR_LOG_ERROR, idRadio, "sliceprocess (thrProcessa) : Erro de segmentacao - loop principal\n");
     }
     catch(BadAllocException& err)
     {
         Status = enumSliceProcess::ERROR;
-        objLog->mr_printf(MR_LOG_ERROR, idRadio, "Erro de alocacao de memoria : %d\n", *boost::get_error_info<errno_code>(err));
+        objLog->mr_printf(MR_LOG_ERROR, idRadio, "sliceprocess (thrProcessa) : Erro de alocacao de memoria : %d\n", *boost::get_error_info<errno_code>(err));
     }
     catch(RawDataException& err)
     {
         Status = enumSliceProcess::ERROR;
-        objLog->mr_printf(MR_LOG_ERROR, idRadio, "Erro na criacao do objeto RawData : %d\n", *boost::get_error_info<errno_code>(err));
+        objLog->mr_printf(MR_LOG_ERROR, idRadio, "sliceprocess (thrProcessa) : Erro na criacao do objeto RawData : %d\n", *boost::get_error_info<errno_code>(err));
     }
     catch(FileDataException& err)
     {
         Status = enumSliceProcess::ERROR;
-        objLog->mr_printf(MR_LOG_ERROR, idRadio, "Erro na criacao do objeto FileData : %d\n", *boost::get_error_info<errno_code>(err));
+        objLog->mr_printf(MR_LOG_ERROR, idRadio, "sliceprocess (thrProcessa) : Erro na criacao do objeto FileData : %d\n", *boost::get_error_info<errno_code>(err));
     }
     catch (ExceptionClass& err)
     {
@@ -298,7 +289,7 @@ objLog->mr_printf(MR_LOG_DEBUG, idRadio, "FrameSize: %d    ChannelLayout: %d    
     catch(...)
     {
         Status = enumSliceProcess::ERROR;
-        objLog->mr_printf(MR_LOG_ERROR, idRadio, ">>>>>>>>>>>>>>>>>>> Erro grave, sem indice. <<<<<<<<<<<<<<<<<<<\n");
+        objLog->mr_printf(MR_LOG_ERROR, idRadio, "sliceprocess (thrProcessa) : >>>>>>>>>>>>>>>>>>> Erro grave, sem indice. <<<<<<<<<<<<<<<<<<<\n");
     }
 
     Status = enumSliceProcess::STOP;

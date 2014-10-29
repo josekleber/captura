@@ -150,6 +150,7 @@ public:
     int getFrameFormat();
     int getFrameSampleRate();
     uint64_t getFrameChannelLayout();
+    int getFrameChannels();
 protected:
 private:
     AVFormatContext *formatContext;
@@ -165,6 +166,7 @@ private:
     int FrameFormat;
     int FrameSampleRate;
     uint64_t FrameChannelLayout;
+    int FrameChannels;
 
 
 

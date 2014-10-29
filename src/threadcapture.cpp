@@ -47,37 +47,37 @@ void ThreadCapture::thrRun()
                     catch (SignalException& err)
                     {
                         isError = true;
-                        objLog->mr_printf(MR_LOG_ERROR, idThread, "%d\n", *boost::get_error_info<errno_code>(err));
+                        objLog->mr_printf(MR_LOG_ERROR, idThread, "threadcapture (thrRun) : %d\n", *boost::get_error_info<errno_code>(err));
                     }
                     catch(BadAllocException& err)
                     {
                         isError = true;
-                        objLog->mr_printf(MR_LOG_ERROR, idThread, "%d\n", *boost::get_error_info<errno_code>(err));
+                        objLog->mr_printf(MR_LOG_ERROR, idThread, "threadcapture (thrRun) : %d\n", *boost::get_error_info<errno_code>(err));
                     }
                     catch(OpenConnectionException& err)
                     {
                         isError = true;
-                        objLog->mr_printf(MR_LOG_ERROR, idThread, "%d\n", *boost::get_error_info<errno_code>(err));
+                        objLog->mr_printf(MR_LOG_ERROR, idThread, "threadcapture (thrRun) : %d\n", *boost::get_error_info<errno_code>(err));
                     }
                     catch(FifoException& err)
                     {
                         isError = true;
-                        objLog->mr_printf(MR_LOG_ERROR, idThread, "%d\n", *boost::get_error_info<errno_code>(err));
+                        objLog->mr_printf(MR_LOG_ERROR, idThread, "threadcapture (thrRun) : %d\n", *boost::get_error_info<errno_code>(err));
                     }
                     catch(StreamRadioException& err)
                     {
                         isError = true;
-                        objLog->mr_printf(MR_LOG_ERROR, idThread, "%d\n", *boost::get_error_info<errno_code>(err));
+                        objLog->mr_printf(MR_LOG_ERROR, idThread, "threadcapture (thrRun) : %d\n", *boost::get_error_info<errno_code>(err));
                     }
                     catch(GeneralException& err)
                     {
                         isError = true;
-                        objLog->mr_printf(MR_LOG_ERROR, idThread, "%d\n", *boost::get_error_info<errno_code>(err));
+                        objLog->mr_printf(MR_LOG_ERROR, idThread, "threadcapture (thrRun) : %d\n", *boost::get_error_info<errno_code>(err));
                     }
                     catch(...)
                     {
                         isError = true;
-                        objLog->mr_printf(MR_LOG_ERROR, idThread, "General erros\n");
+                        objLog->mr_printf(MR_LOG_ERROR, idThread, "threadcapture (thrRun) : General error\n");
                     }
 
                     if (objRadio)
@@ -202,7 +202,7 @@ void ThreadCapture::thrRun()
         }
         catch(SignalException& err)
         {
-            objLog->mr_printf(MR_LOG_ERROR, idThread, "Erro de SignalException (%s)\n", err.what());
+            objLog->mr_printf(MR_LOG_ERROR, idThread, "threadcapture (thrRun) : Erro de SignalException (%s)\n", err.what());
         }
         catch(ExceptionClass& err)
         {

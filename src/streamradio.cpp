@@ -322,7 +322,7 @@ int njn = 0;
         }
         catch(SignalException& err)
         {
-            objLog->mr_printf(MR_LOG_ERROR, idRadio, "streakradio (readFrame) : Erro de segmentacao\n");
+            objLog->mr_printf(MR_LOG_ERROR, idRadio, "streamradio (readFrame) : Erro de segmentacao\n");
         }
         catch(ExceptionClass& err)
         {
@@ -365,10 +365,19 @@ void StreamRadio::decodeAudioFrame(int *haveData, AVPacket *inputPacket)
         throw StreamRadioException() << errno_code(MIR_ERR_DECODE);
     }
 
+/**/
     FrameSize          = frame->nb_samples;
     FrameFormat        = frame->format;
     FrameSampleRate    = frame->sample_rate;
     FrameChannelLayout = frame->channel_layout;
+    FrameChannels      = frame->channels;
+/**
+    FrameSize          = frame->nb_samples;
+    FrameFormat        = frame->format;
+    FrameSampleRate    = frame->sample_rate;
+    FrameChannelLayout = frame->channel_layout;
+    FrameChannels      = codecContext->channels;
+/**/
 }
 
 vector<vector<uint8_t>> StreamRadio::getQueueData()
@@ -434,4 +443,9 @@ int StreamRadio::getFrameSampleRate()
 uint64_t StreamRadio::getFrameChannelLayout()
 {
     return FrameChannelLayout;
+}
+
+int StreamRadio::getFrameChannels()
+{
+    return FrameChannels;
 }

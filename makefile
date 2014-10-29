@@ -22,12 +22,12 @@ LDFLAGS_G = -lz -lm -lpthread -lmp3lame -lx264 -lvorbis -lfdk-aac -lfaac
 OUTNAME = captura
 
 debug: INC = $(INC_G)
-debug: CFLAGS = $(CFLAGS_G)
+debug: CFLAGS =  -ggdb -O0 $(CFLAGS_G)
 debug: RESINC = $(RESINC_G)
 debug: DEP = $(DEP_G)
 debug: LIBDIR = $(LIBDIR_G)
 debug: LIB = $(LIB_G)
-debug: LDFLAGS = $(LDFLAGS_G) -s
+debug: LDFLAGS = -g -ggdb $(LDFLAGS_G) -s
 debug: DIR = Debug
 debug: before out after
 

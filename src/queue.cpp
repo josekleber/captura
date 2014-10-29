@@ -42,10 +42,6 @@ int Queue::getQueueSize()
 
 void Queue::addQueueData(AVFrame* frame)
 {
-    /**
-     * Make the FIFO as large as it needs to be to hold both,
-     * the old and the new samples.
-     */
 //    boost::lock_guard<boost::mutex> guard(mtx_);
     while (mtx)
         boost::this_thread::sleep(boost::posix_time::milliseconds(10));

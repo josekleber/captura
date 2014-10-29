@@ -16,10 +16,16 @@ void Parser::EndProcess()
     try
     {
         if (frame_in)
+        {
             av_frame_free(&frame_in);
+            frame_in = NULL;
+        }
 
         if (frame_out)
+        {
             av_frame_free(&frame_out);
+            frame_out = NULL;
+        }
 
         for (int i = 0; i < (int)vetAux.size(); i++)
             if (vetAux[i].size() > 0)
@@ -39,7 +45,7 @@ void Parser::EndProcess()
             bufFrames.clear();
 
         if (dic)
-            av_free(dic);
+            av_freep(dic);
         if (fmt_ctx_out->pb)
             avio_close(fmt_ctx_out->pb);
         if (swr_ctx)
@@ -63,7 +69,7 @@ void Parser::Config()
 {
     try
     {
-        nbBuffers = av_sample_fmt_is_planar((AVSampleFormat)sampleFormatIn) ? this->nbChannelIn : 1;
+        nbBuffers = av_sample_fmt_is_planar((AVSampleFormat)sampleFormatIn) ? this->nbChannelsIn : 1;
 
         // cria o contexto de saída
         CreateContext();
@@ -222,29 +228,48 @@ void Parser::Resample()
     int idxFrame;
     int idxBuff;
 
+    bool isExtAAC = false;
+    if (cdc_ctx_in->codec_id == AV_CODEC_ID_AAC)
+        isExtAAC = sampleFormatIn == (int)AVSampleFormat::AV_SAMPLE_FMT_FLTP;
+
     try
     {
-        //!< alocando buffers para o frame de entrada, so roda uma vez
         try
         {
             if (nbSamplesIn > 0)
             {
-                frame_in->nb_samples = nbSamplesIn;
+                if (isExtAAC)
+                {
+                    frame_in->nb_samples = 2048;
+                    frame_in->channels = cdc_ctx_in->channels;
+                }
+                else
+                {
+                    frame_in->nb_samples = nbSamplesIn;
+                    frame_in->channels = nbChannelsIn;
+                }
                 frame_in->format = sampleFormatIn;
                 frame_in->sample_rate = sampleRateIn;
                 frame_in->channel_layout = channelLayoutIn;
+
                 if (av_frame_get_buffer(frame_in, 1) < 0)
                     throw ResampleException() << errno_code(MIR_ERR_BUFFER_ALLOC_IN);
+
+                if (isExtAAC)
+                    frame_in->nb_samples = nbSamplesIn;
             }
             else
                 throw ResampleException() << errno_code(MIR_ERR_BUFFER_ALLOC_NULL);
+        }
+        catch(SignalException& err)
+        {
+            throw ExceptionClass("parser", "Resample", "Segmentation error");
         }
         catch(ResampleException& err)
         {
             throw;
         }
 
-        //!< alocando buffers para o frame de saida, so roda uma vez
         try
         {
             frame_out->nb_samples = cdc_ctx_out->frame_size;
@@ -275,7 +300,7 @@ void Parser::Resample()
 
                     for (idxBuff = 0; idxBuff < (int)vetAux.size(); idxBuff++)
                     {
-                        if ((int)vetAux[idxBuff].size() != frame_in->linesize[0])
+                        if ((int)vetAux[idxBuff].size() > frame_in->linesize[0])
                             throw FifoException() << errno_code(MIR_ERR_FIFO_DATA2);
 
                         try
@@ -335,7 +360,7 @@ void Parser::Resample()
             }
             catch(FifoException& err)
             {
-                char aux[100];
+                char aux[200];
 
                 switch(*boost::get_error_info<errno_code>(err))
                 {
@@ -344,8 +369,20 @@ void Parser::Resample()
                                 (int)vetAux.size(), nbBuffers);
                         break;
                     case MIR_ERR_FIFO_DATA2:
+/**
                         sprintf(aux, "Error (%d) : vetAux[idxBuff].size = %d    linesize = %d\n", MIR_ERR_FIFO_DATA2,
                                 (int)vetAux[idxBuff].size(), frame_in->linesize[0]);
+/**/
+                        sprintf(aux, "Error (%d) : vetAux[idxBuff].size = %d    linesize = %d    channels = %d"
+                                "    channelsLayout = %d    format = %d    nb_samples = %d\n",
+                                MIR_ERR_FIFO_DATA2,
+                                (int)vetAux[idxBuff].size(),
+                                frame_in->linesize[0],
+                                frame_in->channels,
+                                frame_in->channel_layout,
+                                frame_in->format,
+                                frame_in->nb_samples);
+/**/
                         break;
                     case MIR_ERR_FIFO_DATA3:
                         sprintf(aux, "Error (%d) : General Frame allocation error\n", MIR_ERR_FIFO_DATA3);
@@ -385,10 +422,16 @@ void Parser::Resample()
     catch (SignalException& err)
     {
         if (frame_in)
+        {
             av_frame_free(&frame_in);
+            frame_in = NULL;
+        }
 
         if (frame_out)
+        {
             av_frame_free(&frame_out);
+            frame_out = NULL;
+        }
 
         for (int idxBuff = 0; idxBuff < (int)vetAux.size(); idxBuff++)
             if (vetAux[idxBuff].size() > 0)
@@ -412,10 +455,16 @@ void Parser::Resample()
     catch(...)
     {
         if (frame_in)
+        {
             av_frame_free(&frame_in);
+            frame_in = NULL;
+        }
 
         if (frame_out)
+        {
             av_frame_free(&frame_out);
+            frame_out = NULL;
+        }
 
         for (int idxBuff = 0; idxBuff < (int)vetAux.size(); idxBuff++)
             if (vetAux[idxBuff].size() > 0)
@@ -493,7 +542,8 @@ void Parser::setChannels(unsigned int value)
 }
 
 void Parser::setBuffer(string arqName, vector<vector<vector<uint8_t>>> value,
-                       int nbSamplesIn, int sampleFormatIn, int sampleRateIn, uint64_t channelLayoutIn)
+                       int nbSamplesIn, int sampleFormatIn, int sampleRateIn,
+                       uint64_t channelLayoutIn, int nbChannelsIn)
 {
     int error;
 
@@ -503,6 +553,7 @@ void Parser::setBuffer(string arqName, vector<vector<vector<uint8_t>>> value,
     this->sampleFormatIn = sampleFormatIn;
     this->sampleRateIn = sampleRateIn;
     this->channelLayoutIn = channelLayoutIn;
+//    this->nbChannelsIn = nbChannelsIn;
 
     if (swr_ctx)
         swr_free(&swr_ctx);
