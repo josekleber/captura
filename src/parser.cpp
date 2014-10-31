@@ -190,6 +190,21 @@ void Parser::createFrames()
     {
         throw;
     }
+
+    try
+    {
+        frame_out->nb_samples = cdc_ctx_out->frame_size;
+        frame_out->format = cdc_ctx_out->sample_fmt;
+        frame_out->sample_rate = sampleRate;
+        frame_out->channel_layout = av_get_default_channel_layout(nbChannel);
+
+        if (av_frame_get_buffer(frame_out, 1) < 0)
+            throw ResampleException() << errno_code(MIR_ERR_BUFFER_ALLOC_OUT);
+    }
+    catch(ResampleException& err)
+    {
+        throw;
+    }
 }
 
 void Parser::InitResampler()
@@ -270,6 +285,7 @@ void Parser::Resample()
             throw;
         }
 
+/**
         try
         {
             frame_out->nb_samples = cdc_ctx_out->frame_size;
@@ -284,6 +300,7 @@ void Parser::Resample()
         {
             throw;
         }
+/**/
 
         for (idxFrame = 0; idxFrame < (int)this->bufFrames.size(); idxFrame++)
         {
@@ -406,7 +423,7 @@ void Parser::Resample()
         }
 
         av_frame_unref(frame_in);
-        av_frame_unref(frame_out);
+//        av_frame_unref(frame_out);
 
         for (int idxFrame = 0; idxFrame < (int)this->bufFrames.size(); idxFrame++)
         {

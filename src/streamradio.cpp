@@ -244,6 +244,10 @@ void StreamRadio::readFrame()
     int error;
     int haveData;
 
+    bool isError;
+    int cntError = 0;
+    int cntCicle = 0;
+
     // Pacote para dados temporários.
     AVPacket inputPacket;
 
@@ -256,6 +260,8 @@ int njn = 0;
 
     while ((finished == 0) && !isExit)
     {
+        isError = false;
+
         boost::this_thread::sleep(boost::posix_time::milliseconds(15));  // jk
         av_init_packet(&inputPacket);
         // ainda não entendi o porquê setar os dados abaixo. Porém, em todos os
@@ -265,6 +271,18 @@ int njn = 0;
 
         try
         {
+            if (cntCicle >= 10)
+            {
+                if (cntError >= 3)
+                {
+                    objLog->mr_printf(MR_LOG_ERROR, idRadio, "Many errors, sleeping\n");
+                    sleep(1 * 60);
+                }
+
+                cntError = 0;
+                cntCicle = 0;
+            }
+
             // Lê um frame do áudio e coloca no pacote temporário.
             if ((error = av_read_frame(formatContext, &inputPacket)) < 0)
             {
@@ -322,24 +340,34 @@ int njn = 0;
         }
         catch(SignalException& err)
         {
+            isError = true;
             objLog->mr_printf(MR_LOG_ERROR, idRadio, "streamradio (readFrame) : Erro de segmentacao\n");
         }
         catch(ExceptionClass& err)
         {
+            isError = true;
             objLog->mr_printf(MR_LOG_ERROR, idRadio, "%s\n", err.what());
         }
         catch(StreamRadioException& err)
         {
+            isError = true;
             objLog->mr_printf(MR_LOG_ERROR, idRadio, "Stream Error %d\n", *boost::get_error_info<errno_code>(err));
         }
         catch(FifoException& err)
         {
+            isError = true;
             objLog->mr_printf(MR_LOG_ERROR, idRadio, "Queue Error %d\n", *boost::get_error_info<errno_code>(err));
         }
         catch (...)
         {
+            isError = true;
             objLog->mr_printf(MR_LOG_ERROR, idRadio, "Ocorreu um erro no stream de entrada.\n");
         }
+
+        if (isError)
+            cntError++;
+
+        cntCicle++;
     }
     av_frame_free(&frame);
 
@@ -365,19 +393,11 @@ void StreamRadio::decodeAudioFrame(int *haveData, AVPacket *inputPacket)
         throw StreamRadioException() << errno_code(MIR_ERR_DECODE);
     }
 
-/**/
     FrameSize          = frame->nb_samples;
     FrameFormat        = frame->format;
     FrameSampleRate    = frame->sample_rate;
     FrameChannelLayout = frame->channel_layout;
     FrameChannels      = frame->channels;
-/**
-    FrameSize          = frame->nb_samples;
-    FrameFormat        = frame->format;
-    FrameSampleRate    = frame->sample_rate;
-    FrameChannelLayout = frame->channel_layout;
-    FrameChannels      = codecContext->channels;
-/**/
 }
 
 vector<vector<uint8_t>> StreamRadio::getQueueData()

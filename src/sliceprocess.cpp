@@ -128,7 +128,11 @@ void SliceProcess::thrProcessa()
                 if (szFifo >= szFrame)
                 {
                     // carregando dados da FIFO
-//objRadio->delQueueData();
+/**
+objRadio->delQueueData();
+sleep(1);
+continue;
+/**/
                     aux = objRadio->getQueueData();
                     if (aux.size() > 0)
                     {
