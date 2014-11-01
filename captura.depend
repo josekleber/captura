@@ -73,7 +73,7 @@
 1402933448 source:/home/kleber/projetos/mir/captura/src/streamradio.cpp
 	"streamradio.h"
 
-1413993742 /usr/local/include/libavformat/avformat.h
+1414593985 /usr/local/include/libavformat/avformat.h
 	<time.h>
 	<stdio.h>
 	"libavcodec/avcodec.h"
@@ -82,7 +82,7 @@
 	"avio.h"
 	"libavformat/version.h"
 
-1413993742 /usr/local/include/libavcodec/avcodec.h
+1414593985 /usr/local/include/libavcodec/avcodec.h
 	<errno.h>
 	"libavutil/samplefmt.h"
 	"libavutil/attributes.h"
@@ -99,12 +99,12 @@
 	"libavutil/mem.h"
 	"old_codec_ids.h"
 
-1413993743 /usr/local/include/libavutil/samplefmt.h
+1414593985 /usr/local/include/libavutil/samplefmt.h
 	<stdint.h>
 	"avutil.h"
 	"attributes.h"
 
-1413993742 /usr/local/include/libavutil/avutil.h
+1414593985 /usr/local/include/libavutil/avutil.h
 	"common.h"
 	"error.h"
 	"version.h"
@@ -114,7 +114,7 @@
 	"log.h"
 	"pixfmt.h"
 
-1413993742 /usr/local/include/libavutil/common.h
+1414593985 /usr/local/include/libavutil/common.h
 	<errno.h>
 	<inttypes.h>
 	<limits.h>
@@ -132,66 +132,66 @@
 	"mem.h"
 	"internal.h"
 
-1413993742 /usr/local/include/libavutil/attributes.h
+1414593985 /usr/local/include/libavutil/attributes.h
 
-1413993743 /usr/local/include/libavutil/version.h
+1414593985 /usr/local/include/libavutil/version.h
 	"macros.h"
 
-1413993742 /usr/local/include/libavutil/macros.h
+1414593985 /usr/local/include/libavutil/macros.h
 
-1413993743 /usr/local/include/libavutil/avconfig.h
+1414593985 /usr/local/include/libavutil/avconfig.h
 
-1413993742 /usr/local/include/libavutil/mem.h
+1414593985 /usr/local/include/libavutil/mem.h
 	<limits.h>
 	<stdint.h>
 	"attributes.h"
 	"error.h"
 	"avutil.h"
 
-1413993742 /usr/local/include/libavutil/error.h
+1414593985 /usr/local/include/libavutil/error.h
 	<errno.h>
 	<stddef.h>
 
-1413993742 /usr/local/include/libavutil/mathematics.h
+1414593985 /usr/local/include/libavutil/mathematics.h
 	<stdint.h>
 	<math.h>
 	"attributes.h"
 	"rational.h"
 	"intfloat.h"
 
-1413993743 /usr/local/include/libavutil/rational.h
+1414593985 /usr/local/include/libavutil/rational.h
 	<stdint.h>
 	<limits.h>
 	"attributes.h"
 
-1413993742 /usr/local/include/libavutil/intfloat.h
+1414593985 /usr/local/include/libavutil/intfloat.h
 	<stdint.h>
 	"attributes.h"
 
-1413993742 /usr/local/include/libavutil/log.h
+1414593985 /usr/local/include/libavutil/log.h
 	<stdarg.h>
 	"avutil.h"
 	"attributes.h"
 
-1413993743 /usr/local/include/libavutil/pixfmt.h
+1414593985 /usr/local/include/libavutil/pixfmt.h
 	"libavutil/avconfig.h"
 	"version.h"
 	"old_pix_fmts.h"
 
-1413993742 /usr/local/include/libavutil/old_pix_fmts.h
+1414593985 /usr/local/include/libavutil/old_pix_fmts.h
 
-1413993742 /usr/local/include/libavutil/buffer.h
+1414593985 /usr/local/include/libavutil/buffer.h
 	<stdint.h>
 
-1413993742 /usr/local/include/libavutil/cpu.h
+1414593985 /usr/local/include/libavutil/cpu.h
 	"attributes.h"
 
-1413993742 /usr/local/include/libavutil/channel_layout.h
+1414593985 /usr/local/include/libavutil/channel_layout.h
 	<stdint.h>
 
-1413993742 /usr/local/include/libavutil/dict.h
+1414593985 /usr/local/include/libavutil/dict.h
 
-1413993742 /usr/local/include/libavutil/frame.h
+1414593985 /usr/local/include/libavutil/frame.h
 	<stdint.h>
 	"avutil.h"
 	"buffer.h"
@@ -200,20 +200,20 @@
 	"samplefmt.h"
 	"version.h"
 
-1413993742 /usr/local/include/libavcodec/version.h
+1414593985 /usr/local/include/libavcodec/version.h
 	"libavutil/version.h"
 
-1413993742 /usr/local/include/libavcodec/old_codec_ids.h
+1414593985 /usr/local/include/libavcodec/old_codec_ids.h
 	"libavutil/common.h"
 
-1413993742 /usr/local/include/libavformat/avio.h
+1414593985 /usr/local/include/libavformat/avio.h
 	<stdint.h>
 	"libavutil/common.h"
 	"libavutil/dict.h"
 	"libavutil/log.h"
 	"libavformat/version.h"
 
-1413993742 /usr/local/include/libavformat/version.h
+1414593985 /usr/local/include/libavformat/version.h
 	"libavutil/version.h"
 
 1403093719 source:/home/kleber/git/captura/src/aacdata.cpp
@@ -7092,28 +7092,28 @@
 1403643101 source:/home/kleber/git/captura/src/threadcapture.cpp
 	"threadcapture.h"
 
-1413993743 /usr/local/include/libavutil/timestamp.h
+1414593985 /usr/local/include/libavutil/timestamp.h
 	"common.h"
 
-1413993742 /usr/local/include/libswresample/swresample.h
+1414593985 /usr/local/include/libswresample/swresample.h
 	<stdint.h>
 	"libavutil/samplefmt.h"
 	"libswresample/version.h"
 
-1413993742 /usr/local/include/libswresample/version.h
+1414593985 /usr/local/include/libswresample/version.h
 	"libavutil/avutil.h"
 
-1413993742 /usr/local/include/libavutil/avassert.h
+1414593985 /usr/local/include/libavutil/avassert.h
 	<stdlib.h>
 	"avutil.h"
 	"log.h"
 
-1413993742 /usr/local/include/libavutil/audio_fifo.h
+1414593985 /usr/local/include/libavutil/audio_fifo.h
 	"avutil.h"
 	"fifo.h"
 	"samplefmt.h"
 
-1413993742 /usr/local/include/libavutil/fifo.h
+1414593985 /usr/local/include/libavutil/fifo.h
 	<stdint.h>
 	"avutil.h"
 	"attributes.h"
@@ -7136,7 +7136,7 @@
 	<sqlext.h>
 	<vector>
 
-1413953212 /home/nelson/Projetos/mir/captura/include/exceptionmir.h
+1414418074 /home/nelson/Projetos/mir/captura/include/exceptionmir.h
 	<boost/exception/all.hpp>
 
 1413296292 source:/home/nelson/Projetos/mir/captura/src/logger.cpp
@@ -7156,7 +7156,7 @@
 	<boost/log/sources/global_logger_storage.hpp>
 	<boost/log/support/date_time.hpp>
 
-1413600552 source:/home/nelson/Projetos/mir/captura/src/rawdata.cpp
+1414548675 source:/home/nelson/Projetos/mir/captura/src/rawdata.cpp
 	"rawdata.h"
 
 1412945411 /home/nelson/Projetos/mir/captura/include/rawdata.h
@@ -7168,7 +7168,7 @@
 	"util.h"
 	"parser.h"
 
-1413326613 source:/home/nelson/Projetos/mir/captura/src/threadcapture.cpp
+1414606367 source:/home/nelson/Projetos/mir/captura/src/threadcapture.cpp
 	"threadcapture.h"
 
 1412437756 /home/nelson/Projetos/mir/captura/include/threadcapture.h
@@ -7200,7 +7200,7 @@
 1403569888 /home/nelson/Projetos/mir/captura/include/queuehandler.h
 	<amqpcpp.h>
 
-1414412590 /home/nelson/Projetos/mir/captura/include/streamradio.h
+1414515789 /home/nelson/Projetos/mir/captura/include/streamradio.h
 	<stdio.h>
 	<time.h>
 	<string.h>
@@ -7210,10 +7210,10 @@
 	"util.h"
 	"queue.h"
 
-1414016781 source:/home/nelson/Projetos/mir/captura/src/parser.cpp
+1414597999 source:/home/nelson/Projetos/mir/captura/src/parser.cpp
 	"parser.h"
 
-1414412590 /home/nelson/Projetos/mir/captura/include/parser.h
+1414590569 /home/nelson/Projetos/mir/captura/include/parser.h
 	<iostream>
 	<cstdio>
 	<unistd.h>
@@ -7234,10 +7234,10 @@
 	<mir/exceptionclass.h>
 	"util.h"
 
-1413499279 source:/home/nelson/Projetos/mir/captura/src/streamradio.cpp
+1414626900 source:/home/nelson/Projetos/mir/captura/src/streamradio.cpp
 	"streamradio.h"
 
-1413993742 /usr/local/include/libavutil/avstring.h
+1414593985 /usr/local/include/libavutil/avstring.h
 	<stddef.h>
 	<stdint.h>
 	"attributes.h"
@@ -16489,7 +16489,7 @@
 	<fstream>
 	<boost/filesystem.hpp>
 
-1413993742 /usr/local/include/libavutil/opt.h
+1414593985 /usr/local/include/libavutil/opt.h
 	"rational.h"
 	"avutil.h"
 	"dict.h"
@@ -16660,7 +16660,7 @@
 	"exceptionmir.h"
 	"LogClass.h"
 
-1413998000 source:/home/nelson/Projetos/mir/captura/src/filedata.cpp
+1414154765 source:/home/nelson/Projetos/mir/captura/src/filedata.cpp
 	"filedata.h"
 
 1413913785 /home/nelson/Projetos/mir/captura/include/filedata.h
@@ -16669,7 +16669,7 @@
 	"util.h"
 	"parser.h"
 
-1414412126 /home/nelson/Projetos/mir/captura/include/sliceprocess.h
+1414417603 /home/nelson/Projetos/mir/captura/include/sliceprocess.h
 	<stdlib.h>
 	<stdio.h>
 	<string>
@@ -16680,7 +16680,7 @@
 	"rawdata.h"
 	"filedata.h"
 
-1413468931 source:/home/nelson/Projetos/mir/captura/src/sliceprocess.cpp
+1414627843 source:/home/nelson/Projetos/mir/captura/src/sliceprocess.cpp
 	"sliceprocess.h"
 
 1404431267 /usr/local/include/boost/log/core.hpp
@@ -17648,7 +17648,7 @@
 	<mir/exceptionclass.h>
 	"util.h"
 
-1413598967 source:/home/nelson/Projetos/mir/captura/src/queue.cpp
+1414596035 source:/home/nelson/Projetos/mir/captura/src/queue.cpp
 	"queue.h"
 
 1412083935 source:/home/mir/Projetos/mir/captura/src/configuration.cpp
@@ -21330,7 +21330,7 @@
 	<errno.h>
 	"ExceptionClass.h"
 
-1413499354 source:/home/nelson/Projetos/mir/captura/src/captura.cpp
+1414595994 source:/home/nelson/Projetos/mir/captura/src/captura.cpp
 	"captura.h"
 
 1413293930 /home/nelson/Projetos/mir/captura/include/captura.h

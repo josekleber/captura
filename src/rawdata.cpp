@@ -214,7 +214,7 @@ clock_t start = clock();
                     int cntTimeOut = 0;
                     while ((objClient->strResp == "") && (cntTimeOut < SOCKET_TIMEOUT / 10))
                     {
-                        usleep(10);
+                        boost::this_thread::sleep(boost::posix_time::milliseconds(10));
                         cntTimeOut++;
                     }
 

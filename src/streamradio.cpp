@@ -18,10 +18,10 @@ StreamRadio::~StreamRadio()
 {
     isExit = true;
 
-    sleep(5);
+    boost::this_thread::sleep(boost::posix_time::seconds(5));
 
     while (statusConnection == EnumStatusConnect::MIR_CONNECTION_OPEN)
-        usleep(10);
+        boost::this_thread::sleep(boost::posix_time::milliseconds(10));
 
     try
     {
@@ -276,7 +276,7 @@ int njn = 0;
                 if (cntError >= 3)
                 {
                     objLog->mr_printf(MR_LOG_ERROR, idRadio, "Many errors, sleeping\n");
-                    sleep(1 * 60);
+                    boost::this_thread::sleep(boost::posix_time::minutes(10));
                 }
 
                 cntError = 0;
@@ -324,7 +324,7 @@ int njn = 0;
 //objLog->mr_printf(MR_LOG_DEBUG, idRadio, "Frame : %5d    Fifo : %d\n", njn++, objQueue->getQueueSize());
 
                     if (getQueueSize() > MAX_QUEUE_SIZE)
-                        usleep(10);
+                        boost::this_thread::sleep(boost::posix_time::milliseconds(10));
                 }
                 catch(ExceptionClass& err)
                 {

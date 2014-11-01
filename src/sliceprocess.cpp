@@ -10,7 +10,7 @@ SliceProcess::~SliceProcess()
 {
     stopThread = true;
 
-    sleep(10);
+    boost::this_thread::sleep(boost::posix_time::seconds(10));
 
     for (int i = 0; i < (int)aux.size(); i++)
         if (aux[i].size() > 0)
@@ -130,7 +130,7 @@ void SliceProcess::thrProcessa()
                     // carregando dados da FIFO
 /**
 objRadio->delQueueData();
-sleep(1);
+boost::this_thread::sleep(boost::posix_time::seconds(1));
 continue;
 /**/
                     aux = objRadio->getQueueData();
@@ -231,7 +231,7 @@ continue;
 //objLog->mr_printf(MR_LOG_DEBUG, idRadio, "Recorte : %5d    Fifo : %d\n", idSlice, objRadio->getQueueSize());
                         idSlice++;
 
-                        sleep(1);
+                        boost::this_thread::sleep(boost::posix_time::seconds(1));
                     }
                 }
             }

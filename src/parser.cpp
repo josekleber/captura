@@ -167,6 +167,7 @@ void Parser::setStream()
 void Parser::createFrames()
 {
 
+    // Frame In
     frame_in = NULL;
     try
     {
@@ -179,6 +180,7 @@ void Parser::createFrames()
         throw;
     }
 
+    // Frame Out
     frame_out = NULL;
     try
     {
@@ -566,11 +568,12 @@ void Parser::setBuffer(string arqName, vector<vector<vector<uint8_t>>> value,
 
     this->fileName = arqName;
     this->bufFrames = value;
+
     this->nbSamplesIn = nbSamplesIn;
     this->sampleFormatIn = sampleFormatIn;
     this->sampleRateIn = sampleRateIn;
     this->channelLayoutIn = channelLayoutIn;
-//    this->nbChannelsIn = nbChannelsIn;
+    this->nbChannelsIn = nbChannelsIn;
 
     if (swr_ctx)
         swr_free(&swr_ctx);

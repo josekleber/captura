@@ -16,7 +16,7 @@ ThreadCapture::~ThreadCapture()
     stopThread = true;
 
     while (status == CAPTURE_STATUS::ON)
-        usleep(10);
+        boost::this_thread::sleep(boost::posix_time::milliseconds(10));
 
     if (objRadio != NULL)
     {
@@ -86,7 +86,7 @@ void ThreadCapture::thrRun()
                         {
                             delete objRadio;
                             objRadio = NULL;
-                            sleep(30);
+                            boost::this_thread::sleep(boost::posix_time::seconds(30));
 
                             continue;
                         }
@@ -143,7 +143,7 @@ void ThreadCapture::thrRun()
                         objThreadProcessa = new thread(&SliceProcess::thrProcessa, objSlice);
                         objThreadProcessa->detach();
 
-                        sleep(1);
+                        boost::this_thread::sleep(boost::posix_time::seconds(1));
                     }
                     catch(SignalException& err)
                     {
@@ -213,7 +213,7 @@ void ThreadCapture::thrRun()
             objLog->mr_printf(MR_LOG_ERROR, idThread, "threadcapture (thrRun) : Erro desconhecido");
         }
 
-        usleep(1);
+        boost::this_thread::sleep(boost::posix_time::milliseconds(1));
     }
 
     status = CAPTURE_STATUS::OFF;
