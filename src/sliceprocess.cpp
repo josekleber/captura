@@ -77,6 +77,8 @@ void SliceProcess::thrProcessa()
             objRawData->MutexAccess = MutexAccess;
             objRawData->ipRecognition = ipRecognition;
             objRawData->portRecognition = portRecognition;
+            objRawData->ipResult = ipResult;
+            objRawData->portResult = portResult;
             objRawData->mySqlConnString = mySqlConnString;
 
             objRawData->Config();

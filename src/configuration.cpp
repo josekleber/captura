@@ -23,6 +23,9 @@ Configuration::Configuration()
     mrIP = pt.get<std::string>("MRServer.IP");
     mrPort = pt.get<std::string>("MRServer.Port");
 
+    srIP = pt.get<std::string>("SearchResult.IP");
+    srPort = pt.get<std::string>("SearchResult.Port");
+
     cutFolder = pt.get<std::string>("AudityInfo.Folder");
 
     toFile = pt.get<bool>("Log.toFile");

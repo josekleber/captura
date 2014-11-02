@@ -2,13 +2,16 @@
 
 using namespace std;
 
-ThreadPool::ThreadPool(int mrOn, bool svFP, string ipRecognition, string portRecognition,
+ThreadPool::ThreadPool(int mrOn, bool svFP, string ipRecognition, string portRecognition, string ipResult, string portResult,
                    string mySqlConnString, string cutFolder, vector<Filter> *Filters)
 {
     this->mrOn = mrOn;
     this->svFP = svFP;
     this->ipRecognition = ipRecognition;
     this->portRecognition = portRecognition;
+
+    this->ipResult = ipResult;
+    this->portResult = portResult;
 
     this->mySqlConnString = mySqlConnString;
 
@@ -41,6 +44,8 @@ void ThreadPool::addThreads(string uriRadio, int idRadio)
         objThreadControl->objCapture->svFP = svFP;
         objThreadControl->objCapture->ipRecognition = ipRecognition;
         objThreadControl->objCapture->portRecognition = portRecognition;
+        objThreadControl->objCapture->ipResult = ipResult;
+        objThreadControl->objCapture->portResult = portResult;
         objThreadControl->objCapture->mySqlConnString = mySqlConnString;
 
         objThreadControl->objCapture->idThread = idRadio;

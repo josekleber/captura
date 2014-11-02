@@ -11,6 +11,8 @@
 #include "util.h"
 #include "parser.h"
 
+#define TAM_CAB_SOCKET 16
+
 #define RAW_SAMPLE_RATE 11025
 #define SOCKET_TIMEOUT  20000          // milisegundos
 
@@ -29,6 +31,8 @@ class RAWData : public Parser
         bool svFP;
         string ipRecognition;
         string portRecognition;
+        string ipResult;
+        string portResult;
         string mySqlConnString;
         mutex* MutexAccess;
 

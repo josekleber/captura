@@ -27,6 +27,10 @@ class Configuration
         std::string mrIP;
         std::string mrPort;
 
+        // informacoes do servidor de resultados
+        std::string srIP;
+        std::string srPort;
+
         std::string cutFolder;
 
         bool toFile;

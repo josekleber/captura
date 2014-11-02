@@ -18,7 +18,7 @@ Captura::Captura()
     {
         init();
 
-        objThreadPool = new ThreadPool(config->mrOn, config->svFP, config->mrIP, config->mrPort,
+        objThreadPool = new ThreadPool(config->mrOn, config->svFP, config->mrIP, config->mrPort, config->srIP, config->srPort,
                                        config->ConnectionStringMySQL, config->cutFolder, &Filters);
     }
     catch(SignalException& err)
@@ -268,6 +268,10 @@ void Captura::init()
                       "MRServer.IP: %s\n", config->mrIP.c_str());
     objLog->mr_printf(MR_LOG_AUDIT, 0,
                       "MRServer.Port: %s\n", config->mrPort.c_str());
+    objLog->mr_printf(MR_LOG_AUDIT, 0,
+                      "SearchResult.IP: %s\n", config->srIP.c_str());
+    objLog->mr_printf(MR_LOG_AUDIT, 0,
+                      "SearchResult.Port: %s\n", config->srPort.c_str());
     objLog->mr_printf(MR_LOG_AUDIT, 0,
                       "AudityInfo.Folder: %s\n", config->cutFolder.c_str());
     objLog->mr_printf(MR_LOG_AUDIT, 0,

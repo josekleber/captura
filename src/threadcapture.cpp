@@ -121,6 +121,8 @@ void ThreadCapture::thrRun()
                         objSlice->svFP = svFP;
                         objSlice->ipRecognition = ipRecognition;
                         objSlice->portRecognition = portRecognition;
+                        objSlice->ipResult = ipResult;
+                        objSlice->portResult = portResult;
                         objSlice->mySqlConnString = mySqlConnString;
                         objSlice->cutFolder = cutFolder;
                         objSlice->idRadio = idThread;

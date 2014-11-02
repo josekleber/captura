@@ -167,10 +167,12 @@ clock_t start = clock();
                 int pos = 0;
 
                 int16_t arqNameSize = fileName.size();
+                int8_t ipResultSize = ipResult.size();
+                int8_t portResultSize = portResult.size();
 
                 try
                 {
-                    buff  = new uint8_t[4 * nbits + arqNameSize + 14];
+                    buff  = new uint8_t[4 * nbits + arqNameSize + ipResult.size() + portResult.size() + TAM_CAB_SOCKET];
                 }
                 catch(...)
                 {
@@ -186,8 +188,16 @@ clock_t start = clock();
                 conv = (uint8_t*)&nbits;
                 for (int i = 0; i < 4; buff[pos++] = conv[i++]);
 
+                buff[pos++] = ipResultSize;
+
+                buff[pos++] = portResultSize;
+
                 conv = (uint8_t*)&arqNameSize;
                 for (int i = 0; i < 2; buff[pos++] = conv[i++]);
+
+                for (int i = 0; i < (int)ipResult.size(); buff[pos++] = (ipResult.c_str())[i++]);
+
+                for (int i = 0; i < (int)portResult.size(); buff[pos++] = (portResult.c_str())[i++]);
 
                 for (int i = 0; i < arqNameSize - 3; buff[pos++] = (fileName.c_str())[i++]);
                 buff[pos++] = 'm';

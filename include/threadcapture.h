@@ -40,6 +40,8 @@ class ThreadCapture
         bool svFP;
         string ipRecognition;
         string portRecognition;
+        string ipResult;
+        string portResult;
         string mySqlConnString;
 
         mutex* MutexAccess;

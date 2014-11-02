@@ -24,7 +24,7 @@ class ThreadPool
 {
     public:
         /** Default constructor */
-        ThreadPool(int mrOn, bool svFP, string ipRecognition, string portRecognition,
+        ThreadPool(int mrOn, bool svFP, string ipRecognition, string portRecognition, string ipResult, string portResult,
                    string sqlConnString, string cutFolder, vector<Filter> *Filters);
         /** Default destructor */
         virtual ~ThreadPool();
@@ -39,6 +39,8 @@ class ThreadPool
         bool svFP;
         string ipRecognition;
         string portRecognition;
+        string ipResult;
+        string portResult;
         string mySqlConnString;
 
         string cutFolder;
